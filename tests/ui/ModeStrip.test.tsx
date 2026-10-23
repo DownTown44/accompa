@@ -3,12 +3,13 @@ import { join } from 'node:path'
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { App } from '../../src/ui/App'
+import { createFakeEngine } from './fakeEngine'
 
 const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
 
 describe('mode strip', () => {
   it('opens on Listen and Piano', () => {
-    render(<App />)
+    render(<App engine={createFakeEngine()} />)
     expect(radio('Listen').checked).toBe(true)
     expect(radio('Explore').checked).toBe(false)
     expect(radio('Piano').checked).toBe(true)
@@ -16,7 +17,7 @@ describe('mode strip', () => {
   })
 
   it('shows the wordmark, the two groups and the placeholder slots', () => {
-    render(<App />)
+    render(<App engine={createFakeEngine()} />)
     expect(screen.getByRole('heading', { name: 'accompa' })).toBeTruthy()
     const mode = screen.getByRole('radiogroup', { name: 'Mode' })
     const instrument = screen.getByRole('radiogroup', { name: 'Instrument' })
@@ -26,7 +27,7 @@ describe('mode strip', () => {
   })
 
   it('switches mode and instrument on selection, one checked per group', () => {
-    render(<App />)
+    render(<App engine={createFakeEngine()} />)
     fireEvent.click(radio('Explore'))
     expect(radio('Explore').checked).toBe(true)
     expect(radio('Listen').checked).toBe(false)
@@ -36,10 +37,10 @@ describe('mode strip', () => {
     expect(radio('Explore').checked).toBe(true)
   })
 
-  it('puts the mode group before the instrument group and nothing else in the tab order', () => {
-    render(<App />)
+  it('puts the mode group before the instrument group, then the Listen controls', () => {
+    render(<App engine={createFakeEngine()} />)
     const focusable = [...document.querySelectorAll<HTMLElement>('input, button, a[href], select, textarea, [tabindex]')]
-    expect(focusable.map((el) => (el as HTMLInputElement).value)).toEqual(['listen', 'explore', 'piano', 'guitar'])
+    expect(focusable.map((el) => (el as HTMLInputElement).value || el.textContent)).toEqual(['listen', 'explore', 'piano', 'guitar', 'Play again Space'])
     for (const slot of document.querySelectorAll('.strip-slot')) expect(slot.querySelector('button, [tabindex]')).toBeNull()
   })
 })

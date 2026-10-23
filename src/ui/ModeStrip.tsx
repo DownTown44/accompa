@@ -1,9 +1,11 @@
 import './shell.css'
 import { SegmentedGroup } from './SegmentedGroup'
 import { useSession } from './SessionContext'
+import { useSessionActions } from './useSessionActions'
 
 export function ModeStrip() {
-  const { session, dispatch } = useSession()
+  const { session } = useSession()
+  const { selectMode, selectInstrument } = useSessionActions()
   return (
     <header className="strip">
       <h1 className="wordmark">accompa</h1>
@@ -16,7 +18,7 @@ export function ModeStrip() {
           { value: 'explore', label: 'Explore' },
         ]}
         value={session.mode}
-        onChange={(mode) => dispatch({ type: 'setMode', mode })}
+        onChange={selectMode}
       />
       <SegmentedGroup
         label="Instrument"
@@ -27,7 +29,7 @@ export function ModeStrip() {
           { value: 'guitar', label: 'Guitar' },
         ]}
         value={session.instrument}
-        onChange={(instrument) => dispatch({ type: 'setInstrument', instrument })}
+        onChange={selectInstrument}
       />
       <span className="strip-slot" aria-hidden="true" />
       <span className="strip-slot" aria-hidden="true" />

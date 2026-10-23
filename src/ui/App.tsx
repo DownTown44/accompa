@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createSynthEngine } from '../audio/synth'
 import type { AudioEngine } from '../audio/engine'
 import { EngineProvider } from './EngineContext'
+import { ListenView } from './ListenView'
 import { ModeStrip } from './ModeStrip'
 import { SessionProvider } from './SessionContext'
 import { StatusNote } from './StatusNote'
@@ -16,6 +17,7 @@ function Shell() {
     <div className="page">
       <ModeStrip />
       <main className="body">
+        <ListenView />
         <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : undefined} />
       </main>
     </div>
