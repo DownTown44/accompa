@@ -39,6 +39,7 @@ class FakeContext {
   onstatechange: (() => void) | null = null
   oscillators: FakeOscillator[] = []
   resumes = 0
+  failOscillators = false
   constructor(
     initial: 'running' | 'suspended',
     private afterResume: 'running' | 'suspended' = 'running',
@@ -46,6 +47,7 @@ class FakeContext {
     this.state = initial
   }
   createOscillator() {
+    if (this.failOscillators) throw new Error('no oscillator')
     const osc = new FakeOscillator()
     this.oscillators.push(osc)
     return osc
@@ -182,5 +184,33 @@ describe('synth engine', () => {
     engine.play([pitch(62)], 'block')
     expect(ctx.oscillators[0].stoppedNow).toBe(true)
     expect(ctx.oscillators[1].stoppedNow).toBe(false)
+  })
+
+  it('lets only the latest request start when several wait on resume', async () => {
+    const ctx = new FakeContext('suspended', 'running')
+    const engine = createSynthEngine(asContext(ctx))
+    engine.play([pitch(60)], 'block')
+    engine.play([pitch(64)], 'block')
+    await flush()
+    expect(ctx.oscillators).toHaveLength(1)
+    expect(ctx.oscillators[0].frequency.value).toBeCloseTo(329.63, 1)
+  })
+
+  it('does not start a request that was stopped while waiting on resume', async () => {
+    const ctx = new FakeContext('suspended', 'running')
+    const engine = createSynthEngine(asContext(ctx))
+    engine.play([pitch(60)], 'block')
+    engine.stop()
+    await flush()
+    expect(ctx.oscillators).toHaveLength(0)
+  })
+
+  it('reports blocked instead of throwing when scheduling fails after a resume', async () => {
+    const ctx = new FakeContext('suspended', 'running')
+    ctx.failOscillators = true
+    const engine = createSynthEngine(asContext(ctx))
+    engine.play([pitch(60)], 'block')
+    await flush()
+    expect(engine.status()).toBe('blocked')
   })
 })

@@ -14,6 +14,8 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
   let context: AudioContext | null = null
   let status: AudioStatus = 'idle'
   let sounding: OscillatorNode[] = []
+  // Bumped by play and stop so a request still waiting on resume cannot start late.
+  let generation = 0
   const listeners = new Set<() => void>()
 
   function setStatus(next: AudioStatus) {
@@ -40,6 +42,7 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
 
   // Runs the callback once the context is running; reports blocked when it cannot be.
   function whenRunning(ctx: AudioContext, callback: () => void) {
+    const requested = generation
     if (ctx.state === 'running') {
       refresh()
       callback()
@@ -48,10 +51,10 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
     ctx.resume().then(
       () => {
         refresh()
-        if (ctx.state === 'running') callback()
+        if (ctx.state === 'running' && requested === generation) callback()
       },
       refresh,
-    )
+    ).catch(() => setStatus('blocked'))
   }
 
   function stopSounding() {
@@ -92,13 +95,17 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
     play(pitches, mode) {
       const ctx = ensureContext()
       if (!ctx) return
+      generation++
       try {
         whenRunning(ctx, () => schedule(ctx, pitches, mode))
       } catch {
         setStatus('blocked')
       }
     },
-    stop: stopSounding,
+    stop() {
+      generation++
+      stopSounding()
+    },
     unlock() {
       const ctx = ensureContext()
       if (!ctx) return
