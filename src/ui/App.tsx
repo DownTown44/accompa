@@ -1,3 +1,21 @@
+import { ModeStrip } from './ModeStrip'
+import { SessionProvider } from './SessionContext'
+import { useShortcuts } from './useShortcuts'
+
+function Shell() {
+  useShortcuts()
+  return (
+    <div className="page">
+      <ModeStrip />
+      <main className="body" />
+    </div>
+  )
+}
+
 export function App() {
-  return <h1>accompa</h1>
+  return (
+    <SessionProvider>
+      <Shell />
+    </SessionProvider>
+  )
 }

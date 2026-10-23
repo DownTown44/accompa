@@ -1,0 +1,153 @@
+:root {
+  color-scheme: light dark;
+
+  --color-bg: #FDF1E8;
+  --color-surface: #FFFAF5;
+  --color-ink: #2C2A2B;
+  --color-muted: #6F635D;
+  --color-keyline: #EFD9CC;
+  --color-accent: #F3B5B0;
+  --color-action: #F6D0A8;
+  --color-interval-tint: #F8E1DC;
+  --color-wrong: #E6D6DD;
+  --color-role-root: #F29D95;
+  --color-role-third: #F5D08C;
+  --color-role-fifth: #A9D8B8;
+  --color-role-seventh: #C7B1E6;
+  --color-key-black: #4A4547;
+  --color-key-edge: #4A4547;
+  --color-focus: #2C2A2B;
+  --color-on-fill: #2C2A2B;
+  --color-chip: #0000000D;
+
+  --color-bg-dark: #272022;
+  --color-surface-dark: #342A2D;
+  --color-ink-dark: #F3E7E2;
+  --color-muted-dark: #A89A9C;
+  --color-keyline-dark: #46393D;
+  --color-accent-dark: #E9A8A6;
+  --color-action-dark: #E3BC8F;
+  --color-interval-tint-dark: #3D2E32;
+  --color-wrong-dark: #4A3A44;
+  --color-role-root-dark: #EE9F98;
+  --color-role-third-dark: #E5C58A;
+  --color-role-fifth-dark: #8CC5A0;
+  --color-role-seventh-dark: #B9A5DC;
+  --color-key-black-dark: #170F11;
+  --color-key-edge-dark: #A89A9C;
+  --color-focus-dark: #F3E7E2;
+  --color-on-fill-dark: #241E20;
+  --color-chip-dark: #FFFFFF14;
+
+  --font-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --font-sans: system-ui, 'Segoe UI', sans-serif;
+
+  --type-wordmark-size: 30px;
+  --type-wordmark-weight: 600;
+  --type-readout-size: 84px;
+  --type-readout-weight: 600;
+  --type-readout-line-height: 1.05;
+  --type-readout-question-size: 56px;
+  --type-readout-question-weight: 600;
+  --type-readout-question-line-height: 1.05;
+  --type-hint-size: 22px;
+  --type-hint-weight: 400;
+  --type-legend-size: 20px;
+  --type-legend-weight: 400;
+  --type-mode-size: 24px;
+  --type-mode-weight: 400;
+  --type-segment-size: 22px;
+  --type-segment-weight: 400;
+  --type-button-size: 26px;
+  --type-button-weight: 400;
+  --type-interval-label-size: 28px;
+  --type-interval-label-weight: 600;
+  --type-note-label-size: 20px;
+  --type-note-label-weight: 400;
+  --type-key-hint-size: 15px;
+  --type-key-hint-weight: 600;
+  --type-key-hint-small-size: 14px;
+  --type-key-hint-small-weight: 600;
+  --type-key-hint-letter-spacing: 0.04em;
+
+  --rounded-key-black: 9px;
+  --rounded-key: 12px;
+  --rounded-interval: 22px;
+  --rounded-full: 999px;
+
+  --spacing-mode-gap: 8px;
+  --spacing-toggle-gap: 2px;
+  --spacing-toggle-padding: 5px;
+  --spacing-readout-gap: 14px;
+  --spacing-interval-gap: 10px;
+  --spacing-control-gap: 18px;
+  --spacing-control-top: 26px;
+  --spacing-strip-height: 84px;
+  --spacing-strip-padding-x: 44px;
+  --spacing-body-padding: 20px 56px 44px;
+  --spacing-mode-padding: 10px 26px;
+  --spacing-segment-padding: 8px 24px;
+  --spacing-button-padding: 14px 38px;
+  --spacing-interval-padding: 18px 0 12px;
+  --spacing-help-size: 38px;
+  --spacing-focus-ring-width: 2px;
+  --spacing-focus-ring-offset: 2px;
+  --spacing-key-edge-width: 1.5px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-surface-dark);
+    --color-ink: var(--color-ink-dark);
+    --color-muted: var(--color-muted-dark);
+    --color-keyline: var(--color-keyline-dark);
+    --color-accent: var(--color-accent-dark);
+    --color-action: var(--color-action-dark);
+    --color-interval-tint: var(--color-interval-tint-dark);
+    --color-wrong: var(--color-wrong-dark);
+    --color-role-root: var(--color-role-root-dark);
+    --color-role-third: var(--color-role-third-dark);
+    --color-role-fifth: var(--color-role-fifth-dark);
+    --color-role-seventh: var(--color-role-seventh-dark);
+    --color-key-black: var(--color-key-black-dark);
+    --color-key-edge: var(--color-key-edge-dark);
+    --color-focus: var(--color-focus-dark);
+    --color-on-fill: var(--color-on-fill-dark);
+    --color-chip: var(--color-chip-dark);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.key-hint {
+  font-family: var(--font-sans);
+  font-size: var(--type-key-hint-size);
+  font-weight: var(--type-key-hint-weight);
+  font-style: normal;
+  letter-spacing: var(--type-key-hint-letter-spacing);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
