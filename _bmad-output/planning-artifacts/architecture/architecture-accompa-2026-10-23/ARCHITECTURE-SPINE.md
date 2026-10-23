@@ -8,9 +8,9 @@ scope: 'accompa Phase 1 (slice 1A intervals, slice 1B chords and voicings): sing
 status: final
 created: '2026-10-23'
 updated: '2026-10-23'
-binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22]
+binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-22]
 sources: ['_bmad-output/planning-artifacts/prds/prd-accompa-2026-10-22/prd.md']
-companions: []
+companions: ['_bmad-output/planning-artifacts/ux-designs/ux-accompa-2026-10-23/DESIGN.md', '_bmad-output/planning-artifacts/ux-designs/ux-accompa-2026-10-23/EXPERIENCE.md']
 ---
 
 # Architecture Spine — accompa
@@ -30,6 +30,8 @@ graph TD
 
 ## Invariants & Rules
 
+FR-21 is withdrawn (piano voicings and inversions are Phase 2), so no decision below binds it. Phase 1 generates guitar voicings only.
+
 ### AD-1 — Dependency direction
 
 - **Binds:** all
@@ -38,7 +40,7 @@ graph TD
 
 ### AD-2 — Pitch is an integer
 
-- **Binds:** FR-3, FR-4, FR-10, FR-12, FR-14, FR-15, FR-16, FR-21, FR-22
+- **Binds:** FR-3, FR-4, FR-10, FR-12, FR-14, FR-15, FR-16, FR-22
 - **Prevents:** the piano view, fretboard, voicing generator and audio disagreeing about what a note is.
 - **Rule:** In `core/`, absolute pitch is a MIDI note number (60 = middle C), pitch class is `n mod 12`, and an interval is a semitone count. They are distinct branded TypeScript types (`Pitch`, `PitchClass`, `Interval`), so the compiler stops them mixing. No note-name strings are stored, passed between modules, or compared. A spelled note is a struct of integers (`letter` 0 to 6, `accidental` as a semitone offset), never a string. **[ADOPTED]**
 
@@ -46,7 +48,7 @@ graph TD
 
 - **Binds:** FR-4, FR-12, FR-14, FR-15
 - **Prevents:** two views labelling the same chord tone differently (C♯ vs D♭, or a wrong dim7 spelling).
-- **Rule:** One `core/spelling` module turns pitches into labels. Chord tones are spelled by letter-name stepping from the spelled root (3rd = root letter + 2, 5th = +4, 7th = +6), with accidentals as needed. Root spelling comes from the user's pick in the builder; a default table (D♭, E♭, G♭, A♭, B♭ flat; C♯, F♯ sharp) applies where no pick exists. Interval spelling: each of the 12 intervals has one fixed name in the interval table (m2, M2, m3, M3, P4, A4, P5, m6, M6, m7, M7, P8; 6 semitones is always A4), and the upper note is spelled by that interval's letter step. The namer (AD-10) supplies the root spelling when the root is derived, not picked. No component spells notes itself. **[ADOPTED]**
+- **Rule:** One `core/spelling` module turns pitches into labels. Chord tones are spelled by letter-name stepping from the spelled root (3rd = root letter + 2, 5th = +4, 7th = +6), with accidentals as needed. Root spelling comes from the namer's chosen reading (AD-10) or the user's explicit root change; a default table (D♭, E♭, G♭, A♭, B♭ flat; C♯, F♯ sharp) applies where neither exists. Interval spelling: each of the 12 intervals has one fixed name in the interval table (m2, M2, m3, M3, P4, A4, P5, m6, M6, m7, M7, P8; 6 semitones is always A4), and the upper note is spelled by that interval's letter step. No component spells notes itself. **[ADOPTED]**
 
 ### AD-4 — One table per music concept
 
@@ -56,7 +58,7 @@ graph TD
 
 ### AD-5 — Session model is instrument-independent
 
-- **Binds:** FR-1, FR-2, FR-10, FR-12, FR-15, FR-16, FR-19, FR-21, FR-22
+- **Binds:** FR-1, FR-2, FR-10, FR-12, FR-15, FR-16, FR-19, FR-22
 - **Prevents:** state that resets or diverges when the user swaps instruments, practice rounds overwriting what the user built, and views owning musical state.
 - **Rule:** Session types are plain data defined in `core/model` (reducers live in `ui/`). The session has two separate parts, each with one writer:
   - **workspace** (written only by builder, free-play and voicing editing): the current interval, the chord (spelled root and quality), and the selected voicing per instrument. A guitar voicing carries its string and fret positions (AD-8), so positions survive an instrument swap and swapping back.
@@ -68,7 +70,7 @@ graph TD
 
 - **Binds:** FR-1 to FR-22 (UI)
 - **Prevents:** ad hoc component state, and audio mixed into React state.
-- **Rule:** React Context with a reducer, split into a **settings** context (interval pool, direction, root mode) and a **session** context (current interval or chord, instrument, voicing selection). State is plain and serializable. Playing a sound is a command to the audio engine, never React state. No other state library is added unless Context demonstrably fails. **[ADOPTED]**
+- **Rule:** React Context with a reducer, split into a **settings** context (interval pool, direction, root mode, sound, theme) and a **session** context (current interval or chord, instrument, voicing selection). Only sound, theme and interval pool persist to `localStorage`; direction, root mode, chord, voicing and the current question do not. State is plain and serializable. Playing a sound is a command to the audio engine, never React state. No other state library is added unless Context demonstrably fails. **[ADOPTED]**
 
 ### AD-7 — Audio engine is one interface
 
@@ -78,9 +80,9 @@ graph TD
 
 ### AD-8 — Voicings: one shape, generation separate from ranking
 
-- **Binds:** FR-16, FR-17, FR-18, FR-19, FR-20, FR-21
+- **Binds:** FR-16, FR-17, FR-18, FR-19, FR-20
 - **Prevents:** guitar and piano voicings needing different naming and audio paths, and ranking rules tangled into generation.
-- **Rule:** A voicing is an ordered list of absolute pitches, bass to treble. A guitar voicing adds a per-string fret assignment (or muted). Generation is a pure `core` function: chord, instrument, tuning and constraints in, every playable voicing out, unranked. Ranking is a separate pure function. Its primary key is register distance: the absolute difference between the voicing's mean pitch and the source chord's mean pitch, in semitones, so a high chord surfaces high voicings first (FR-18). Template match breaks ties within a distance bucket, so a fixed open shape ranks first only when it is near the source register. Bucket width is a parameter. Naming and playback take the pitch list and ignore how the voicing was produced.
+- **Rule:** A voicing is an ordered list of absolute pitches, bass to treble. A guitar voicing adds a per-string fret assignment (or muted). Generation is a pure `core` function: chord, instrument, tuning and constraints in, every playable voicing out, unranked. Ranking is a separate pure function. Its primary key is register distance: the absolute difference between the voicing's mean pitch and the source chord's mean pitch, in semitones, so a high chord surfaces high voicings first (FR-18). Template match breaks ties within a distance bucket, so a fixed open shape ranks first only when it is near the source register. Bucket width is a parameter. Naming and playback take the pitch list and ignore how the voicing was produced. The shape is shared by guitar and piano, but Phase 1 generates guitar voicings only (piano voicings are Phase 2). Voicing parameters are decided defaults, kept in one place as tunable constants in `core/` and revisited only if real voicings feel wrong: max fret span 4 frets (user-confirmed); open strings do not count toward the span; root and 3rd are always present; the 7th is mandatory on seventh chords; only the 5th may be dropped; register distance is mean-pitch distance, as above.
 
 ### AD-9 — Common shapes are curated data
 
@@ -90,9 +92,9 @@ graph TD
 
 ### AD-10 — Chord naming returns ranked readings
 
-- **Binds:** FR-14, FR-19
+- **Binds:** FR-12, FR-14, FR-19
 - **Prevents:** two surfaces naming the same toggled notes differently (Am7 vs C6).
-- **Rule:** The namer is used only when the chord is derived from toggled or edited notes (free-play, hand-edited voicings). A chord the user built by choosing root and quality keeps that root and quality; it is never renamed. The namer takes pitches and returns all matching readings as root, quality and optional bass note (so an inversion reads as a slash chord), ranked with the lowest sounding note as root first. Surfaces show the first and may list the rest. No surface picks its own reading.
+- **Rule:** The namer is the only path to a chord's name in Phase 1: chords are built by clicking notes (there is no root-and-quality builder; a chord library is Phase 2) and by hand-editing voicings. The namer takes pitches and returns all matching readings as root, quality and optional bass note (so an inversion reads as a slash chord), ranked with the lowest sounding note as root first. The UI shows the first reading large and the rest as clickable alternatives. Choosing an alternative sets the chord's root and its spelling (same pitches, different root, for example C6 vs Am7/C). The default root is the lowest sounding note, and the user can change the root (R). No surface picks its own reading. In Phase 2, a chord library that picks root and quality may bypass the namer.
 
 ### AD-11 — Randomness is injected
 
@@ -106,7 +108,7 @@ graph TD
 | --- | --- |
 | Naming | TypeScript, `camelCase` values, `PascalCase` types and components. Files named after their main export. Music concepts use standard terms (interval, pitch class, voicing). |
 | Data and formats | Pitch is `number` (AD-2). Intervals are semitone `number`. Voicings are readonly arrays. No dates, ids or serialization formats beyond `localStorage` JSON for settings. |
-| State | Reducers are pure. Settings may persist to `localStorage`; nothing else persists. Read failures fall back to defaults. |
+| State | Reducers are pure. Only sound, theme (with manual override of the system setting) and interval pool persist to `localStorage`. Direction, root mode, chord, voicing and the current question do not. Read failures fall back to defaults. |
 | Errors | `core/` functions are total over valid input and return empty results, not exceptions, when no voicing exists. Audio failures surface as a UI message and never break theory features. |
 | Tests | Vitest on `core/` (logic and risk live there). Light component tests. No end-to-end suite. |
 | Instrument parameters | Guitar is six strings, standard tuning (E A D G B E), 22 frets. Tuning is a parameter to core functions so alternate tunings are a later feature, not a rewrite. Each instrument's pitch range is owned by one `core/instruments` module (piano default MIDI 36 to 96, a UX-changeable value). Practice logic picks random roots so every note it plays fits the active instrument's range. |
@@ -161,16 +163,17 @@ graph LR
 | Sound (FR-11, FR-13, FR-20 playback) | `audio/` | AD-7 |
 | Chord builder and naming (FR-12 to FR-14) | `core/`, `ui/` | AD-3, AD-4, AD-10 |
 | Fretboard transfer (FR-15) | `ui/` | AD-5 |
-| Voicings (FR-16 to FR-21) | `core/` | AD-8, AD-9 |
+| Voicings (FR-16 to FR-20) | `core/` | AD-8, AD-9 |
 | Chord ear practice (FR-22) | `core/` logic, `ui/` | AD-4, AD-11 |
 
 ## Deferred
 
-- **Sampled piano and guitar:** a later phase. AD-7 keeps the swap local to `audio/`.
-- **Voicing rules (max fret span, droppable chord tones, how open strings count, how "closest register" is measured):** defined when the generator is built. They are parameters inside AD-8, not new structure.
-- **Visual design, layout and voicing browsing UX:** Sally's UX work.
+- **Sampled piano and guitar:** Phase 2; the sample source is decided then. AD-7 keeps the swap local to `audio/`.
+- **Piano voicings and inversions (FR-21, withdrawn) and a chord library by root and quality:** Phase 2.
+- **Voicing rules:** parameters inside AD-8 with the defaults stated there (all decided; span 4 user-confirmed, the rest delegated to the team). Revisit only if real voicings feel wrong.
+- **Visual design, layout and voicing browsing UX:** decided in the UX spines (DESIGN.md, EXPERIENCE.md).
 - **Alternate tunings, other string counts:** a tuning parameter exists (see conventions); no UI yet.
 - **Hosting and deployment:** local only. A static host works without change when wanted.
-- **Piano keyboard range and instrument fret-region UI details:** UX decisions.
+- **Piano keyboard range and fret-region UI:** decided in the UX spines. The piano shows 3 octaves (engine range stays MIDI 36 to 96); the fret region is set by dragging, with the whole neck by default.
 - **Later capability areas in the PRD (scales and modes, circle of fifths, progression analysis):** not in Phase 1.
-- **Accessibility and keyboard navigation:** not decided; revisit with UX.
+- **Accessibility and keyboard navigation:** decided in the UX spines. Keyboard-first for Listen, mode and instrument switching, transport and voicing stepping; instrument note-toggling and fret-region drag are pointer-only in v1 (see EXPERIENCE.md Accessibility Floor).

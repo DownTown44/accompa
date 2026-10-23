@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Round Table: accompa wrap-up</title>
+<style>
+:root{
+  --bg:#FDF1E8; --surface:#FFFAF5; --ink:#2C2A2B; --muted:#6F635D; --keyline:#EFD9CC;
+  --accent:#F3B5B0; --action:#F6D0A8; --root:#F29D95; --third:#F5D08C; --fifth:#A9D8B8; --seventh:#C7B1E6;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#272022; --surface:#342A2D; --ink:#F3E7E2; --muted:#A89A9C; --keyline:#46393D;
+    --accent:#E9A8A6; --action:#E3BC8F; --root:#EE9F98; --third:#E5C58A; --fifth:#8CC5A0; --seventh:#B9A5DC;
+  }
+}
+*{box-sizing:border-box}
+html{font-size:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;line-height:1.6}
+.wrap{max-width:46rem;margin:0 auto;padding:0 16px 64px}
+header{text-align:center;padding:48px 0 24px;position:relative;overflow:hidden}
+header h1{font-size:clamp(2rem,6vw,3rem);font-style:italic;font-weight:600;margin:.2em 0 .1em;letter-spacing:.01em}
+header p{color:var(--muted);font-style:italic;margin:0}
+.floaters{position:absolute;inset:0;pointer-events:none}
+.floaters svg{position:absolute;opacity:.85;animation:drift 9s ease-in-out infinite}
+.floaters svg:nth-child(1){left:8%;top:30px;animation-delay:0s}
+.floaters svg:nth-child(2){left:22%;top:110px;animation-delay:-3s}
+.floaters svg:nth-child(3){right:20%;top:40px;animation-delay:-5s}
+.floaters svg:nth-child(4){right:7%;top:120px;animation-delay:-1.5s}
+@keyframes drift{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-14px) rotate(6deg)}}
+@media (prefers-reduced-motion:reduce){.floaters svg{animation:none}}
+.cast{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:24px 0 8px;padding:0;list-style:none}
+.cast li{background:var(--surface);border-radius:999px;padding:8px 18px;box-shadow:inset 0 0 0 1.5px var(--keyline);font-size:.95rem}
+.cast b{font-weight:600}
+h2{font-style:italic;font-weight:600;font-size:1.5rem;margin:40px 0 12px}
+.turn{display:flex;gap:12px;margin:14px 0;align-items:flex-start}
+.av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;color:#2C2A2B}
+.bubble{background:var(--surface);border-radius:20px;padding:10px 16px;box-shadow:inset 0 0 0 1.5px var(--keyline);flex:1}
+.bubble .who{font-size:.85rem;color:var(--muted);font-style:italic;display:block;margin-bottom:2px}
+.bubble p{margin:0}
+.mary .av{background:var(--third)} .john .av{background:var(--action)} .sally .av{background:var(--accent)}
+.winston .av{background:var(--seventh)} .amelia .av{background:var(--fifth)}
+.apor .bubble{background:var(--accent);box-shadow:none}
+.apor .av{background:var(--root)}
+.apor .bubble .who{color:#2C2A2B}
+.apor .bubble p{color:#2C2A2B}
+.stage{text-align:center;color:var(--muted);font-style:italic;margin:22px 0}
+table{width:100%;border-collapse:separate;border-spacing:0 8px;font-size:.98rem}
+td{background:var(--surface);padding:10px 14px;vertical-align:top}
+td:first-child{border-radius:16px 0 0 16px;font-style:italic;width:34%;box-shadow:inset 1.5px 0 0 var(--keyline)}
+td:last-child{border-radius:0 16px 16px 0}
+.next{background:var(--surface);border-radius:22px;padding:6px 22px 16px;box-shadow:inset 0 0 0 1.5px var(--keyline)}
+.next ol{margin:.5em 0 0;padding-left:1.3em}
+footer{text-align:center;color:var(--muted);font-style:italic;margin-top:40px;font-size:.9rem}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="floaters" aria-hidden="true">
+    <svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="9" fill="var(--root)" stroke="var(--ink)" stroke-width="1.8"/><circle cx="17" cy="17" r="14" fill="none" stroke="var(--ink)" stroke-width="1.8"/></svg>
+    <svg width="30" height="30" viewBox="0 0 30 30"><polygon points="15,3 27,15 15,27 3,15" fill="var(--third)" stroke="var(--ink)" stroke-width="1.8"/></svg>
+    <svg width="28" height="28" viewBox="0 0 28 28"><rect x="3" y="3" width="22" height="22" fill="var(--fifth)" stroke="var(--ink)" stroke-width="1.8"/></svg>
+    <svg width="32" height="32" viewBox="0 0 32 32"><polygon points="16,4 28,26 4,26" fill="var(--seventh)" stroke="var(--ink)" stroke-width="1.8"/></svg>
+  </div>
+  <p>2026-10-23 · accompa · planning phase</p>
+  <h1>The Round Table</h1>
+  <p>How five agents and one guitarist closed the planning phase</p>
+</header>
+
+<div class="wrap">
+<ul class="cast" aria-label="The room">
+  <li>📊 <b>Mary</b> · analyst</li>
+  <li>📋 <b>John</b> · product</li>
+  <li>🎨 <b>Sally</b> · UX</li>
+  <li>🏗️ <b>Winston</b> · architect</li>
+  <li>💻 <b>Amelia</b> · engineer</li>
+</ul>
+
+<h2>Act one: the contradictions</h2>
+<div class="turn mary"><div class="av">📊</div><div class="bubble"><span class="who">Mary</span><p>Ten open items. But when I lined the architecture spine up against the PRD and UX, three of them weren't loose at all. They were contradictions hiding in plain sight.</p></div></div>
+<div class="turn john"><div class="av">📋</div><div class="bubble"><span class="who">John</span><p>Contradictions. Name them.</p></div></div>
+<div class="turn mary"><div class="av">📊</div><div class="bubble"><span class="who">Mary</span><p>The spine still binds FR-21, piano voicings. AD-10 says a chord built by root and quality is never renamed, but we cut root-and-quality. And AD-3 takes its root from a "pick" that no longer exists.</p></div></div>
+<div class="turn amelia"><div class="av">💻</div><div class="bubble"><span class="who">Amelia</span><p>Confirmed. Three edits. Zero ambiguity.</p></div></div>
+<div class="turn winston"><div class="av">🏗️</div><div class="bubble"><span class="who">Winston</span><p>AD-10 isn't just wrong, it's inverted. The namer was the exception and is now the rule. One rewrite, not three patches.</p></div></div>
+<div class="turn sally"><div class="av">🎨</div><div class="bubble"><span class="who">Sally</span><p>You click C, E, G, A. The screen says "C6", and a small italic "Am7/C" waits beside it. Tap it and the ringed root jumps from C to A. The notes never move. The meaning does.</p></div></div>
+
+<p class="stage">Four questions go to the guitarist.</p>
+
+<h2>Act two: Apor answers</h2>
+<div class="turn john"><div class="av">📋</div><div class="bubble"><span class="who">John</span><p>Apor, tell me why you'd want inversions. What problem do they solve for you at the piano?</p></div></div>
+<div class="turn apor"><div class="av">🎸</div><div class="bubble"><span class="who">Apor</span><p>Inversions can wait for the next phase. I only want voicings because I need them: a triad on the piano usually becomes a barre chord on the guitar, and you can play the same chord in different ways.</p></div></div>
+<div class="turn winston"><div class="av">🏗️</div><div class="bubble"><span class="who">Winston</span><p>That's the best argument for voicings I've heard. You build the triad where the structure is visible, then you need the fingers.</p></div></div>
+<div class="turn apor"><div class="av">🎸</div><div class="bubble"><span class="who">Apor</span><p>Sample source later. Why would I pick it now if it's phase two?</p></div></div>
+<div class="turn amelia"><div class="av">💻</div><div class="bubble"><span class="who">Amelia</span><p>Logged. Span is 4 frets. Inversions are Phase 2. Samples are Phase 2.</p></div></div>
+<div class="turn mary"><div class="av">📊</div><div class="bubble"><span class="who">Mary</span><p>You confirmed 4 frets and nothing else about voicings, so the rest went in as adjustable defaults. Later you handed them to us. Now they're decided.</p></div></div>
+
+<h2>What got decided</h2>
+<table>
+  <tr><td>Modes</td><td>Listen and Explore, plus an always-visible Piano / Guitar toggle. The PRD uses the same names.</td></tr>
+  <tr><td>Guessing</td><td>Optional guess-by-click in Listen. Correct advances, wrong stays marked, Reveal is free. No score.</td></tr>
+  <tr><td>Chord building</td><td>Click notes. The name shows live, alternatives are clickable and change the root. Root-and-quality picking is a Phase 2 chord library.</td></tr>
+  <tr><td>Voicings</td><td>Guitar only in Phase 1. Span 4 frets, open strings free, root and 3rd always present, 7th mandatory on seventh chords, only the 5th droppable.</td></tr>
+  <tr><td>Inversions, samples</td><td>Phase 2.</td></tr>
+  <tr><td>Persisted settings</td><td>Sound choice, theme, interval pool. Nothing else.</td></tr>
+  <tr><td>Look</td><td>Pebble direction, Rose Quartz theme, sage-mint 5th, Palatino stack (swappable later).</td></tr>
+  <tr><td>Setup</td><td>Gear icon beside the <b>?</b> hint opens the panel. Listen layout accepted.</td></tr>
+  <tr><td>Keys</td><td>Tab stays native. <b>M</b> switches mode. <b>I</b> swaps instrument. Shortcuts yield to focused controls.</td></tr>
+  <tr><td>Accepted limits</td><td>Pointer-only note toggling and fret-region drag, laptop screens only, Listen needs hearing, screen readers best-effort.</td></tr>
+</table>
+
+<h2>Curtain call</h2>
+<div class="turn john"><div class="av">📋</div><div class="bubble"><span class="who">John</span><p>Planning is closed. I've got nothing left to interrogate.</p></div></div>
+<div class="turn winston"><div class="av">🏗️</div><div class="bubble"><span class="who">Winston</span><p>The architecture, the PRD and both UX spines agree. I'm calling that boring technology.</p></div></div>
+<div class="turn sally"><div class="av">🎨</div><div class="bubble"><span class="who">Sally</span><p>The one thing I can't promise is how it looks on your screen.</p></div></div>
+<div class="turn apor"><div class="av">🎸</div><div class="bubble"><span class="who">Apor</span><p>I already checked the mocks, don't worry.</p></div></div>
+
+<h2>What happens next</h2>
+<div class="next">
+  <ol>
+    <li><b>bmad-create-epics-and-stories</b>: break the requirements into epics and stories (start a new session with John).</li>
+    <li><b>bmad-sprint-planning</b>: check readiness and set up tracking.</li>
+    <li><b>bmad-build</b>: build the first story.</li>
+  </ol>
+</div>
+
+<footer>PRD · DESIGN.md · EXPERIENCE.md · ARCHITECTURE-SPINE.md — all final, 2026-10-23</footer>
+</div>
+</body>
+</html>

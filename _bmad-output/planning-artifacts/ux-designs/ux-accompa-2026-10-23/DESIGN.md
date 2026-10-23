@@ -312,11 +312,11 @@ Honest failures: in **light** theme every role fill fails 3:1 against surface (1
 
 ## Typography
 
-Face: the mocks rendered the **Palatino** stack (the `fontFamily` of every serif token) as a system fallback. No web font was rendered or confirmed. [ASSUMPTION] Keep the Palatino stack as the token. **Open:** Fraunces vs Newsreader Italic as the web font is undecided (a loading and licensing decision, not yet seen); if a web font is chosen, load its true italic.
+Face: the mocks rendered the **Palatino** stack (the `fontFamily` of every serif token) as a system fallback. No web font was rendered or confirmed. The Palatino stack is the v1 font stack (decided by the user). Fraunces vs Newsreader Italic is a later swap behind the typography tokens; if a web font is chosen, load its true italic.
 
 Style: everything is **italic** (the user wanted "lots of italic styling"; deliberate, see Accessibility Floor in EXPERIENCE.md), with weight 600 for `wordmark`, `readout`, selected states and `interval-label`. Exception: `key-hint` (shortcut caps such as `Enter`, `Space`) is non-italic system sans, so a key reads as a key. Key hints are **solid color, no opacity** (see Contrast): `muted` on bg, chip, interval-tint and surface; `on-fill` on the action fill; `ink` on a wrong button. Inside interval buttons use `key-hint-small`.
 
-Ramp: the typography tokens are the ramp; `readout-question` is the Listen question size. Guitar-snippet text sizes in the mock were drawn at a different frame scale and are not reproduced. [NOTE FOR UX] Guitar-view type sizes need a pass against the full canvas.
+Ramp: the typography tokens are the ramp; `readout-question` is the Listen question size. Guitar-snippet text sizes in the mock were drawn at a different frame scale and are not reproduced. Tune guitar-view type sizes at build against the full 1280 x 800 canvas.
 
 ## Layout & Spacing
 
@@ -324,7 +324,7 @@ Pixel values are from a **1280 x 800 design canvas** (the mocks render it 1:1). 
 
 Top to bottom: a slim **mode strip** ({spacing.strip-height}, side padding {spacing.strip-padding-x}) holding the wordmark, the Listen / Explore modes (gap {spacing.mode-gap}), the Piano|Guitar toggle pushed right, then the Setup opener and the help hint at the far right (opener just left of the hint). Below, the body (padding {spacing.body-padding}): readout centered ({typography.readout}) with the role legend under it (gap {spacing.readout-gap}), the instrument filling the remaining height and horizontally centered, then a centered control row (gap {spacing.control-gap}, top {spacing.control-top}). In Listen, a row of 12 interval buttons sits at the bottom (gap {spacing.interval-gap}).
 
-The guitar view adds a voicing stepper and a fret-region bar around the fretboard ([wireframe frame 3](wireframes/flow-build-chord-2026-10-23.excalidraw); [guitar mock](mockups/key-explore-guitar.html)); exact placement beyond what the wireframe shows is not specified. **Setup panel placement is accepted by the user:** the [Listen and setup mock](mockups/key-listen-setup.html) shows it anchored under the strip at the right, a 560px floating overlay on the instrument's right edge; it may cover part of the readout and Reveal while open (accepted limit). The Listen arrangement around it remains PROPOSED. The panel uses existing tokens only (surface, {rounded.interval}).
+The guitar view adds a voicing stepper and a fret-region bar around the fretboard ([wireframe frame 3](wireframes/flow-build-chord-2026-10-23.excalidraw); [guitar mock](mockups/key-explore-guitar.html)); exact placement beyond what the wireframe shows is not specified. **Setup panel placement is accepted by the user:** the [Listen and setup mock](mockups/key-listen-setup.html) shows it anchored under the strip at the right, a 560px floating overlay on the instrument's right edge; it may cover part of the readout and Reveal while open (accepted limit). The Listen arrangement around it is accepted by the user. The panel uses existing tokens only (surface, {rounded.interval}).
 
 The piano shows three octaves; `[` and `]` move by octave (EXPERIENCE.md).
 
@@ -348,9 +348,11 @@ Pill ({rounded.full}) for modes, toggle segments, action buttons, pool chips, th
 
 All colored shapes use a 1.8px ink outline and stay at least 18px. On piano, keys additionally carry an 80%-opacity tint of the role fill with the marker on top. **Open string** = the role shape inside a ring at the nut (user-approved). Muted strings are a cross (`x`) in muted. The no-role dot is [ASSUMPTION] (added after the accessibility review so a lit note never relies on color alone).
 
+Stroke widths, opacities and state treatments given as prose values (for example the 1.8px outline, 80% tint, 70% strings) are not tokenized; builders may extract them into tokens at build time.
+
 ## Components
 
-Names are identical in EXPERIENCE.md Component Patterns. Illustrations: [Explore, piano](mockups/key-explore-piano.html) (C major 7 built; root ringed and filled, 3rd diamond, 5th square green, 7th triangle; light and dark); [Explore, guitar](mockups/key-explore-guitar.html) (same chord as a fretboard voicing, then the no-voicing state); [Listen with setup panel](mockups/key-listen-setup.html) (Listen layout PROPOSED; panel placement accepted; opener shown pressed). Where a mock differs from this file, this file wins. The mocks' visual render is unchecked: the designer never viewed them in a browser.
+Names are identical in EXPERIENCE.md Component Patterns. Illustrations: [Explore, piano](mockups/key-explore-piano.html) (C major 7 built; root ringed and filled, 3rd diamond, 5th square green, 7th triangle; light and dark); [Explore, guitar](mockups/key-explore-guitar.html) (same chord as a fretboard voicing, then the no-voicing state); [Listen with setup panel](mockups/key-listen-setup.html) (Listen layout accepted by the user; panel placement accepted; opener shown pressed). Where a mock differs from this file, this file wins. The mocks' visual render is unchecked: the designer never viewed them in a browser.
 
 - **Mode strip** — {spacing.strip-height} tall (use as a minimum, not a fixed height), {colors.bg}, no border. Holds wordmark, Mode tabs, Instrument toggle, Setup opener, Help hint.
 - **Mode tab** — pill, {typography.mode}, {colors.muted} text at rest. Selected: fill {colors.accent}, text {colors.on-fill}, weight 600 (`mode-tab-selected`).

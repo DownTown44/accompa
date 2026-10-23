@@ -10,7 +10,7 @@ companion: DESIGN.md
 
 # accompa — Experience Spine
 
-> **PRD override.** The user confirmed that Listen has an optional guess-by-click (correct answer advances, wrong answer stays marked). This overrides PRD FR-6 ("No scoring, no right/wrong, no guess-first step"). There is still no score counter, and guessing is optional. See "PRD updates needed" at the end.
+> **PRD override (applied).** The user confirmed that Listen has an optional guess-by-click (correct answer advances, wrong answer stays marked). PRD FR-6 was rewritten to match on 2026-10-23. There is still no score counter, and guessing is optional.
 >
 > **Vocabulary.** PRD "Practice mode (listen and reveal)" is **Listen**; PRD "Free-play mode" plus the chord builder is **Explore**. Piano and Guitar are not modes; they are an always-visible instrument toggle.
 
@@ -30,7 +30,7 @@ References:
 
 ### Persisted settings
 
-Persisted across sessions: sound choice, theme (including a manual override of the system setting), interval pool. Not persisted: chord, voicing, current question, direction and root mode. [ASSUMPTION] The architecture spine's settings context may persist direction and root mode; reconcile the two.
+Persisted across sessions: sound choice, theme (including a manual override of the system setting), interval pool. Not persisted: chord, voicing, current question, direction and root mode. This matches the architecture spine (AD-6).
 
 ## Information Architecture
 
@@ -46,7 +46,7 @@ The instrument (piano or guitar) is always on screen. A mode layers over it.
 
 Persistent chrome: a slim **Mode strip** (wordmark, Listen / Explore, Piano / Guitar toggle, Setup opener, Help hint) that does not compete with the instrument. Under it: **Readout**, instrument, controls. No navigation beyond this.
 
-Listen layout ([mock](mockups/key-listen-setup.html)) is **PROPOSED, pending user view** (the user approved the Listen behavior, not the arrangement): Readout shows the question, the instrument below, a control row (Play again, Reveal), and a row of 12 Interval buttons. Setup panel contents are decided (interval pool, direction, root, sound choice, theme); its **placement and size (560px floating overlay) are accepted by the user**.
+Listen layout ([mock](mockups/key-listen-setup.html)) is **accepted by the user** (behavior and arrangement): Readout shows the question, the instrument below, a control row (Play again, Reveal), and a row of 12 Interval buttons. Setup panel contents are decided (interval pool, direction, root, sound choice, theme); its **placement and size (560px floating overlay) are accepted by the user**.
 
 The workspace (current chord, voicing) is shared across Piano and Guitar and survives a swap and swap-back (ARCHITECTURE-SPINE AD-5). Listen never overwrites it.
 
@@ -63,7 +63,7 @@ Quiet, short, sentence case, italic in the UI. No exclamation marks, no scores, 
 | `P5. Next interval is playing.` | `Correct! Great job!` |
 | `Which interval?` | `Question 4 of 10` |
 
-Chord and interval names come from the one spelling module (AD-3); copy never spells notes itself. The 6-semitone interval is labelled **A4**.
+Chord and interval names come from the one spelling module (AD-3); copy never spells notes itself. The 6-semitone interval is labelled **A4** (aligned with ARCHITECTURE-SPINE AD-3).
 
 ## Inspiration & Anti-patterns
 
@@ -87,7 +87,7 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 | Role marker | On piano keys and frets | Root is ringed and filled; 3rd, 5th, 7th are distinct shapes, always shape plus color. A lit note with no role gets the no-role dot. |
 | Action button | Play and reveal controls | Click or its key-hint key. One primary per row. Explore: Block (`Enter`), Arpeggio (`A`). Listen: Play again (`Space`), Reveal (`Enter`). After Reveal, a Next button takes the primary slot; `Enter` again = Next. |
 | Interval button | Listen, 12 of them (m2 to P8) | Click or keys `1`-`9`, `0`, `-`, `=`. Correct: advances to the next question and auto-plays it. Wrong: the button is marked and disabled until the next question; the question stays. Disabled while revealed. Only intervals in the pool are enabled; [ASSUMPTION] pool-excluded buttons are shown disabled, not hidden. A wrong button keeps focusability for assistive tech (`aria-disabled`), and its accessible name carries the state (for example `m3, tried`). |
-| Voicing stepper | Guitar view | `◀ Voicing 1 of N ▶`; `Left` / `Right` or the arrows step. [ASSUMPTION] No wrap: the arrow at either end is inert (`aria-disabled`, replaced visually by `·`). If a focused arrow goes inert, focus moves to the remaining stepper arrow; if the stepper hides, to the instrument if no stepper control is left. Best playable shape ranks first. Guitar only; piano voicings (FR-21) are **open**, see PRD updates. |
+| Voicing stepper | Guitar view | `◀ Voicing 1 of N ▶`; `Left` / `Right` or the arrows step. [ASSUMPTION] No wrap: the arrow at either end is inert (`aria-disabled`, replaced visually by `·`). If a focused arrow goes inert, focus moves to the remaining stepper arrow; if the stepper hides, to the instrument if no stepper control is left. Best playable shape ranks first. Guitar only; piano voicings and inversions are Phase 2 (FR-21 withdrawn). |
 | Fret-region bar | Guitar view | Defaults to the whole neck. Set by dragging over the fret numbers; the quiet clear control restores the whole neck. It sits outside the track, to the right of the bar, on the page background. It is a real button, accessible name `Clear fret region`, keyboard-focusable with the standard focus ring, and operable by keyboard even though the region is set by drag. It is disabled (visually unchanged) when the region is already the whole neck; its hit area stays at least 28px. Stepper recomputes for the region. |
 | Setup panel | On demand | Non-modal. `P` toggles, `Esc` closes. Focus enters on open and returns to the opener on close. Holds the inner controls below. The opener is the gear icon (Setup opener). Width (560px) and floating overlap of the instrument are accepted by the user. |
 | Pool chip | Setup panel | Checkbox chip per interval; on = selected treatment (accent fill, weight 600), no check glyph. [ASSUMPTION] At least one interval stays selected; the last ticked chip cannot be unticked: it gets `aria-disabled` (stays focusable), a non-colour cue, and a live-region hint `Keep at least one interval.` [ASSUMPTION]. On/off cue is fill, text color and weight, with no check glyph (user decision); dark unselected label contrast on the panel is 4.00 (muted on chip over surface; light 5.02), an accepted limit (see Accessibility Floor). |
@@ -212,22 +212,24 @@ Failure: no voicing fits the region, so the fretboard is empty and the Status no
 
 Failure: audio blocked, same note as Flow 1.
 
-### Flow 3: Chord ear practice (PRD FR-22) [ASSUMPTION]
+### Flow 3: Chord ear practice (PRD FR-22)
 
-Not designed by the user. Assumed to reuse the Listen pattern of Flow 2 with a chord-quality pool, answer buttons for chord qualities, and Reveal lighting the chord on the active instrument. Button layout, keys for chord qualities, and whether guess-by-click applies are undecided. To be confirmed when slice 1B practice is designed. Do not read this as specified.
+User-confirmed: it reuses the Listen pattern of Flow 2 with a chord-quality pool, answer buttons for chord qualities, and Reveal lighting the chord on the active instrument. Guess-by-click is optional, as in FR-22. Button layout and keys for chord qualities are set when slice 1B practice is built.
 
 ## Open items
 
-- **Web font:** Fraunces vs Newsreader Italic is undecided (DESIGN.md Typography).
-- Listen layout: PROPOSED (see Information Architecture); Setup panel placement and size are accepted by the user.
-- Every [ASSUMPTION] tag in this document is open for confirmation; search for the tag.
-- Flow 3 is unspecified (see Key Flows).
-- [NOTE FOR UX] Guitar-view type sizes need a pass against the full canvas (DESIGN.md Typography).
-- FR-21 and PRD naming: see PRD updates needed.
+- Only the inline [ASSUMPTION] tags remain open: build-time defaults, revisit when real code exists (search for the tag). The Listen layout, setup panel placement and size are accepted by the user.
+- Defaults, not open: the Palatino stack is the v1 font stack (a later web-font swap sits behind the typography tokens; decided by the user); guitar-view type sizes are tuned at build against the 1280 x 800 canvas; prose stroke, opacity and state values may be extracted into tokens at build time (DESIGN.md).
+- Piano voicings and inversions are Phase 2 (FR-21 withdrawn); no piano voicing UI in this spine.
 
-## PRD updates needed
+## PRD sync
 
-Run `bmad-prd` Update for:
-- **FR-6**: see the PRD override callout at the top.
-- **FR-21**: decide whether piano voicings (inversions, spread) are in scope and how they are browsed.
-- **Naming**: the PRD's Practice and Free-play modes are Listen and Explore in the UX; Piano and Guitar are an instrument toggle, not modes.
+The PRD was updated on 2026-10-23 (`bmad-prd` Update):
+- **FR-6** rewritten for optional guess-by-click.
+- **FR-21** withdrawn: voicings are guitar-only in Phase 1; piano inversions are Phase 2.
+- **FR-12** no longer includes choosing a chord by root and quality (a Phase 2 chord library); the builder is note-clicking.
+- **Naming**: the PRD now uses Listen and Explore; Piano / Guitar is an instrument toggle, not a mode.
+- **FR-17** span limit decided (4 frets); other voicing rules are `[ASSUMPTION]` defaults in the PRD and architecture AD-8.
+- **FR-21** stays withdrawn: piano inversions are deferred to Phase 2.
+- **FR-22** is user-confirmed as the Listen pattern with chord qualities (Flow 3).
+- **Open Questions** are all closed: sound (synthesized v1, samples Phase 2), tech stack, swap UX, voicing rules, piano inversions, persisted settings (matches AD-6).
