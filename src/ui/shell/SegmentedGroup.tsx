@@ -7,11 +7,12 @@ interface Option<T extends string> {
 
 interface SegmentedGroupProps<T extends string> {
   label: string
+  labelledBy?: string
   name: string
   options: readonly Option<T>[]
   value: T
   onChange: (value: T) => void
-  variant: 'mode' | 'segment'
+  variant: 'mode' | 'segment' | 'setup'
 }
 
 // A pointer click hands focus back to the page so shortcuts keep working; keyboard activation keeps it.
@@ -19,9 +20,9 @@ function releaseFocusAfterPointer(event: MouseEvent<HTMLInputElement>) {
   if (event.detail > 0) event.currentTarget.blur()
 }
 
-export function SegmentedGroup<T extends string>({ label, name, options, value, onChange, variant }: SegmentedGroupProps<T>) {
+export function SegmentedGroup<T extends string>({ label, labelledBy, name, options, value, onChange, variant }: SegmentedGroupProps<T>) {
   return (
-    <div role="radiogroup" aria-label={label} className={`group group-${variant}`}>
+    <div role="radiogroup" aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy} className={`group group-${variant}`}>
       {options.map((option) => (
         <label key={option.value} className={`segment segment-${variant}`}>
           <input

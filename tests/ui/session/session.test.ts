@@ -36,14 +36,14 @@ describe('sessionReducer', () => {
   })
 
   it('stores a question in the practice part and leaves the workspace untouched', () => {
-    const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
     const next = sessionReducer(initialSession, { type: 'setQuestion', question })
     expect(next.practice.question).toBe(question)
     expect(next.workspace).toBe(initialSession.workspace)
   })
 
   it('keeps the question when the mode or instrument changes', () => {
-    const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
     state = sessionReducer(state, { type: 'setMode', mode: 'explore' })
     state = sessionReducer(state, { type: 'toggleInstrument' })
@@ -54,7 +54,7 @@ describe('sessionReducer', () => {
 
 describe('instrument swap', () => {
   it('changes only the instrument, there and back', () => {
-    const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
     state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
     const guitar = sessionReducer(state, { type: 'toggleInstrument' })
@@ -89,7 +89,7 @@ describe('piano window in the session', () => {
 })
 
 describe('window refit on mode and instrument change', () => {
-  const question = { root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
+  const question = { direction: 'ascending' as const, root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
   const revealed = () => {
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
     state = sessionReducer(state, { type: 'reveal' })
@@ -113,7 +113,7 @@ describe('window refit on mode and instrument change', () => {
 })
 
 describe('reveal', () => {
-  const question = { root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
+  const question = { direction: 'ascending' as const, root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
   const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
 
   it('does nothing without a question', () => {
@@ -141,7 +141,7 @@ describe('reveal', () => {
 })
 
 describe('guess', () => {
-  const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+  const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
   const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
 
   it('appends wrong marks and records the feedback', () => {
@@ -181,7 +181,7 @@ describe('guess', () => {
 })
 
 describe('setup and pool', () => {
-  const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+  const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
 
   it('opens and closes the panel', () => {
     expect(initialSession.setupOpen).toBe(false)

@@ -58,6 +58,13 @@
   outline-offset: var(--spacing-focus-ring-offset);
 }
 
+.setup-sublabel {
+  margin: 16px 0 8px;
+  color: var(--color-muted);
+  font-size: var(--type-legend-size);
+  font-weight: 600;
+}
+
 .setup-note {
   min-height: 1.4em;
   margin: 12px 0 0;
