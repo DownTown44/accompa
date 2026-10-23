@@ -1,7 +1,7 @@
 .setup-panel {
   position: absolute;
-  top: var(--spacing-strip-height);
-  right: var(--spacing-strip-padding-x);
+  top: 100%;
+  right: 0;
   z-index: 10;
   box-sizing: border-box;
   width: 560px;

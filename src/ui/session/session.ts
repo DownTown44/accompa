@@ -26,6 +26,7 @@ export interface Session {
   readonly pianoStart: number
   readonly feedback: Feedback | null
   readonly setupOpen: boolean
+  readonly helpOpen: boolean
 }
 
 export type SessionAction =
@@ -38,6 +39,10 @@ export type SessionAction =
   | { type: 'rightGuess'; interval: Interval }
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
+  | { type: 'openHelp' }
+  | { type: 'closeHelp' }
+  | { type: 'toggleHelp' }
+  | { type: 'dismiss' }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
@@ -48,6 +53,7 @@ export const initialSession: Session = {
   pianoStart: DEFAULT_WINDOW_START,
   feedback: null,
   setupOpen: false,
+  helpOpen: false,
 }
 
 // A revealed question must be visible when the piano is showing.
@@ -93,6 +99,16 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     case 'toggleSetup':
       return { ...state, setupOpen: !state.setupOpen }
     case 'closeSetup':
+      return state.setupOpen ? { ...state, setupOpen: false } : state
+    case 'openHelp':
+      return state.helpOpen ? state : { ...state, helpOpen: true }
+    case 'closeHelp':
+      return state.helpOpen ? { ...state, helpOpen: false } : state
+    case 'toggleHelp':
+      return { ...state, helpOpen: !state.helpOpen }
+    // Esc closes the shortcuts list first, else the Setup panel.
+    case 'dismiss':
+      if (state.helpOpen) return { ...state, helpOpen: false }
       return state.setupOpen ? { ...state, setupOpen: false } : state
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { COMMON_RANGE } from '../../../src/core/instruments'
 import { App } from '../../../src/ui/app/App'
@@ -159,11 +159,18 @@ describe('entering Listen', () => {
 })
 
 describe('focus after a pointer click on the strip', () => {
-  it('moves focus off the control so shortcuts keep working', () => {
+  it('moves focus to the instrument so shortcuts keep working', async () => {
     const explore = radio('Explore')
     explore.focus()
     fireEvent.click(explore, { detail: 1 })
-    expect(document.activeElement).toBe(document.body)
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('.piano')))
+  })
+
+  it('lands on the fretboard after choosing Guitar', async () => {
+    const guitar = radio('Guitar')
+    guitar.focus()
+    fireEvent.click(guitar, { detail: 1 })
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('.fretboard')))
   })
 
   it('keeps focus when the control is activated from the keyboard', () => {
