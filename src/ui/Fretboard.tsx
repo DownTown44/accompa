@@ -15,6 +15,7 @@ const NUMBER_Y = 344
 const NAME_X = 58
 const DOT_RADIUS = 9
 const OPEN_RING_RADIUS = 19
+const ROOT_RING_RADIUS = 16
 const OPEN_X = 108
 const THICKEST_STRING = 3.25
 const THINNEST_STRING = 1.0
@@ -31,12 +32,13 @@ interface FretboardProps {
   tuning: readonly Pitch[]
   frets?: number
   lit: readonly FretPosition[]
+  root?: FretPosition
   onNotePress?: (note: FretNote) => void
   onNoteRelease?: (note: FretNote) => void
 }
 
 // Presentational: draws the board and reports presses; it owns no musical state or sound.
-export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, onNotePress, onNoteRelease }: FretboardProps) {
+export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, onNotePress, onNoteRelease }: FretboardProps) {
   const held = useRef<string | null>(null)
   const fretWidth = (BOARD_RIGHT - NUT_X) / frets
   const wireX = (fret: number) => NUT_X + fret * fretWidth
@@ -121,8 +123,11 @@ export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, onNotePress, onNo
         }),
       )}
       {visible.map(({ string, fret }) => (
-        <g key={keyOf(string, fret)} data-lit={keyOf(string, fret)} className="fb-lit">
+        <g key={keyOf(string, fret)} data-lit={keyOf(string, fret)} data-root={root?.string === string && root.fret === fret ? '' : undefined} className="fb-lit">
           {fret === 0 && <circle className="fb-open-ring" cx={OPEN_X} cy={stringY(string)} r={OPEN_RING_RADIUS} />}
+          {root?.string === string && root.fret === fret && (
+            <circle className="root-ring" cx={cellX(fret)} cy={stringY(string)} r={ROOT_RING_RADIUS} />
+          )}
           <circle className="lit-dot" cx={cellX(fret)} cy={stringY(string)} r={DOT_RADIUS} />
         </g>
       ))}

@@ -173,3 +173,78 @@ describe('focus after a pointer click on the strip', () => {
     expect(document.activeElement).toBe(explore)
   })
 })
+
+describe('Reveal and Next', () => {
+  const reveal = () => screen.getByRole('button', { name: /Reveal|Next/ })
+  const lit = () => [...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit'))
+
+  it('is disabled with no question and Enter does nothing', () => {
+    expect(reveal().getAttribute('aria-disabled')).toBe('true')
+    fireEvent.click(reveal())
+    press({ key: 'Enter' })
+    expect(screen.getByText('Which interval?')).toBeTruthy()
+    expect(engine.plays).toHaveLength(0)
+  })
+
+  it('reveals with Enter: abbreviation, both notes lit, root marked, focus kept, announced', () => {
+    press({ key: ' ' })
+    const button = reveal()
+    button.focus()
+    const event = press({ key: 'Enter' })
+    expect(event.defaultPrevented).toBe(true)
+    expect(screen.getByText('P5', { selector: '.readout-question' })).toBeTruthy()
+    expect(lit()).toEqual(['60', '67'])
+    expect(document.querySelectorAll('[data-root]')).toHaveLength(1)
+    expect(document.querySelector('[data-root]')!.getAttribute('data-lit')).toBe('60')
+    expect(button.textContent).toContain('Next')
+    expect(document.activeElement).toBe(button)
+    expect(document.querySelector('[aria-live="polite"].visually-hidden')!.textContent).toBe('perfect fifth')
+    expect(document.body.textContent).not.toMatch(/score|correct|great/i)
+  })
+
+  it('reveals on click, and Next draws and plays a new interval and unlights', () => {
+    press({ key: ' ' })
+    fireEvent.click(reveal())
+    expect(lit()).toHaveLength(2)
+    vi.spyOn(Math, 'random').mockReturnValue(0.1)
+    fireEvent.click(reveal())
+    expect(engine.plays).toHaveLength(2)
+    expect(engine.plays[1].pitches).not.toEqual(engine.plays[0].pitches)
+    expect(screen.getByText('Which interval?')).toBeTruthy()
+    expect(lit()).toHaveLength(0)
+    expect(reveal().textContent).toContain('Reveal')
+  })
+
+  it('Enter yields to other focused controls', () => {
+    press({ key: ' ' })
+    press({ key: 'Enter' }, radio('Piano'))
+    const field = document.createElement('input')
+    field.type = 'text'
+    document.body.append(field)
+    press({ key: 'Enter' }, field)
+    field.remove()
+    expect(lit()).toHaveLength(0)
+  })
+
+  it('keeps the reveal across a swap and replays the same pitches with Space', () => {
+    press({ key: ' ' })
+    press({ key: 'Enter' })
+    press({ key: 'i' })
+    expect(document.querySelector('.fretboard')).not.toBeNull()
+    expect(lit()).toHaveLength(2)
+    expect(document.querySelectorAll('[data-root]')).toHaveLength(1)
+    press({ key: ' ' })
+    expect(engine.plays[1].pitches).toEqual(engine.plays[0].pitches)
+    expect(screen.getByText('P5', { selector: '.readout-question' })).toBeTruthy()
+  })
+
+  it('keeps the revealed state through Explore, which shows the workspace', () => {
+    press({ key: ' ' })
+    press({ key: 'Enter' })
+    press({ key: 'm' })
+    expect(lit()).toHaveLength(0)
+    press({ key: 'm' })
+    expect(lit()).toHaveLength(2)
+    expect(engine.plays).toHaveLength(1)
+  })
+})

@@ -46,3 +46,29 @@ export function positionsForPitch(
   })
   return found
 }
+
+export interface PositionPair {
+  readonly root: FretPosition
+  readonly upper: FretPosition
+}
+
+// The closest position for each note, by fret plus string distance, then the lowest frets.
+export function closestPair(
+  root: Pitch,
+  upper: Pitch,
+  tuning: readonly Pitch[] = STANDARD_GUITAR_TUNING,
+  frets: number = GUITAR_FRETS,
+): PositionPair | null {
+  let best: PositionPair | null = null
+  let bestScore: [number, number] = [Infinity, Infinity]
+  for (const a of positionsForPitch(root, tuning, frets)) {
+    for (const b of positionsForPitch(upper, tuning, frets)) {
+      const score: [number, number] = [Math.abs(a.fret - b.fret) + Math.abs(a.string - b.string), a.fret + b.fret]
+      if (score[0] < bestScore[0] || (score[0] === bestScore[0] && score[1] < bestScore[1])) {
+        best = { root: a, upper: b }
+        bestScore = score
+      }
+    }
+  }
+  return best
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pitch } from '../../src/core/pitch'
-import { DEFAULT_WINDOW_START, isBlackKey, offscreenLit, offscreenNote, shiftWindow, windowPitches } from '../../src/core/piano'
+import { DEFAULT_WINDOW_START, fitWindow, isBlackKey, offscreenLit, offscreenNote, shiftWindow, windowPitches } from '../../src/core/piano'
 
 describe('piano window', () => {
   it('defaults to C3', () => expect(DEFAULT_WINDOW_START).toBe(48))
@@ -38,5 +38,25 @@ describe('piano window', () => {
     expect(offscreenNote({ below: 2, above: 3 })).toBe('◀ 2 notes lit · 3 notes lit ▶')
     expect(offscreenNote({ below: 0, above: 1 })).toBe('1 note lit ▶')
     expect(offscreenNote({ below: 0, above: 0 })).toBeUndefined()
+  })
+})
+
+describe('fitWindow', () => {
+  it('keeps a window that already shows the pitches', () => {
+    expect(fitWindow(48, [pitch(50), pitch(57)])).toBe(48)
+  })
+
+  it('shifts by octaves to the nearest window', () => {
+    expect(fitWindow(48, [pitch(40), pitch(47)])).toBe(36)
+    expect(fitWindow(36, [pitch(80), pitch(83)])).toBe(48)
+    expect(fitWindow(36, [pitch(86), pitch(91)])).toBe(60)
+  })
+
+  it('never leaves the piano range', () => {
+    for (let low = 36; low <= 84; low++) {
+      const start = fitWindow(48, [pitch(low), pitch(low + 12)])
+      expect(start).toBeGreaterThanOrEqual(36)
+      expect(start).toBeLessThanOrEqual(60)
+    }
   })
 })

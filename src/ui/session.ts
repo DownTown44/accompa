@@ -6,7 +6,7 @@ import {
   type Question,
   type Workspace,
 } from '../core/model'
-import { DEFAULT_WINDOW_START, shiftWindow } from '../core/piano'
+import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../core/piano'
 
 export type { Instrument }
 export type Mode = 'listen' | 'explore'
@@ -24,6 +24,7 @@ export type SessionAction =
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
+  | { type: 'reveal' }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
@@ -34,19 +35,31 @@ export const initialSession: Session = {
   pianoStart: DEFAULT_WINDOW_START,
 }
 
+// A revealed question must be visible when the piano is showing.
+function fitRevealed(state: Session): Session {
+  const { question, revealed } = state.practice
+  if (state.mode !== 'listen' || state.instrument !== 'piano' || !revealed || !question) return state
+  const pianoStart = fitWindow(state.pianoStart, question.pitches)
+  return pianoStart === state.pianoStart ? state : { ...state, pianoStart }
+}
+
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
     case 'setMode':
-      return { ...state, mode: action.mode }
+      return fitRevealed({ ...state, mode: action.mode })
     case 'setInstrument':
-      return { ...state, instrument: action.instrument }
+      return fitRevealed({ ...state, instrument: action.instrument })
     case 'toggleInstrument':
-      return { ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' }
+      return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' })
     case 'setQuestion':
       return {
         ...state,
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
       }
+    case 'reveal': {
+      if (!state.practice.question || state.practice.revealed) return state
+      return fitRevealed({ ...state, practice: { ...state.practice, revealed: true } })
+    }
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state
       const pianoStart = shiftWindow(state.pianoStart, action.direction)

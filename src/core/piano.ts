@@ -19,6 +19,22 @@ export function shiftWindow(start: number, direction: 1 | -1): number {
   return Math.min(MAX_START, Math.max(MIN_START, start + direction * 12))
 }
 
+// The window start, moved by whole octaves from the current one, that shows every pitch.
+export function fitWindow(start: number, pitches: readonly Pitch[]): number {
+  const shows = (s: number) => pitches.every((p) => p >= s && p < s + WINDOW_SEMITONES)
+  let best = start
+  let bestDistance = Infinity
+  for (let s = MIN_START; s <= MAX_START; s += 12) {
+    if (!shows(s)) continue
+    const distance = Math.abs(s - start)
+    if (distance < bestDistance) {
+      best = s
+      bestDistance = distance
+    }
+  }
+  return best
+}
+
 export interface OffscreenLit {
   readonly below: number
   readonly above: number
