@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>accompa Explore piano</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+/* key-explore-piano.html governs: DESIGN.md Colors, Typography, Shapes (role markers), Components (Mode strip, Mode tab, Instrument toggle, Help hint, Readout, Role legend, Piano keyboard, Role marker, Action button, Key hint);
+   EXPERIENCE.md Component Patterns (same names), State Patterns (Multiple chord readings), Flow 1 steps 1-3. Selected state is one rule shared by .mode.on and .seg.on. No green on mode buttons: the only green is the 5th (role-fifth).
+   Illustrative strings: 'C major 7' and 'E minor add b6' (chord names come from the spelling module, AD-3; not final copy). */
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#ECE8DF;color:#262626;font-family:system-ui,'Segoe UI',sans-serif;padding:32px 24px 80px}
+.page{width:1280px;margin:0 auto}
+.cap{font:600 12px system-ui;letter-spacing:.1em;text-transform:uppercase;color:#777;margin:0 0 8px}
+.cap2{font:15px/1.5 system-ui;color:#444;margin:0 0 20px;max-width:1100px}
+.sec{margin-bottom:64px}
+/* page furniture (not product): browser-window frame */
+.win{width:1280px;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px #0003}
+.bar{height:44px;background:#DDD8CE;display:flex;align-items:center;gap:8px;padding:0 16px}
+.bar i{width:12px;height:12px;border-radius:50%;background:#0003;display:block}
+.bar b{display:block;margin-left:24px;height:26px;width:520px;border-radius:13px;background:#F4F1EA}
+/* product screen, 1:1 at 1280 x 800 */
+.scr{position:relative;width:1280px;height:800px;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;font-style:italic;overflow:hidden}
+.strip{display:flex;align-items:center;gap:36px;height:84px;padding:0 44px;flex:none}
+.word{font-style:italic;font-weight:600;font-size:30px}
+.modes{display:flex;gap:8px}
+/* ONE shared selected-state: accent fill, on-fill text, weight 600 (mode tab AND instrument-toggle segment AND setup-panel segments) */
+.mode{font-style:italic;font-size:24px;color:var(--muted);padding:10px 26px;border-radius:999px}
+.seg{font-size:22px;font-style:italic;padding:8px 24px;color:var(--muted);border-radius:999px}
+.mode.on,.seg.on{background:var(--accent);color:var(--on);font-weight:600}
+.toggle{margin-left:auto;display:flex;border-radius:999px;background:var(--chip);gap:2px;padding:5px}
+.help{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-style:italic;font-size:21px;color:var(--muted);flex:none;background:var(--chip)}
+.body{flex:1;display:flex;flex-direction:column;padding:20px 56px 44px;min-height:0}
+.ro{text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.name{font-style:italic;font-weight:600;font-size:84px;line-height:1.05;color:var(--ink)}
+.name.q{font-size:56px}
+.alts{font-size:22px;color:var(--muted);display:flex;gap:22px;margin-top:-6px}
+.hint{font-size:22px;color:var(--muted)}
+.legend{display:flex;gap:22px;font-size:20px;color:var(--muted);align-items:center}
+.lg{display:flex;align-items:center;gap:4px}
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+.inst{width:100%;height:auto;max-height:100%;display:block;min-height:0}
+.ctl{display:flex;gap:18px;justify-content:center;align-items:center;padding-top:26px}
+.btn{font-style:italic;font-size:26px;padding:14px 38px;border-radius:999px;background:var(--chip);color:var(--ink);display:inline-flex;gap:12px;align-items:baseline}
+.btn.on{background:var(--action);color:var(--on);font-weight:600}
+kbd{font:normal 600 15px system-ui,sans-serif;opacity:.6;letter-spacing:.04em;font-style:normal}
+.ivrow{display:flex;gap:10px;margin-top:26px}
+.iv{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 0 12px;border-radius:22px;background:var(--iv);position:relative}
+.iv em{font-size:28px;font-weight:600}
+.iv kbd{font-size:13px}
+.iv.off{opacity:.4}
+.iv.wrong{background:var(--wrong);box-shadow:inset 0 0 0 2px var(--muted);color:var(--ink)}
+.iv.wrong em{text-decoration:line-through;text-decoration-thickness:3px;opacity:.75}
+.iv.wrong::after{content:"\2715";position:absolute;top:6px;right:10px;font-size:15px;font-style:normal}
+.wk{fill:var(--surface);stroke:var(--keyline);stroke-width:1.5;rx:12px}
+.bk{fill:var(--keyb);stroke:none;rx:9px}
+.tint{stroke:none;rx:12px;opacity:.8}
+.tint.root,.sh.root{fill:var(--root)}.tint.third,.sh.third{fill:var(--third)}.tint.fifth,.sh.fifth{fill:var(--fifth)}.tint.seventh,.sh.seventh{fill:var(--seventh)}
+.sh{stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round}
+.ring{fill:none;stroke:var(--ink);stroke-width:1.8}
+.oct,.fn,.sn{fill:var(--muted);font-style:italic;font-size:20px;font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif}
+.sn{font-size:24px;fill:var(--ink)}
+.fbbg{fill:var(--surface);rx:12px}
+.fret{stroke:var(--keyline);stroke-width:2}
+.nut{stroke:var(--ink);stroke-width:7}
+.str{stroke:var(--ink);opacity:.7}
+.om{fill:none;stroke:var(--muted);stroke-width:2.5}
+.xm{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round}
+.trk{fill:var(--chip)}
+.reg{fill:var(--accent)}
+.fn.fnn{fill:var(--ink)}
+.vrow{display:flex;justify-content:space-between;align-items:center;width:100%;padding:0 12px 10px;min-height:48px}
+.stepper{font-size:22px;color:var(--ink);display:flex;gap:16px;align-items:baseline}
+.stepper s{text-decoration:none;color:var(--muted)}
+.regl{display:flex;gap:12px;align-items:center;font-size:22px;color:var(--muted)}
+.status{font-size:22px;color:var(--muted);text-align:center;padding-top:10px}
+/* setup panel (PROPOSED placement) */
+.pn{position:absolute;top:96px;right:44px;width:470px;background:var(--surface);color:var(--ink);border-radius:22px;padding:22px 26px 24px;box-shadow:inset 0 0 0 1.5px var(--keyline);display:flex;flex-direction:column;gap:16px}
+.pn h3{font-size:28px;font-weight:600;display:flex;justify-content:space-between;align-items:baseline}
+.pn .lab{font-size:20px;color:var(--muted);margin-bottom:6px}
+.pn .pool{display:flex;flex-wrap:wrap;gap:6px}
+.pn .pool span{font-size:20px;padding:5px 14px;border-radius:999px;background:var(--chip);color:var(--muted)}
+.pn .pool span.on{background:var(--accent);color:var(--on);font-weight:600}
+.pn .toggle{margin-left:0;display:inline-flex}
+.pn .seg{font-size:20px;padding:7px 16px}
+.light{--bg:#FDF1E8;--surface:#FFFAF5;--ink:#2C2A2B;--muted:#6F635D;--keyline:#EFD9CC;--accent:#F3B5B0;--action:#F6D0A8;--iv:#F8E1DC;--wrong:#E6D6DD;--root:#F29D95;--third:#F5D08C;--fifth:#A9D8B8;--seventh:#C7B1E6;--keyb:#4A4547;--on:#2C2A2B;--chip:#0000000D}
+.dark{--bg:#272022;--surface:#342A2D;--ink:#F3E7E2;--muted:#A89A9C;--keyline:#46393D;--accent:#E9A8A6;--action:#E3BC8F;--iv:#3D2E32;--wrong:#4A3A44;--root:#EE9F98;--third:#E5C58A;--fifth:#8CC5A0;--seventh:#B9A5DC;--keyb:#170F11;--on:#241E20;--chip:#FFFFFF14}
+</style></head><body><div class="page"><div class="cap2">Explore, piano, C major 7 built (C E G B). Root ringed and filled, 3rd diamond, 5th square (green), 7th triangle. 1280 x 800 viewport, light then dark. Visual render unchecked.</div><div class="sec"><div class="cap">Light</div><div class="win"><div class="bar"><i></i><i></i><i></i><b></b></div><div class="scr light"><div class="strip"><b class="word">accompa</b><div class="modes"><span class="mode">Listen</span><span class="mode on">Explore</span></div><div class="toggle"><span class="seg on">Piano</span><span class="seg">Guitar</span></div><span class="help">?</span></div><div class="body"><div class="ro"><div class="name">C major 7</div><div class="alts"><i>E minor add ♭6</i></div><div class="legend"><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><circle class="sh root" cx="15" cy="15" r="5"/><circle class="ring" cx="15" cy="15" r="11"/></svg><i>root C</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><polygon class="sh third" points="15,7.2 22.8,15 15,22.8 7.2,15"/></svg><i>3rd E</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><rect class="sh fifth" x="9.3" y="9.3" width="11.4" height="11.4"/></svg><i>5th G</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><polygon class="sh seventh" points="15,7.8 22.2,20.76 7.8,20.76"/></svg><i>7th B</i></span></div></div><div class="stage"><svg class="inst" viewBox="0 0 1199 330" width="1199" height="330"><rect class="wk" x="1" y="4" width="57" height="300"/><rect class="wk" x="58" y="4" width="57" height="300"/><rect class="wk" x="115" y="4" width="57" height="300"/><rect class="wk" x="172" y="4" width="57" height="300"/><rect class="wk" x="229" y="4" width="57" height="300"/><rect class="wk" x="286" y="4" width="57" height="300"/><rect class="wk" x="343" y="4" width="57" height="300"/><rect class="wk" x="400" y="4" width="57" height="300"/><rect class="wk" x="457" y="4" width="57" height="300"/><rect class="wk" x="514" y="4" width="57" height="300"/><rect class="wk" x="571" y="4" width="57" height="300"/><rect class="wk" x="628" y="4" width="57" height="300"/><rect class="wk" x="685" y="4" width="57" height="300"/><rect class="wk" x="742" y="4" width="57" height="300"/><rect class="wk" x="799" y="4" width="57" height="300"/><rect class="wk" x="856" y="4" width="57" height="300"/><rect class="wk" x="913" y="4" width="57" height="300"/><rect class="wk" x="970" y="4" width="57" height="300"/><rect class="wk" x="1027" y="4" width="57" height="300"/><rect class="wk" x="1084" y="4" width="57" height="300"/><rect class="wk" x="1141" y="4" width="57" height="300"/><rect class="tint root" x="400" y="4" width="57" height="300"/><rect class="tint third" x="514" y="4" width="57" height="300"/><rect class="tint fifth" x="628" y="4" width="57" height="300"/><rect class="tint seventh" x="742" y="4" width="57" height="300"/><rect class="bk" x="40" y="4" width="36" height="185"/><rect class="bk" x="97" y="4" width="36" height="185"/><rect class="bk" x="211" y="4" width="36" height="185"/><rect class="bk" x="268" y="4" width="36" height="185"/><rect class="bk" x="325" y="4" width="36" height="185"/><rect class="bk" x="439" y="4" width="36" height="185"/><rect class="bk" x="496" y="4" width="36" height="185"/><rect class="bk" x="610" y="4" width="36" height="185"/><rect class="bk" x="667" y="4" width="36" height="185"/><rect class="bk" x="724" y="4" width="36" height="185"/><rect class="bk" x="838" y="4" width="36" height="185"/><rect class="bk" x="895" y="4" width="36" height="185"/><rect class="bk" x="1009" y="4" width="36" height="185"/><rect class="bk" x="1066" y="4" width="36" height="185"/><rect class="bk" x="1123" y="4" width="36" height="185"/><circle class="sh root" cx="428.5" cy="255" r="13"/><circle class="ring" cx="428.5" cy="255" r="19"/><polygon class="sh third" points="542.5,238.1 559.4,255 542.5,271.9 525.6,255"/><rect class="sh fifth" x="644.15" y="242.65" width="24.7" height="24.7"/><polygon class="sh seventh" points="770.5,239.4 786.1,267.5 754.9,267.5"/><text class="oct" x="29.5" y="324" text-anchor="middle">C3</text><text class="oct" x="428.5" y="324" text-anchor="middle">C4</text><text class="oct" x="827.5" y="324" text-anchor="middle">C5</text></svg></div><div class="ctl"><span class="btn on">Block <kbd>Enter</kbd></span><span class="btn">Arpeggio <kbd>A</kbd></span></div></div></div></div></div><div class="sec"><div class="cap">Dark</div><div class="win"><div class="bar"><i></i><i></i><i></i><b></b></div><div class="scr dark"><div class="strip"><b class="word">accompa</b><div class="modes"><span class="mode">Listen</span><span class="mode on">Explore</span></div><div class="toggle"><span class="seg on">Piano</span><span class="seg">Guitar</span></div><span class="help">?</span></div><div class="body"><div class="ro"><div class="name">C major 7</div><div class="alts"><i>E minor add ♭6</i></div><div class="legend"><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><circle class="sh root" cx="15" cy="15" r="5"/><circle class="ring" cx="15" cy="15" r="11"/></svg><i>root C</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><polygon class="sh third" points="15,7.2 22.8,15 15,22.8 7.2,15"/></svg><i>3rd E</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><rect class="sh fifth" x="9.3" y="9.3" width="11.4" height="11.4"/></svg><i>5th G</i></span><span class="lg"><svg width="30" height="30" viewBox="0 0 30 30"><polygon class="sh seventh" points="15,7.8 22.2,20.76 7.8,20.76"/></svg><i>7th B</i></span></div></div><div class="stage"><svg class="inst" viewBox="0 0 1199 330" width="1199" height="330"><rect class="wk" x="1" y="4" width="57" height="300"/><rect class="wk" x="58" y="4" width="57" height="300"/><rect class="wk" x="115" y="4" width="57" height="300"/><rect class="wk" x="172" y="4" width="57" height="300"/><rect class="wk" x="229" y="4" width="57" height="300"/><rect class="wk" x="286" y="4" width="57" height="300"/><rect class="wk" x="343" y="4" width="57" height="300"/><rect class="wk" x="400" y="4" width="57" height="300"/><rect class="wk" x="457" y="4" width="57" height="300"/><rect class="wk" x="514" y="4" width="57" height="300"/><rect class="wk" x="571" y="4" width="57" height="300"/><rect class="wk" x="628" y="4" width="57" height="300"/><rect class="wk" x="685" y="4" width="57" height="300"/><rect class="wk" x="742" y="4" width="57" height="300"/><rect class="wk" x="799" y="4" width="57" height="300"/><rect class="wk" x="856" y="4" width="57" height="300"/><rect class="wk" x="913" y="4" width="57" height="300"/><rect class="wk" x="970" y="4" width="57" height="300"/><rect class="wk" x="1027" y="4" width="57" height="300"/><rect class="wk" x="1084" y="4" width="57" height="300"/><rect class="wk" x="1141" y="4" width="57" height="300"/><rect class="tint root" x="400" y="4" width="57" height="300"/><rect class="tint third" x="514" y="4" width="57" height="300"/><rect class="tint fifth" x="628" y="4" width="57" height="300"/><rect class="tint seventh" x="742" y="4" width="57" height="300"/><rect class="bk" x="40" y="4" width="36" height="185"/><rect class="bk" x="97" y="4" width="36" height="185"/><rect class="bk" x="211" y="4" width="36" height="185"/><rect class="bk" x="268" y="4" width="36" height="185"/><rect class="bk" x="325" y="4" width="36" height="185"/><rect class="bk" x="439" y="4" width="36" height="185"/><rect class="bk" x="496" y="4" width="36" height="185"/><rect class="bk" x="610" y="4" width="36" height="185"/><rect class="bk" x="667" y="4" width="36" height="185"/><rect class="bk" x="724" y="4" width="36" height="185"/><rect class="bk" x="838" y="4" width="36" height="185"/><rect class="bk" x="895" y="4" width="36" height="185"/><rect class="bk" x="1009" y="4" width="36" height="185"/><rect class="bk" x="1066" y="4" width="36" height="185"/><rect class="bk" x="1123" y="4" width="36" height="185"/><circle class="sh root" cx="428.5" cy="255" r="13"/><circle class="ring" cx="428.5" cy="255" r="19"/><polygon class="sh third" points="542.5,238.1 559.4,255 542.5,271.9 525.6,255"/><rect class="sh fifth" x="644.15" y="242.65" width="24.7" height="24.7"/><polygon class="sh seventh" points="770.5,239.4 786.1,267.5 754.9,267.5"/><text class="oct" x="29.5" y="324" text-anchor="middle">C3</text><text class="oct" x="428.5" y="324" text-anchor="middle">C4</text><text class="oct" x="827.5" y="324" text-anchor="middle">C5</text></svg></div><div class="ctl"><span class="btn on">Block <kbd>Enter</kbd></span><span class="btn">Arpeggio <kbd>A</kbd></span></div></div></div></div></div></div></body></html>
