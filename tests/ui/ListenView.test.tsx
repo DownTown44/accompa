@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { COMMON_RANGE } from '../../src/core/instruments'
 import { App } from '../../src/ui/App'
 import { createFakeEngine, type FakeEngine } from './fakeEngine'
 
@@ -86,6 +87,30 @@ describe('Space and Play again', () => {
   })
 })
 
+describe('question generation', () => {
+  it.each([0, 0.999999])('keeps both notes inside the range both instruments share at random %s', (value) => {
+    vi.spyOn(Math, 'random').mockReturnValue(value)
+    press({ key: ' ' })
+    for (const p of engine.plays[0].pitches) {
+      expect(p).toBeGreaterThanOrEqual(COMMON_RANGE.low)
+      expect(p).toBeLessThanOrEqual(COMMON_RANGE.high)
+    }
+  })
+
+  it('draws a new question only when none exists, even if the random source changes', () => {
+    const random = vi.spyOn(Math, 'random')
+    random.mockReturnValue(0.1)
+    press({ key: ' ' })
+    random.mockReturnValue(0.9)
+    press({ key: ' ' })
+    press({ key: 'i' })
+    press({ key: ' ' })
+    expect(engine.plays).toHaveLength(3)
+    expect(engine.plays[1].pitches).toEqual(engine.plays[0].pitches)
+    expect(engine.plays[2].pitches).toEqual(engine.plays[0].pitches)
+  })
+})
+
 describe('entering Listen', () => {
   it('plays at once with M when no question exists yet', () => {
     press({ key: 'm' })
@@ -117,6 +142,12 @@ describe('entering Listen', () => {
     press({ key: ' ' })
     expect(radio('Guitar').checked).toBe(true)
     expect(engine.plays[1].pitches).toEqual(engine.plays[0].pitches)
+  })
+
+  it('stops the sound when leaving Listen', () => {
+    press({ key: ' ' })
+    press({ key: 'm' })
+    expect(engine.stops).toBe(1)
   })
 
   it('does not play from Space in Explore, and hides the Listen view', () => {

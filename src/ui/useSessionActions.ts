@@ -24,6 +24,7 @@ export function useSessionActions() {
   function selectMode(mode: Mode) {
     if (mode === session.mode) return
     dispatch({ type: 'setMode', mode })
+    if (mode === 'explore') engine.stop()
     if (mode === 'listen' && !session.practice.question) engine.play(startQuestion().pitches, 'arpeggio')
   }
 

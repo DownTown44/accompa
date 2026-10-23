@@ -7,7 +7,7 @@ export function useAudioStatus(): AudioStatus {
   return useSyncExternalStore(engine.subscribe, engine.status)
 }
 
-// While audio is blocked, the next key or pointer press is the gesture that wakes it.
+// While audio is blocked, the next key press or click is the gesture that wakes it.
 export function useAudioWake() {
   const engine = useEngine()
   const status = useAudioStatus()
@@ -16,10 +16,10 @@ export function useAudioWake() {
     if (status !== 'blocked') return
     const wake = () => engine.unlock()
     document.addEventListener('keydown', wake)
-    document.addEventListener('pointerdown', wake)
+    document.addEventListener('click', wake)
     return () => {
       document.removeEventListener('keydown', wake)
-      document.removeEventListener('pointerdown', wake)
+      document.removeEventListener('click', wake)
     }
   }, [engine, status])
 }

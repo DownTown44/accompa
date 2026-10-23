@@ -20,7 +20,6 @@ export interface Session {
 export type SessionAction =
   | { type: 'setMode'; mode: Mode }
   | { type: 'setInstrument'; instrument: Instrument }
-  | { type: 'toggleMode' }
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
 
@@ -37,8 +36,6 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return { ...state, mode: action.mode }
     case 'setInstrument':
       return { ...state, instrument: action.instrument }
-    case 'toggleMode':
-      return { ...state, mode: state.mode === 'listen' ? 'explore' : 'listen' }
     case 'toggleInstrument':
       return { ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' }
     case 'setQuestion':

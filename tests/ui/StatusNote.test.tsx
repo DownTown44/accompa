@@ -32,10 +32,10 @@ describe('audio status note', () => {
     expect(engine.unlocks).toBe(1)
   })
 
-  it('unlocks audio on the next pointer press while blocked', () => {
+  it('unlocks audio on the next click while blocked', () => {
     const engine = createFakeEngine('blocked')
     render(<App engine={engine} />)
-    fireEvent.pointerDown(document.body)
+    fireEvent.click(document.body)
     expect(engine.unlocks).toBe(1)
   })
 
@@ -43,7 +43,7 @@ describe('audio status note', () => {
     const engine = createFakeEngine('running')
     render(<App engine={engine} />)
     fireEvent.keyDown(document.body, { key: 'a' })
-    fireEvent.pointerDown(document.body)
+    fireEvent.click(document.body)
     expect(engine.unlocks).toBe(0)
   })
 })

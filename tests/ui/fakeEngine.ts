@@ -4,6 +4,7 @@ import type { Pitch } from '../../src/core/pitch'
 export interface FakeEngine extends AudioEngine {
   plays: { pitches: readonly Pitch[]; mode: PlayMode }[]
   unlocks: number
+  stops: number
   setStatus(next: AudioStatus): void
 }
 
@@ -13,10 +14,13 @@ export function createFakeEngine(initial: AudioStatus = 'idle'): FakeEngine {
   const engine: FakeEngine = {
     plays: [],
     unlocks: 0,
+    stops: 0,
     play(pitches, mode) {
       engine.plays.push({ pitches, mode })
     },
-    stop() {},
+    stop() {
+      engine.stops++
+    },
     unlock() {
       engine.unlocks++
     },

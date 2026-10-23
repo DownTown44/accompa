@@ -17,10 +17,7 @@ describe('sessionReducer', () => {
     expect(sessionReducer(initialSession, { type: 'setInstrument', instrument: 'guitar' }).instrument).toBe('guitar')
   })
 
-  it('toggles between the two modes and the two instruments', () => {
-    const explore = sessionReducer(initialSession, { type: 'toggleMode' })
-    expect(explore.mode).toBe('explore')
-    expect(sessionReducer(explore, { type: 'toggleMode' }).mode).toBe('listen')
+  it('toggles between the two instruments', () => {
     const guitar = sessionReducer(initialSession, { type: 'toggleInstrument' })
     expect(guitar.instrument).toBe('guitar')
     expect(sessionReducer(guitar, { type: 'toggleInstrument' }).instrument).toBe('piano')
@@ -33,7 +30,7 @@ describe('sessionReducer', () => {
   })
 
   it('does not mutate the previous state', () => {
-    sessionReducer(initialSession, { type: 'toggleMode' })
+    sessionReducer(initialSession, { type: 'setMode', mode: 'explore' })
     expect(initialSession.mode).toBe('listen')
   })
 
@@ -47,9 +44,9 @@ describe('sessionReducer', () => {
   it('keeps the question when the mode or instrument changes', () => {
     const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
-    state = sessionReducer(state, { type: 'toggleMode' })
+    state = sessionReducer(state, { type: 'setMode', mode: 'explore' })
     state = sessionReducer(state, { type: 'toggleInstrument' })
-    state = sessionReducer(state, { type: 'toggleMode' })
+    state = sessionReducer(state, { type: 'setMode', mode: 'listen' })
     expect(state.practice.question).toBe(question)
   })
 })
