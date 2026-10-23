@@ -1,5 +1,6 @@
 import './listen.css'
 import { INTERVALS } from '../../core/theory'
+import { useSettings } from '../settings/SettingsContext'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
 import { releaseFocusAfterPointer } from './focus'
@@ -7,9 +8,11 @@ import { INTERVAL_KEYS } from './intervalKeys'
 
 export function IntervalButtons() {
   const { session } = useSession()
+  const { settings } = useSettings()
   const { guess } = useSessionActions()
   if (session.mode !== 'listen') return null
-  const { question, revealed, pool, wrongMarks } = session.practice
+  const { question, revealed, wrongMarks } = session.practice
+  const { pool } = settings
   const active = question !== null && !revealed
   return (
     <div className="interval-row" role="group" aria-label="Guess the interval">

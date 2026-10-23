@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { pitch } from '../../../../src/core/pitch'
 import { App, Shell } from '../../../../src/ui/app/App'
 import { EngineProvider } from '../../../../src/ui/engine/EngineContext'
+import { SettingsProvider } from '../../../../src/ui/settings/SettingsContext'
 import { SessionProvider } from '../../../../src/ui/session/SessionContext'
 import { initialSession } from '../../../../src/ui/session/session'
 import { createFakeEngine } from '../../support/fakeEngine'
@@ -25,9 +26,11 @@ describe('guitar stage', () => {
     const initial = { ...initialSession, instrument: 'guitar' as const, workspace: { pitches: [pitch(64)] } }
     const { container } = render(
       <EngineProvider engine={createFakeEngine()}>
-        <SessionProvider initial={initial}>
-          <Shell />
-        </SessionProvider>
+        <SettingsProvider>
+          <SessionProvider initial={initial}>
+            <Shell />
+          </SessionProvider>
+        </SettingsProvider>
       </EngineProvider>,
     )
     expect([...container.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit')).sort()).toEqual(['1:19', '2:14', '3:9', '4:5', '5:0'])
@@ -38,9 +41,11 @@ describe('guitar stage', () => {
     const initial = { ...initialSession, instrument: 'guitar' as const, workspace: { pitches: [pitch(64), pitch(64)] } }
     const { container } = render(
       <EngineProvider engine={createFakeEngine()}>
-        <SessionProvider initial={initial}>
-          <Shell />
-        </SessionProvider>
+        <SettingsProvider>
+          <SessionProvider initial={initial}>
+            <Shell />
+          </SessionProvider>
+        </SettingsProvider>
       </EngineProvider>,
     )
     expect(container.querySelectorAll('[data-lit]')).toHaveLength(5)

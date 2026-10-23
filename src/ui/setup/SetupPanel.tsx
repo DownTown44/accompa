@@ -1,11 +1,11 @@
 import './setup.css'
 import { useEffect, useRef, useState } from 'react'
-import type { Direction } from '../../core/model'
+import type { Direction, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { INTERVALS } from '../../core/theory'
 import { SegmentedGroup } from '../shell/SegmentedGroup'
 import { useSession } from '../session/SessionContext'
-import { useSessionActions } from '../session/useSessionActions'
+import { useSettings } from '../settings/SettingsContext'
 
 export const SETUP_PANEL_ID = 'setup-panel'
 export const SETUP_OPENER_ID = 'setup-opener'
@@ -16,11 +16,19 @@ const DIRECTIONS: readonly { value: Direction; label: string }[] = [
   { value: 'harmonic', label: 'Harmonic' },
 ]
 
+const SOUNDS: readonly { value: Sound; label: string }[] = [{ value: 'synthesized', label: 'Synthesized' }]
+
+const THEMES: readonly { value: Theme; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+
 export function SetupPanel() {
   const { session } = useSession()
-  const { togglePool, setDirection } = useSessionActions()
+  const { settings, dispatch } = useSettings()
   const open = session.setupOpen
-  const { pool } = session.practice
+  const { pool } = settings
   const [keepNote, setKeepNote] = useState(false)
   const first = useRef<HTMLButtonElement>(null)
   const wasOpen = useRef(false)
@@ -40,7 +48,7 @@ export function SetupPanel() {
       return
     }
     setKeepNote(false)
-    togglePool(semitones)
+    dispatch({ type: 'togglePool', interval: semitones })
   }
 
   return (
@@ -76,8 +84,32 @@ export function SetupPanel() {
         name="direction"
         variant="setup"
         options={DIRECTIONS}
-        value={session.direction}
-        onChange={setDirection}
+        value={settings.direction}
+        onChange={(direction) => dispatch({ type: 'setDirection', direction })}
+      />
+      <h3 id="sound-label" className="setup-sublabel">
+        Sound
+      </h3>
+      <SegmentedGroup<Sound>
+        label="Sound"
+        labelledBy="sound-label"
+        name="sound"
+        variant="setup"
+        options={SOUNDS}
+        value={settings.sound}
+        onChange={(sound) => dispatch({ type: 'setSound', sound })}
+      />
+      <h3 id="theme-label" className="setup-sublabel">
+        Theme
+      </h3>
+      <SegmentedGroup<Theme>
+        label="Theme"
+        labelledBy="theme-label"
+        name="theme"
+        variant="setup"
+        options={THEMES}
+        value={settings.theme}
+        onChange={(theme) => dispatch({ type: 'setTheme', theme })}
       />
       <p className="setup-note" role="status" aria-live="polite">
         {keepNote ? 'Keep at least one interval.' : ''}

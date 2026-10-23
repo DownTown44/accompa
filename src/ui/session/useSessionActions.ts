@@ -1,18 +1,20 @@
-import type { Direction, Question } from '../../core/model'
+import type { Question } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
+import { useSettings } from '../settings/SettingsContext'
 import { useSession } from './SessionContext'
 import type { Instrument, Mode } from './session'
 
 // Every action that can make sound runs here, synchronously inside the user's gesture.
 export function useSessionActions() {
   const { session, dispatch } = useSession()
+  const { settings } = useSettings()
   const engine = useEngine()
 
   function startQuestion() {
-    const question = generateQuestion({ pool: session.practice.pool, range: COMMON_RANGE, random: Math.random, direction: session.direction })
+    const question = generateQuestion({ pool: settings.pool, range: COMMON_RANGE, random: Math.random, direction: settings.direction })
     dispatch({ type: 'setQuestion', question })
     return question
   }
@@ -42,7 +44,8 @@ export function useSessionActions() {
   }
 
   function guess(interval: Interval) {
-    const { question, revealed, pool, wrongMarks } = session.practice
+    const { question, revealed, wrongMarks } = session.practice
+    const { pool } = settings
     if (session.mode !== 'listen' || !question || revealed) return
     if (!(pool.includes(interval) || interval === question.interval) || wrongMarks.includes(interval)) return
     if (interval === question.interval) {
@@ -70,8 +73,6 @@ export function useSessionActions() {
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
     toggleSetup: () => dispatch({ type: 'toggleSetup' }),
     closeSetup: () => dispatch({ type: 'closeSetup' }),
-    setDirection: (direction: Direction) => dispatch({ type: 'setDirection', direction }),
-    togglePool: (interval: Interval) => dispatch({ type: 'togglePool', interval }),
     shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }
 }

@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react'
-import { initialPractice } from '../../core/model'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { offscreenLit, offscreenNote } from '../../core/piano'
-import { createSynthEngine } from '../../audio/synth'
+import { ENGINES } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
 import { EngineProvider } from '../engine/EngineContext'
 import { GuitarStage } from '../instruments/guitar/GuitarStage'
@@ -12,8 +11,8 @@ import { ModeStrip } from '../shell/ModeStrip'
 import { PianoStage } from '../instruments/piano/PianoStage'
 import { SessionProvider, useSession } from '../session/SessionContext'
 import { SetupPanel } from '../setup/SetupPanel'
-import { loadPool, savePool } from '../session/poolStorage'
-import { initialSession } from '../session/session'
+import { SettingsProvider, useSettings } from '../settings/SettingsContext'
+import { loadSettings } from '../settings/settingsStorage'
 import { StatusNote } from '../shell/StatusNote'
 import { useAudioStatus, useAudioWake } from '../engine/useAudioStatus'
 import { useLitNotes } from '../session/useLitNotes'
@@ -25,7 +24,6 @@ export function Shell() {
   const audio = useAudioStatus()
   const { session } = useSession()
   const lit = useLitNotes()
-  useEffect(() => savePool(session.practice.pool), [session.practice.pool])
   const offscreen = session.instrument === 'piano' ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart)) : undefined
   return (
     <div className="page">
@@ -43,14 +41,23 @@ export function Shell() {
   )
 }
 
+// The engine follows the chosen sound; replacing it stops whatever the old one was playing.
+function EngineHost({ override, children }: { override?: AudioEngine; children: ReactNode }) {
+  const { settings } = useSettings()
+  const engine = useMemo(() => override ?? ENGINES[settings.sound](), [override, settings.sound])
+  useEffect(() => () => engine.stop(), [engine])
+  return <EngineProvider engine={engine}>{children}</EngineProvider>
+}
+
 export function App({ engine }: { engine?: AudioEngine }) {
-  const [audio] = useState(() => engine ?? createSynthEngine())
-  const [initial] = useState(() => ({ ...initialSession, practice: { ...initialPractice, pool: loadPool() } }))
+  const [initial] = useState(loadSettings)
   return (
-    <EngineProvider engine={audio}>
-      <SessionProvider initial={initial}>
-        <Shell />
-      </SessionProvider>
-    </EngineProvider>
+    <SettingsProvider initial={initial}>
+      <EngineHost override={engine}>
+        <SessionProvider>
+          <Shell />
+        </SessionProvider>
+      </EngineHost>
+    </SettingsProvider>
   )
 }
