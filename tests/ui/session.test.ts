@@ -51,6 +51,19 @@ describe('sessionReducer', () => {
   })
 })
 
+describe('instrument swap', () => {
+  it('changes only the instrument, there and back', () => {
+    const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    let state = sessionReducer(initialSession, { type: 'setQuestion', question })
+    state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
+    const guitar = sessionReducer(state, { type: 'toggleInstrument' })
+    expect({ ...guitar, instrument: state.instrument }).toEqual(state)
+    const back = sessionReducer(guitar, { type: 'toggleInstrument' })
+    expect(back).toEqual(state)
+    expect(back.pianoStart).toBe(60)
+  })
+})
+
 describe('piano window in the session', () => {
   it('starts at C3', () => expect(initialSession.pianoStart).toBe(48))
 

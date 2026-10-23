@@ -3,6 +3,7 @@ import { offscreenLit, offscreenNote } from '../core/piano'
 import { createSynthEngine } from '../audio/synth'
 import type { AudioEngine } from '../audio/engine'
 import { EngineProvider } from './EngineContext'
+import { GuitarStage } from './GuitarStage'
 import { ListenView } from './ListenView'
 import { ModeStrip } from './ModeStrip'
 import { PianoStage } from './PianoStage'
@@ -23,6 +24,7 @@ export function Shell() {
       <main className="body">
         <ListenView />
         <PianoStage />
+        <GuitarStage />
         <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : offscreen} />
       </main>
     </div>
