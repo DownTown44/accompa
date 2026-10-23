@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-23-2026 17:00
+last_updated: 10-23-2026 19:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -38,7 +38,7 @@ development_status:
   epic-1: in-progress
   1-1-project-scaffold-and-quality-gates: done
   1-2-themed-app-shell: done
-  1-3-hear-a-random-interval: backlog
+  1-3-hear-a-random-interval: review
   1-4-piano-keyboard: backlog
   1-5-guitar-fretboard-and-instrument-swap: backlog
   1-6-reveal-an-interval: backlog
