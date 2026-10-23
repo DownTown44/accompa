@@ -1,21 +1,36 @@
+import { useState } from 'react'
+import { createSynthEngine } from '../audio/synth'
+import type { AudioEngine } from '../audio/engine'
+import { EngineProvider } from './EngineContext'
+import { ListenView } from './ListenView'
 import { ModeStrip } from './ModeStrip'
 import { SessionProvider } from './SessionContext'
+import { StatusNote } from './StatusNote'
+import { useAudioStatus, useAudioWake } from './useAudioStatus'
 import { useShortcuts } from './useShortcuts'
 
 function Shell() {
   useShortcuts()
+  useAudioWake()
+  const audio = useAudioStatus()
   return (
     <div className="page">
       <ModeStrip />
-      <main className="body" />
+      <main className="body">
+        <ListenView />
+        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : undefined} />
+      </main>
     </div>
   )
 }
 
-export function App() {
+export function App({ engine }: { engine?: AudioEngine }) {
+  const [audio] = useState(() => engine ?? createSynthEngine())
   return (
-    <SessionProvider>
-      <Shell />
-    </SessionProvider>
+    <EngineProvider engine={audio}>
+      <SessionProvider>
+        <Shell />
+      </SessionProvider>
+    </EngineProvider>
   )
 }
