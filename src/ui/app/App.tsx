@@ -4,6 +4,7 @@ import { createSynthEngine } from '../../audio/synth'
 import type { AudioEngine } from '../../audio/engine'
 import { EngineProvider } from '../engine/EngineContext'
 import { GuitarStage } from '../instruments/guitar/GuitarStage'
+import { IntervalButtons } from '../listen/IntervalButtons'
 import { ListenControls } from '../listen/ListenControls'
 import { ListenView } from '../listen/ListenView'
 import { ModeStrip } from '../shell/ModeStrip'
@@ -29,6 +30,7 @@ export function Shell() {
         <PianoStage />
         <GuitarStage />
         <ListenControls />
+        <IntervalButtons />
         <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : offscreen} />
       </main>
     </div>

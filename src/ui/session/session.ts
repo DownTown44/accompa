@@ -6,10 +6,17 @@ import {
   type Question,
   type Workspace,
 } from '../../core/model'
+import type { Interval } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
 export type { Instrument }
 export type Mode = 'listen' | 'explore'
+
+// The last guess result; the wording is derived from the interval when shown.
+export interface Feedback {
+  readonly kind: 'right' | 'wrong'
+  readonly interval: Interval
+}
 
 export interface Session {
   readonly mode: Mode
@@ -17,6 +24,7 @@ export interface Session {
   readonly workspace: Workspace
   readonly practice: Practice
   readonly pianoStart: number
+  readonly feedback: Feedback | null
 }
 
 export type SessionAction =
@@ -25,6 +33,8 @@ export type SessionAction =
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
   | { type: 'reveal' }
+  | { type: 'guess'; interval: Interval }
+  | { type: 'rightGuess'; interval: Interval }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
@@ -33,6 +43,7 @@ export const initialSession: Session = {
   workspace: initialWorkspace,
   practice: initialPractice,
   pianoStart: DEFAULT_WINDOW_START,
+  feedback: null,
 }
 
 // A revealed question must be visible when the piano is showing.
@@ -55,11 +66,26 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return {
         ...state,
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
+        feedback: null,
       }
     case 'reveal': {
       if (!state.practice.question || state.practice.revealed) return state
-      return fitRevealed({ ...state, practice: { ...state.practice, revealed: true } })
+      return fitRevealed({ ...state, practice: { ...state.practice, revealed: true }, feedback: null })
     }
+    case 'guess': {
+      const { question, revealed, pool, wrongMarks } = state.practice
+      const { interval } = action
+      if (!question || revealed || question.interval === interval) return state
+      if (!pool.includes(interval) || wrongMarks.includes(interval)) return state
+      return {
+        ...state,
+        practice: { ...state.practice, wrongMarks: [...wrongMarks, interval] },
+        feedback: { kind: 'wrong', interval },
+      }
+    }
+    // Recorded after the next question is set, which clears the feedback.
+    case 'rightGuess':
+      return { ...state, feedback: { kind: 'right', interval: action.interval } }
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state
       const pianoStart = shiftWindow(state.pianoStart, action.direction)

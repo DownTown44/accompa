@@ -1,4 +1,6 @@
 import { useLayoutEffect, useEffect, useRef } from 'react'
+import { INTERVALS } from '../../core/theory'
+import { INTERVAL_KEYS } from '../listen/intervalKeys'
 import { useSessionActions } from '../session/useSessionActions'
 
 const textInputTypes = new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number'])
@@ -31,9 +33,12 @@ export function useShortcuts() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || hasModifier(event) || isTextField(event.target)) return
-      const { play, revealOrNext, toggleMode, toggleInstrument, shiftPiano } = latest.current
+      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano } = latest.current
       const key = event.key.toLowerCase()
-      if (key === 'm') toggleMode()
+      const keyIndex = INTERVAL_KEYS.indexOf(event.key)
+      if (keyIndex >= 0) {
+        if (!isControl(event.target)) guess(INTERVALS[keyIndex].semitones)
+      } else if (key === 'm') toggleMode()
       else if (key === 'i') toggleInstrument()
       else if (key === ']' || event.code === 'BracketRight') shiftPiano(1)
       else if (key === '[' || event.code === 'BracketLeft') shiftPiano(-1)

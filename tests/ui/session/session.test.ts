@@ -138,3 +138,43 @@ describe('reveal', () => {
     expect(sessionReducer(state, { type: 'toggleInstrument' }).pianoStart).toBe(36)
   })
 })
+
+describe('guess', () => {
+  const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+  const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
+
+  it('appends wrong marks and records the feedback', () => {
+    const one = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    const two = sessionReducer(one, { type: 'guess', interval: interval(9) })
+    expect(two.practice.wrongMarks).toEqual([3, 9])
+    expect(two.feedback).toEqual({ kind: 'wrong', interval: 9 })
+    expect(two.practice.question).toBe(question)
+  })
+
+  it('ignores repeats, the right answer, no question, revealed and out-of-pool', () => {
+    const one = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    expect(sessionReducer(one, { type: 'guess', interval: interval(3) })).toBe(one)
+    expect(sessionReducer(asked, { type: 'guess', interval: interval(7) })).toBe(asked)
+    expect(sessionReducer(initialSession, { type: 'guess', interval: interval(3) })).toBe(initialSession)
+    const revealed = sessionReducer(asked, { type: 'reveal' })
+    expect(sessionReducer(revealed, { type: 'guess', interval: interval(3) })).toBe(revealed)
+    const small = { ...asked, practice: { ...asked.practice, pool: [interval(7)] } }
+    expect(sessionReducer(small, { type: 'guess', interval: interval(3) })).toBe(small)
+  })
+
+  it('reveal and a new question clear the feedback, and marks reset on a new question', () => {
+    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    expect(sessionReducer(wrong, { type: 'reveal' }).feedback).toBeNull()
+    const next = sessionReducer(wrong, { type: 'setQuestion', question })
+    expect(next.feedback).toBeNull()
+    expect(next.practice.wrongMarks).toEqual([])
+    expect(sessionReducer(next, { type: 'rightGuess', interval: interval(7) }).feedback).toEqual({ kind: 'right', interval: 7 })
+  })
+
+  it('keeps the feedback and marks across mode and instrument changes', () => {
+    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    const back = sessionReducer(sessionReducer(wrong, { type: 'setMode', mode: 'explore' }), { type: 'setMode', mode: 'listen' })
+    expect(back.feedback).toEqual(wrong.feedback)
+    expect(back.practice.wrongMarks).toEqual([3])
+  })
+})

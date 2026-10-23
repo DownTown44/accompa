@@ -1,3 +1,4 @@
+import type { Interval } from '../../core/pitch'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
@@ -35,6 +36,18 @@ export function useSessionActions() {
     else reveal()
   }
 
+  function guess(interval: Interval) {
+    const { question, revealed, pool, wrongMarks } = session.practice
+    if (session.mode !== 'listen' || !question || revealed) return
+    if (!pool.includes(interval) || wrongMarks.includes(interval)) return
+    if (interval === question.interval) {
+      engine.play(startQuestion().pitches, 'arpeggio')
+      dispatch({ type: 'rightGuess', interval })
+    } else {
+      dispatch({ type: 'guess', interval })
+    }
+  }
+
   function selectMode(mode: Mode) {
     if (mode === session.mode) return
     dispatch({ type: 'setMode', mode })
@@ -45,6 +58,7 @@ export function useSessionActions() {
   return {
     play,
     revealOrNext,
+    guess,
     selectMode,
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
