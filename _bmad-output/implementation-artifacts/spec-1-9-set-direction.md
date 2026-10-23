@@ -2,7 +2,7 @@
 title: 'Story 1.9: Set direction'
 type: 'feature'
 created: '2026-10-24'
-status: 'draft'
+status: 'ready-for-dev'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
