@@ -45,6 +45,21 @@ describe('mode strip', () => {
   })
 })
 
+describe('instrument swap', () => {
+  it('swaps and swaps back by click and by I', () => {
+    const { container } = render(<App engine={createFakeEngine()} />)
+    fireEvent.click(radio('Guitar'))
+    expect(container.querySelector('.fretboard')).not.toBeNull()
+    fireEvent.click(radio('Piano'))
+    expect(container.querySelector('.piano')).not.toBeNull()
+    fireEvent.keyDown(document.body, { key: 'i' })
+    expect(radio('Guitar').checked).toBe(true)
+    expect(container.querySelector('.fretboard')).not.toBeNull()
+    fireEvent.keyDown(document.body, { key: 'i' })
+    expect(radio('Piano').checked).toBe(true)
+  })
+})
+
 describe('shell styles', () => {
   const dir = join(process.cwd(), 'src', 'ui')
   const css = readdirSync(dir)

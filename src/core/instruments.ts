@@ -24,3 +24,25 @@ export const COMMON_RANGE: PitchRange = {
   low: Math.max(...Object.values(INSTRUMENT_RANGES).map((range) => range.low)),
   high: Math.min(...Object.values(INSTRUMENT_RANGES).map((range) => range.high)),
 }
+
+export interface FretPosition {
+  readonly string: number
+  readonly fret: number
+}
+
+// String 0 is the lowest-sounding string.
+export const pitchAt = (tuning: readonly Pitch[], string: number, fret: number): Pitch => pitch(tuning[string]! + fret)
+
+// Every string and fret that sounds the pitch, low string first.
+export function positionsForPitch(
+  p: Pitch,
+  tuning: readonly Pitch[] = STANDARD_GUITAR_TUNING,
+  frets: number = GUITAR_FRETS,
+): FretPosition[] {
+  const found: FretPosition[] = []
+  tuning.forEach((open, string) => {
+    const fret = p - open
+    if (fret >= 0 && fret <= frets) found.push({ string, fret })
+  })
+  return found
+}
