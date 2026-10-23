@@ -1,0 +1,79 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-23-2026 12:00
+last_updated: 10-23-2026 12:00
+project: accompa
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+development_status:
+  epic-1: backlog
+  1-1-project-scaffold-and-quality-gates: backlog
+  1-2-themed-app-shell: backlog
+  1-3-hear-a-random-interval: backlog
+  1-4-piano-keyboard: backlog
+  1-5-guitar-fretboard-and-instrument-swap: backlog
+  1-6-reveal-an-interval: backlog
+  1-7-guess-an-interval: backlog
+  1-8-choose-which-intervals-to-practise: backlog
+  1-9-set-direction-and-root: backlog
+  1-10-choose-sound-and-theme: backlog
+  1-11-shortcuts-and-help-hint: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-name-an-interval-from-two-clicked-notes: backlog
+  2-2-hear-the-interval-and-clear-the-notes: backlog
+  2-3-keep-explore-and-listen-separate: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-see-the-chord-named-as-i-click-notes: backlog
+  3-2-root-marker-role-shapes-and-legend: backlog
+  3-3-choose-between-alternative-chord-readings: backlog
+  3-4-play-the-chord-as-a-block-or-an-arpeggio: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-carry-the-chord-to-the-fretboard: backlog
+  4-2-limit-the-fretboard-to-a-fret-region: backlog
+  4-3-generate-every-playable-guitar-voicing: backlog
+  4-4-step-through-voicings-nearest-register-first: backlog
+  4-5-common-shapes-rank-first: backlog
+  4-6-hand-edit-a-voicing: backlog
+  4-7-hear-the-voicing-strummed-or-arpeggiated: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-choose-chord-practice-and-hear-a-chord: backlog
+  5-2-guess-a-chord-quality: backlog
+  5-3-reveal-the-chord-on-the-instrument: backlog
+  epic-5-retrospective: optional
