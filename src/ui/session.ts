@@ -6,6 +6,7 @@ import {
   type Question,
   type Workspace,
 } from '../core/model'
+import { DEFAULT_WINDOW_START, shiftWindow } from '../core/piano'
 
 export type { Instrument }
 export type Mode = 'listen' | 'explore'
@@ -15,6 +16,7 @@ export interface Session {
   readonly instrument: Instrument
   readonly workspace: Workspace
   readonly practice: Practice
+  readonly pianoStart: number
 }
 
 export type SessionAction =
@@ -22,12 +24,14 @@ export type SessionAction =
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
+  | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
   mode: 'listen',
   instrument: 'piano',
   workspace: initialWorkspace,
   practice: initialPractice,
+  pianoStart: DEFAULT_WINDOW_START,
 }
 
 export function sessionReducer(state: Session, action: SessionAction): Session {
@@ -43,5 +47,10 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         ...state,
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
       }
+    case 'shiftPiano': {
+      if (state.instrument !== 'piano') return state
+      const pianoStart = shiftWindow(state.pianoStart, action.direction)
+      return pianoStart === state.pianoStart ? state : { ...state, pianoStart }
+    }
   }
 }

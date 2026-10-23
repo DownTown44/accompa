@@ -154,3 +154,57 @@
   margin-left: 8px;
   color: var(--color-muted);
 }
+
+.stage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.piano {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  min-height: 0;
+  touch-action: none;
+}
+
+.piano:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}
+
+.key-white {
+  fill: var(--color-surface);
+  stroke: var(--color-keyline);
+  stroke-width: var(--spacing-key-edge-width);
+  rx: var(--rounded-key);
+}
+
+.key-black {
+  fill: var(--color-key-black);
+  stroke: var(--color-key-edge);
+  stroke-width: var(--spacing-key-edge-width);
+  rx: var(--rounded-key-black);
+}
+
+.lit-dot {
+  fill: var(--color-ink);
+  pointer-events: none;
+}
+
+.lit-dot-black {
+  stroke: var(--color-surface);
+  stroke-width: 3px;
+}
+
+.octave-label {
+  fill: var(--color-muted);
+  font-size: var(--type-note-label-size);
+  font-weight: var(--type-note-label-weight);
+  pointer-events: none;
+  user-select: none;
+}
