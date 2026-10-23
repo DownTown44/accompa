@@ -1,3 +1,13 @@
+import { ModeStrip } from './ModeStrip'
+import { SessionProvider } from './SessionContext'
+
 export function App() {
-  return <h1>accompa</h1>
+  return (
+    <SessionProvider>
+      <div className="page">
+        <ModeStrip />
+        <main className="body" />
+      </div>
+    </SessionProvider>
+  )
 }
