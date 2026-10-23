@@ -31,13 +31,16 @@ export function useShortcuts() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || hasModifier(event) || isTextField(event.target)) return
-      const { play, toggleMode, toggleInstrument, shiftPiano } = latest.current
+      const { play, revealOrNext, toggleMode, toggleInstrument, shiftPiano } = latest.current
       const key = event.key.toLowerCase()
       if (key === 'm') toggleMode()
       else if (key === 'i') toggleInstrument()
       else if (key === ']' || event.code === 'BracketRight') shiftPiano(1)
       else if (key === '[' || event.code === 'BracketLeft') shiftPiano(-1)
-      else if (key === ' ' && !isControl(event.target)) {
+      else if (key === 'enter' && !isControl(event.target)) {
+        event.preventDefault()
+        revealOrNext()
+      } else if (key === ' ' && !isControl(event.target)) {
         event.preventDefault()
         play()
       }

@@ -80,3 +80,12 @@ describe('PianoKeyboard', () => {
     expect(onNoteRelease).not.toHaveBeenCalled()
   })
 })
+
+describe('root marker', () => {
+  it('rings only the root key', () => {
+    const { container } = render(<PianoKeyboard start={48} lit={[pitch(60), pitch(67)]} root={pitch(60)} />)
+    expect(container.querySelectorAll('[data-lit]')).toHaveLength(2)
+    expect(container.querySelectorAll('.root-ring')).toHaveLength(1)
+    expect(container.querySelector('[data-root]')!.getAttribute('data-lit')).toBe('60')
+  })
+})

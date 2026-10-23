@@ -86,3 +86,55 @@ describe('piano window in the session', () => {
     expect({ ...next, pianoStart: 48 }).toEqual(initialSession)
   })
 })
+
+describe('window refit on mode and instrument change', () => {
+  const question = { root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
+  const revealed = () => {
+    let state = sessionReducer(initialSession, { type: 'setQuestion', question })
+    state = sessionReducer(state, { type: 'reveal' })
+    state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
+    state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
+    expect(state.pianoStart).toBe(60)
+    return state
+  }
+
+  it('refits when returning to Listen', () => {
+    const explore = sessionReducer(revealed(), { type: 'setMode', mode: 'explore' })
+    expect(explore.pianoStart).toBe(60)
+    expect(sessionReducer(explore, { type: 'setMode', mode: 'listen' }).pianoStart).toBe(36)
+  })
+
+  it('refits when choosing the piano again', () => {
+    const guitar = sessionReducer(revealed(), { type: 'setInstrument', instrument: 'guitar' })
+    expect(guitar.pianoStart).toBe(60)
+    expect(sessionReducer(guitar, { type: 'setInstrument', instrument: 'piano' }).pianoStart).toBe(36)
+  })
+})
+
+describe('reveal', () => {
+  const question = { root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
+  const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
+
+  it('does nothing without a question', () => {
+    expect(sessionReducer(initialSession, { type: 'reveal' })).toBe(initialSession)
+  })
+
+  it('reveals and shifts the piano window to include both notes', () => {
+    const next = sessionReducer(asked, { type: 'reveal' })
+    expect(next.practice.revealed).toBe(true)
+    expect(next.pianoStart).toBe(36)
+    expect(next.workspace).toBe(initialSession.workspace)
+  })
+
+  it('a new question clears it', () => {
+    const next = sessionReducer(sessionReducer(asked, { type: 'reveal' }), { type: 'setQuestion', question })
+    expect(next.practice.revealed).toBe(false)
+  })
+
+  it('fits the window when swapping back to the piano', () => {
+    let state = sessionReducer(asked, { type: 'toggleInstrument' })
+    state = sessionReducer(state, { type: 'reveal' })
+    expect(state.pianoStart).toBe(48)
+    expect(sessionReducer(state, { type: 'toggleInstrument' }).pianoStart).toBe(36)
+  })
+})

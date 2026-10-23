@@ -37,10 +37,10 @@ describe('mode strip', () => {
     expect(radio('Explore').checked).toBe(true)
   })
 
-  it('puts the mode group before the instrument group, then the Listen controls and the keyboard', () => {
+  it('puts the mode group before the instrument group, then the keyboard and the Listen controls', () => {
     render(<App engine={createFakeEngine()} />)
     const focusable = [...document.querySelectorAll<HTMLElement>('input, button, a[href], select, textarea, [tabindex]')]
-    expect(focusable.map((el) => (el as HTMLInputElement).value || el.textContent)).toEqual(['listen', 'explore', 'piano', 'guitar', 'Play again Space', 'C3C4C5'])
+    expect(focusable.map((el) => (el as HTMLInputElement).value || el.textContent)).toEqual(['listen', 'explore', 'piano', 'guitar', 'C3C4C5', 'Play again Space', 'Reveal Enter'])
     for (const slot of document.querySelectorAll('.strip-slot')) expect(slot.querySelector('button, [tabindex]')).toBeNull()
   })
 })

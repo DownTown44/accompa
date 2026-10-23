@@ -9,10 +9,12 @@ const BLACK_WIDTH = 36
 const BLACK_HEIGHT = 185
 const TOP = 4
 const DOT_RADIUS = 9
+const ROOT_RING_RADIUS = 16
 
 interface PianoKeyboardProps {
   start: number
   lit: readonly Pitch[]
+  root?: Pitch
   onNotePress?: (pitch: Pitch) => void
   onNoteRelease?: (pitch: Pitch) => void
 }
@@ -32,7 +34,7 @@ function layout(start: number): KeyShape[] {
 }
 
 // Presentational: draws the window and reports presses; it owns no musical state or sound.
-export function PianoKeyboard({ start, lit, onNotePress, onNoteRelease }: PianoKeyboardProps) {
+export function PianoKeyboard({ start, lit, root, onNotePress, onNoteRelease }: PianoKeyboardProps) {
   const held = useRef<Pitch | null>(null)
   const keys = layout(start)
   const litSet = new Set(lit)
@@ -78,16 +80,16 @@ export function PianoKeyboard({ start, lit, onNotePress, onNoteRelease }: PianoK
       ))}
       {keys
         .filter((k) => litSet.has(k.pitch))
-        .map((k) => (
-          <circle
-            key={k.pitch}
-            className={k.black ? 'lit-dot lit-dot-black' : 'lit-dot'}
-            data-lit={k.pitch}
-            cx={k.x + (k.black ? BLACK_WIDTH : WHITE_WIDTH) / 2}
-            cy={k.black ? 160 : 255}
-            r={DOT_RADIUS}
-          />
-        ))}
+        .map((k) => {
+          const cx = k.x + (k.black ? BLACK_WIDTH : WHITE_WIDTH) / 2
+          const cy = k.black ? 160 : 255
+          return (
+            <g key={k.pitch} data-lit={k.pitch} data-root={k.pitch === root ? '' : undefined}>
+              {k.pitch === root && <circle className="root-ring" cx={cx} cy={cy} r={ROOT_RING_RADIUS} />}
+              <circle className={k.black ? 'lit-dot lit-dot-black' : 'lit-dot'} cx={cx} cy={cy} r={DOT_RADIUS} />
+            </g>
+          )
+        })}
       {white
         .filter((k) => pitchClass(k.pitch) === 0)
         .map((k) => (

@@ -95,3 +95,11 @@ describe('Fretboard', () => {
     expect(onNotePress.mock.calls[0]![0].pitch).toBe(40)
   })
 })
+
+describe('root marker', () => {
+  it('rings only the root position', () => {
+    const c = draw({ lit: [{ string: 1, fret: 0 }, { string: 2, fret: 2 }], root: { string: 1, fret: 0 } })
+    expect(c.querySelectorAll('.root-ring')).toHaveLength(1)
+    expect(c.querySelector('[data-root]')!.getAttribute('data-lit')).toBe('1:0')
+  })
+})
