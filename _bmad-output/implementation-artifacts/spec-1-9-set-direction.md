@@ -2,7 +2,8 @@
 title: 'Story 1.9: Set direction'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '6e0a974dda8a218a58f6e76065569e6cb15d01c4'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -63,9 +64,28 @@ context:
 
 ## Implementation Notes
 
+- `Question.direction` is recorded at draw time; `playQuestion` in `useSessionActions` maps Harmonic to `block` and the rest to `arpeggio`, so replays and mid-question changes follow the question.
+- Descending draws the lower note first, then sets `root` to the higher one with `pitches` high to low. `fitWindow` and `GuitarStage` do not depend on pitch order.
+- The Direction group is a `SegmentedGroup` with a new `setup` variant, labelled by its visible `h3` through `labelledBy`.
+- After `Esc` the opener holds focus, so tests that press digits on `body` blur it first; this is the existing yield rule, not a new behavior.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Finding | Verdict | Evidence / route |
+|---|---|---|
+| Guitar reveal test never checks the ringed note is the higher pitch | medium | Making the root `pitches[1]` kept the guitar case green. **patch**: test maps the `string:fret` key to a pitch and compares it with the maximum |
+| Digit-yield test runs with no question, so it passes vacuously | medium | **patch**: starts a question first and asserts a digit on the page still marks a guess |
+| Unbraced nested `for` in the range test | low | **patch**: braces and indentation |
+| `fitWindow` may miss the lower note for a descending pair | false | `fitWindow` uses `every` over the pitches; order does not matter |
+| Test blur workarounds point to a focus bug | false | `Esc` returns focus to the opener, and digits yield to a focused button as specified in 1.7 |
+| Direction not persisted | false | The spec and the epic say it is not persisted |
+| No exhaustive `never` check in `generateQuestion` | low | The union is closed by the type checker; the fix adds a branch. Rejected |
+| Hard-coded `direction-label` id and `direction` radio name | low | Single instance, no collision. Rejected |
+| No feedback that a direction change applies later | low | Specified behavior; matches the pool rule. Rejected |
+| Pool value outside the range span | low | Pool values come from `INTERVALS`, all within range. Rejected |
+| Duplicated CSS, `label` plus `labelledBy` props, no reducer test for `setDirection`, accessibility wording, narrow screens, `7 as never` | low | Cosmetic or out of scope (laptop only). Rejected |
 
 ## Design Notes
 
