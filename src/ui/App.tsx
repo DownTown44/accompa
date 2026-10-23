@@ -1,24 +1,29 @@
 import { useState } from 'react'
+import { offscreenLit, offscreenNote } from '../core/piano'
 import { createSynthEngine } from '../audio/synth'
 import type { AudioEngine } from '../audio/engine'
 import { EngineProvider } from './EngineContext'
 import { ListenView } from './ListenView'
 import { ModeStrip } from './ModeStrip'
-import { SessionProvider } from './SessionContext'
+import { PianoStage } from './PianoStage'
+import { SessionProvider, useSession } from './SessionContext'
 import { StatusNote } from './StatusNote'
 import { useAudioStatus, useAudioWake } from './useAudioStatus'
 import { useShortcuts } from './useShortcuts'
 
-function Shell() {
+export function Shell() {
   useShortcuts()
   useAudioWake()
   const audio = useAudioStatus()
+  const { session } = useSession()
+  const offscreen = session.instrument === 'piano' ? offscreenNote(offscreenLit(session.workspace.pitches, session.pianoStart)) : undefined
   return (
     <div className="page">
       <ModeStrip />
       <main className="body">
         <ListenView />
-        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : undefined} />
+        <PianoStage />
+        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : offscreen} />
       </main>
     </div>
   )

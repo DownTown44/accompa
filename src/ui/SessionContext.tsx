@@ -8,8 +8,8 @@ interface SessionValue {
 
 const SessionContext = createContext<SessionValue | null>(null)
 
-export function SessionProvider({ children }: { children: ReactNode }) {
-  const [session, dispatch] = useReducer(sessionReducer, initialSession)
+export function SessionProvider({ children, initial = initialSession }: { children: ReactNode; initial?: Session }) {
+  const [session, dispatch] = useReducer(sessionReducer, initial)
   return <SessionContext.Provider value={{ session, dispatch }}>{children}</SessionContext.Provider>
 }
 

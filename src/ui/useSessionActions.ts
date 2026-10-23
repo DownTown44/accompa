@@ -34,5 +34,6 @@ export function useSessionActions() {
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
+    shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }
 }

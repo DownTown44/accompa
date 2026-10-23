@@ -50,3 +50,26 @@ describe('sessionReducer', () => {
     expect(state.practice.question).toBe(question)
   })
 })
+
+describe('piano window in the session', () => {
+  it('starts at C3', () => expect(initialSession.pianoStart).toBe(48))
+
+  it('shifts by an octave and clamps at both ends', () => {
+    const up = sessionReducer(initialSession, { type: 'shiftPiano', direction: 1 })
+    expect(up.pianoStart).toBe(60)
+    expect(sessionReducer(up, { type: 'shiftPiano', direction: 1 })).toBe(up)
+    const down = sessionReducer(initialSession, { type: 'shiftPiano', direction: -1 })
+    expect(down.pianoStart).toBe(36)
+    expect(sessionReducer(down, { type: 'shiftPiano', direction: -1 })).toBe(down)
+  })
+
+  it('does not move the hidden window while Guitar is active', () => {
+    const guitar = sessionReducer(initialSession, { type: 'setInstrument', instrument: 'guitar' })
+    expect(sessionReducer(guitar, { type: 'shiftPiano', direction: 1 })).toBe(guitar)
+  })
+
+  it('leaves the rest of the session untouched', () => {
+    const next = sessionReducer(initialSession, { type: 'shiftPiano', direction: 1 })
+    expect({ ...next, pianoStart: 48 }).toEqual(initialSession)
+  })
+})
