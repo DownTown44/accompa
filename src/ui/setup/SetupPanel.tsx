@@ -1,16 +1,24 @@
 import './setup.css'
 import { useEffect, useRef, useState } from 'react'
+import type { Direction } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { INTERVALS } from '../../core/theory'
+import { SegmentedGroup } from '../shell/SegmentedGroup'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
 
 export const SETUP_PANEL_ID = 'setup-panel'
 export const SETUP_OPENER_ID = 'setup-opener'
 
+const DIRECTIONS: readonly { value: Direction; label: string }[] = [
+  { value: 'ascending', label: 'Ascending' },
+  { value: 'descending', label: 'Descending' },
+  { value: 'harmonic', label: 'Harmonic' },
+]
+
 export function SetupPanel() {
   const { session } = useSession()
-  const { togglePool } = useSessionActions()
+  const { togglePool, setDirection } = useSessionActions()
   const open = session.setupOpen
   const { pool } = session.practice
   const [keepNote, setKeepNote] = useState(false)
@@ -59,6 +67,18 @@ export function SetupPanel() {
           )
         })}
       </div>
+      <h3 id="direction-label" className="setup-sublabel">
+        Direction
+      </h3>
+      <SegmentedGroup<Direction>
+        label="Direction"
+        labelledBy="direction-label"
+        name="direction"
+        variant="setup"
+        options={DIRECTIONS}
+        value={session.direction}
+        onChange={setDirection}
+      />
       <p className="setup-note" role="status" aria-live="polite">
         {keepNote ? 'Keep at least one interval.' : ''}
       </p>

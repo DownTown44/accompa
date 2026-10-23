@@ -37,6 +37,13 @@
   background: var(--color-chip);
 }
 
+.group-setup {
+  gap: var(--spacing-toggle-gap);
+  padding: var(--spacing-toggle-padding);
+  border-radius: var(--rounded-full);
+  background: var(--color-chip);
+}
+
 .segment {
   position: relative;
   border-radius: var(--rounded-full);
@@ -51,6 +58,14 @@
   padding: var(--spacing-mode-padding);
   font-size: var(--type-mode-size);
   font-weight: var(--type-mode-weight);
+}
+
+.segment-setup {
+  flex: 1;
+  padding: var(--spacing-segment-padding);
+  text-align: center;
+  font-size: var(--type-segment-size);
+  font-weight: var(--type-segment-weight);
 }
 
 .segment-segment {

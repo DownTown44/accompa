@@ -229,7 +229,7 @@ describe('pool', () => {
   }
 
   it('disables an out-of-pool interval at readable opacity and ignores its key', () => {
-    const question = { root: 60, interval: interval(7), pitches: [60, 67] } as never
+    const question = { direction: 'ascending', root: 60, interval: interval(7), pitches: [60, 67] } as never
     const pool = INTERVALS.map((i) => i.semitones).filter((s) => s !== 1)
     const initial = { ...initialSession, practice: { ...initialSession.practice, pool, question } }
     render(

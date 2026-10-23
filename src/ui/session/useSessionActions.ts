@@ -1,3 +1,4 @@
+import type { Direction, Question } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
@@ -11,15 +12,19 @@ export function useSessionActions() {
   const engine = useEngine()
 
   function startQuestion() {
-    const question = generateQuestion({ pool: session.practice.pool, range: COMMON_RANGE, random: Math.random })
+    const question = generateQuestion({ pool: session.practice.pool, range: COMMON_RANGE, random: Math.random, direction: session.direction })
     dispatch({ type: 'setQuestion', question })
     return question
+  }
+
+  function playQuestion(question: Question) {
+    engine.play(question.pitches, question.direction === 'harmonic' ? 'block' : 'arpeggio')
   }
 
   function play() {
     if (session.mode !== 'listen') return
     const question = session.practice.question ?? startQuestion()
-    engine.play(question.pitches, 'arpeggio')
+    playQuestion(question)
   }
 
   function reveal() {
@@ -27,7 +32,7 @@ export function useSessionActions() {
   }
 
   function next() {
-    if (session.mode === 'listen') engine.play(startQuestion().pitches, 'arpeggio')
+    if (session.mode === 'listen') playQuestion(startQuestion())
   }
 
   // One button: Reveal while a question waits, Next once it is revealed.
@@ -41,7 +46,7 @@ export function useSessionActions() {
     if (session.mode !== 'listen' || !question || revealed) return
     if (!(pool.includes(interval) || interval === question.interval) || wrongMarks.includes(interval)) return
     if (interval === question.interval) {
-      engine.play(startQuestion().pitches, 'arpeggio')
+      playQuestion(startQuestion())
       dispatch({ type: 'rightGuess', interval })
     } else {
       dispatch({ type: 'guess', interval })
@@ -52,7 +57,7 @@ export function useSessionActions() {
     if (mode === session.mode) return
     dispatch({ type: 'setMode', mode })
     if (mode === 'explore') engine.stop()
-    if (mode === 'listen' && !session.practice.question) engine.play(startQuestion().pitches, 'arpeggio')
+    if (mode === 'listen' && !session.practice.question) playQuestion(startQuestion())
   }
 
   return {
@@ -65,6 +70,7 @@ export function useSessionActions() {
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
     toggleSetup: () => dispatch({ type: 'toggleSetup' }),
     closeSetup: () => dispatch({ type: 'closeSetup' }),
+    setDirection: (direction: Direction) => dispatch({ type: 'setDirection', direction }),
     togglePool: (interval: Interval) => dispatch({ type: 'togglePool', interval }),
     shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }

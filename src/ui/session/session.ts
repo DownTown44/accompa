@@ -1,4 +1,5 @@
 import {
+  type Direction,
   initialPractice,
   initialWorkspace,
   type Instrument,
@@ -27,6 +28,7 @@ export interface Session {
   readonly pianoStart: number
   readonly feedback: Feedback | null
   readonly setupOpen: boolean
+  readonly direction: Direction
 }
 
 export type SessionAction =
@@ -40,6 +42,7 @@ export type SessionAction =
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
   | { type: 'togglePool'; interval: Interval }
+  | { type: 'setDirection'; direction: Direction }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
@@ -50,6 +53,7 @@ export const initialSession: Session = {
   pianoStart: DEFAULT_WINDOW_START,
   feedback: null,
   setupOpen: false,
+  direction: 'ascending',
 }
 
 // A revealed question must be visible when the piano is showing.
@@ -107,6 +111,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       if (next.length === 0) return state
       return { ...state, practice: { ...state.practice, pool: next } }
     }
+    // Applies from the next question; the one in play keeps the direction it was drawn with.
+    case 'setDirection':
+      return state.direction === action.direction ? state : { ...state, direction: action.direction }
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state
       const pianoStart = shiftWindow(state.pianoStart, action.direction)

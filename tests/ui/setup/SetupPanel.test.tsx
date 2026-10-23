@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { STANDARD_GUITAR_TUNING } from '../../../src/core/instruments'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 
@@ -101,6 +102,7 @@ describe('setup panel', () => {
     expect(answer('P5').getAttribute('aria-disabled')).toBe('true')
 
     press({ key: 'Escape' })
+    ;(document.activeElement as HTMLElement).blur()
     const next = engine.plays[1].pitches
     const semitones = next[1] - next[0]
     const key = String(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='][[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].indexOf(semitones)])
@@ -171,5 +173,94 @@ describe('setup panel', () => {
     fireEvent.click(opener(), { detail: 1 })
     expect(opener().getAttribute('aria-expanded')).toBe('false')
     expect(document.activeElement).toBe(opener())
+  })
+})
+
+describe('direction', () => {
+  const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
+
+  it('shows a labelled Direction group with Ascending selected', () => {
+    render(<App engine={createFakeEngine()} />)
+    fireEvent.click(opener())
+    expect(screen.getByRole('radiogroup', { name: 'Direction' })).toBeTruthy()
+    expect(radio('Ascending').checked).toBe(true)
+    expect(radio('Descending').checked).toBe(false)
+    expect(radio('Harmonic').checked).toBe(false)
+  })
+
+  it('plays the question with the matrix list and mode, and replays it identically', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Descending'), { detail: 1 })
+    press({ key: 'Escape' })
+    press({ key: ' ' })
+    press({ key: ' ' })
+    const [first, second] = engine.plays
+    expect(first.mode).toBe('arpeggio')
+    expect(first.pitches[0]).toBeGreaterThan(first.pitches[1])
+    expect(second).toEqual(first)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Harmonic'), { detail: 1 })
+    press({ key: 'Escape' })
+    ;(document.activeElement as HTMLElement).blur()
+    press({ key: ' ' })
+    expect(engine.plays[2]).toEqual(first)
+    press({ key: 'Enter' })
+    press({ key: 'Enter' })
+    const harmonic = engine.plays.at(-1)!
+    expect(harmonic.mode).toBe('block')
+    expect(harmonic.pitches[0]).toBeLessThan(harmonic.pitches[1])
+  })
+
+  it('keeps the question in play and applies a new direction from the next one', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    press({ key: ' ' })
+    const first = engine.plays[0]
+    fireEvent.click(opener())
+    fireEvent.click(radio('Descending'), { detail: 1 })
+    press({ key: 'Escape' })
+    ;(document.activeElement as HTMLElement).blur()
+    press({ key: ' ' })
+    expect(engine.plays[1]).toEqual(first)
+    press({ key: 'Enter' })
+    press({ key: 'Enter' })
+    const next = engine.plays.at(-1)!
+    expect(next.pitches[0]).toBeGreaterThan(next.pitches[1])
+  })
+
+  it.each(['piano', 'guitar'] as const)('marks the higher note as the root of a descending question on the %s', (instrument) => {
+    render(<App engine={createFakeEngine()} />)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Descending'), { detail: 1 })
+    press({ key: 'Escape' })
+    if (instrument === 'guitar') fireEvent.click(screen.getByRole('radio', { name: 'Guitar' }), { detail: 1 })
+    press({ key: ' ' })
+    press({ key: 'Enter' })
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(2)
+    const root = document.querySelector('[data-root]')!
+    expect(root).toBeTruthy()
+    const pitchOf = (node: Element) => {
+      const key = node.getAttribute('data-lit')!
+      if (instrument === 'piano') return Number(key)
+      const [string, fret] = key.split(':').map(Number)
+      return STANDARD_GUITAR_TUNING[string] + fret
+    }
+    const pitches = [...document.querySelectorAll('[data-lit]')].map(pitchOf)
+    expect(pitchOf(root)).toBe(Math.max(...pitches))
+  })
+
+  it('yields digit keys while a radio has focus', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    press({ key: ' ' })
+    fireEvent.click(opener())
+    const r = radio('Harmonic')
+    r.focus()
+    press({ key: '2' }, r)
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(0)
+    press({ key: '3' })
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
   })
 })

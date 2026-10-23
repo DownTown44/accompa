@@ -3,7 +3,10 @@ import { INTERVALS } from './theory'
 
 export type Instrument = 'piano' | 'guitar'
 
+export type Direction = 'ascending' | 'descending' | 'harmonic'
+
 export interface Question {
+  readonly direction: Direction
   readonly root: Pitch
   readonly interval: Interval
   readonly pitches: readonly Pitch[]
