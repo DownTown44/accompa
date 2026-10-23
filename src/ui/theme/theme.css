@@ -96,7 +96,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --color-bg: var(--color-bg-dark);
     --color-surface: var(--color-surface-dark);
     --color-ink: var(--color-ink-dark);
@@ -116,6 +116,32 @@
     --color-on-fill: var(--color-on-fill-dark);
     --color-chip: var(--color-chip-dark);
   }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: var(--color-bg-dark);
+  --color-surface: var(--color-surface-dark);
+  --color-ink: var(--color-ink-dark);
+  --color-muted: var(--color-muted-dark);
+  --color-keyline: var(--color-keyline-dark);
+  --color-accent: var(--color-accent-dark);
+  --color-action: var(--color-action-dark);
+  --color-interval-tint: var(--color-interval-tint-dark);
+  --color-wrong: var(--color-wrong-dark);
+  --color-role-root: var(--color-role-root-dark);
+  --color-role-third: var(--color-role-third-dark);
+  --color-role-fifth: var(--color-role-fifth-dark);
+  --color-role-seventh: var(--color-role-seventh-dark);
+  --color-key-black: var(--color-key-black-dark);
+  --color-key-edge: var(--color-key-edge-dark);
+  --color-focus: var(--color-focus-dark);
+  --color-on-fill: var(--color-on-fill-dark);
+  --color-chip: var(--color-chip-dark);
 }
 
 * {

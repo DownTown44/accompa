@@ -26,6 +26,7 @@ const declared = (text: string) => new Set([...text.matchAll(/(--[\w-]+)\s*:/g)]
 describe('theme tokens', () => {
   const root = block(':root {')
   const dark = block('@media (prefers-color-scheme: dark)')
+  const manualDark = block(":root[data-theme='dark']")
 
   it.each(colors)('defines %s with a -dark twin', (name) => {
     const names = declared(root)
@@ -35,6 +36,14 @@ describe('theme tokens', () => {
 
   it.each(colors)('swaps %s to its twin under a dark scheme', (name) => {
     expect(dark).toContain(`--color-${name}: var(--color-${name}-dark)`)
+  })
+
+  it.each(colors)('swaps %s to its twin under a manual dark theme', (name) => {
+    expect(manualDark).toContain(`--color-${name}: var(--color-${name}-dark)`)
+  })
+
+  it('lets a manual light theme beat the dark scheme', () => {
+    expect(dark).toContain(":root:not([data-theme='light'])")
   })
 
   it('declares the typography ramp', () => {

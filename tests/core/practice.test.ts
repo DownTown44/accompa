@@ -89,11 +89,10 @@ describe('core determinism', () => {
 })
 
 describe('session model parts', () => {
-  it('starts with no question, nothing revealed, no wrong marks and the full pool', () => {
+  it('starts with no question, nothing revealed, no wrong marks', () => {
     expect(initialPractice.question).toBeNull()
     expect(initialPractice.revealed).toBe(false)
     expect(initialPractice.wrongMarks).toEqual([])
-    expect(initialPractice.pool).toEqual(allIntervals)
   })
 
   it('starts with an empty workspace', () => {

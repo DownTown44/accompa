@@ -152,15 +152,13 @@ describe('guess', () => {
     expect(two.practice.question).toBe(question)
   })
 
-  it('ignores repeats, the right answer, no question, revealed and out-of-pool', () => {
+  it('ignores repeats, the right answer, no question and revealed', () => {
     const one = sessionReducer(asked, { type: 'guess', interval: interval(3) })
     expect(sessionReducer(one, { type: 'guess', interval: interval(3) })).toBe(one)
     expect(sessionReducer(asked, { type: 'guess', interval: interval(7) })).toBe(asked)
     expect(sessionReducer(initialSession, { type: 'guess', interval: interval(3) })).toBe(initialSession)
     const revealed = sessionReducer(asked, { type: 'reveal' })
     expect(sessionReducer(revealed, { type: 'guess', interval: interval(3) })).toBe(revealed)
-    const small = { ...asked, practice: { ...asked.practice, pool: [interval(7)] } }
-    expect(sessionReducer(small, { type: 'guess', interval: interval(3) })).toBe(small)
   })
 
   it('reveal and a new question clear the feedback, and marks reset on a new question', () => {
@@ -180,7 +178,7 @@ describe('guess', () => {
   })
 })
 
-describe('setup and pool', () => {
+describe('setup panel', () => {
   const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
 
   it('opens and closes the panel', () => {
@@ -191,24 +189,15 @@ describe('setup and pool', () => {
     expect(sessionReducer(open, { type: 'toggleSetup' }).setupOpen).toBe(false)
   })
 
-  it('removes and restores an interval in table order', () => {
-    const without = sessionReducer(initialSession, { type: 'togglePool', interval: interval(2) })
-    expect(without.practice.pool).not.toContain(2)
-    const back = sessionReducer(without, { type: 'togglePool', interval: interval(2) })
-    expect(back.practice.pool).toEqual(initialSession.practice.pool)
-  })
-
-  it('refuses to empty the pool', () => {
-    let state = initialSession
-    for (const { semitones } of INTERVALS.slice(1)) state = sessionReducer(state, { type: 'togglePool', interval: semitones })
-    expect(state.practice.pool).toEqual([1])
-    expect(sessionReducer(state, { type: 'togglePool', interval: interval(1) })).toBe(state)
+  it('holds no setting', () => {
+    expect(Object.keys(initialSession)).not.toContain('direction')
+    expect(Object.keys(initialSession.practice)).not.toContain('pool')
   })
 
   it('keeps the question, reveal state and wrong marks', () => {
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
     state = sessionReducer(state, { type: 'guess', interval: interval(2) })
-    const next = sessionReducer(state, { type: 'togglePool', interval: interval(7) })
+    const next = sessionReducer(state, { type: 'toggleSetup' })
     expect(next.practice.question).toBe(question)
     expect(next.practice.revealed).toBe(false)
     expect(next.practice.wrongMarks).toEqual([2])

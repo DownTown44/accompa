@@ -5,6 +5,8 @@ import { INTERVALS } from '../../../src/core/theory'
 import { EngineProvider } from '../../../src/ui/engine/EngineContext'
 import { IntervalButtons } from '../../../src/ui/listen/IntervalButtons'
 import { ListenView } from '../../../src/ui/listen/ListenView'
+import { SettingsProvider } from '../../../src/ui/settings/SettingsContext'
+import { initialSettings } from '../../../src/core/model'
 import { SessionProvider } from '../../../src/ui/session/SessionContext'
 import { initialSession } from '../../../src/ui/session/session'
 import { useShortcuts } from '../../../src/ui/shortcuts/useShortcuts'
@@ -231,14 +233,16 @@ describe('pool', () => {
   it('disables an out-of-pool interval at readable opacity and ignores its key', () => {
     const question = { direction: 'ascending', root: 60, interval: interval(7), pitches: [60, 67] } as never
     const pool = INTERVALS.map((i) => i.semitones).filter((s) => s !== 1)
-    const initial = { ...initialSession, practice: { ...initialSession.practice, pool, question } }
+    const initial = { ...initialSession, practice: { ...initialSession.practice, question } }
     render(
       <EngineProvider engine={engine}>
-        <SessionProvider initial={initial}>
-          <Shortcuts />
-          <ListenView />
-          <IntervalButtons />
-        </SessionProvider>
+        <SettingsProvider initial={{ ...initialSettings, pool }}>
+          <SessionProvider initial={initial}>
+            <Shortcuts />
+            <ListenView />
+            <IntervalButtons />
+          </SessionProvider>
+        </SettingsProvider>
       </EngineProvider>,
     )
     const m2 = button('m2')

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { pitch } from '../../../../src/core/pitch'
 import { App, Shell } from '../../../../src/ui/app/App'
 import { EngineProvider } from '../../../../src/ui/engine/EngineContext'
+import { SettingsProvider } from '../../../../src/ui/settings/SettingsContext'
 import { SessionProvider } from '../../../../src/ui/session/SessionContext'
 import { initialSession, type Session } from '../../../../src/ui/session/session'
 import { createFakeEngine } from '../../support/fakeEngine'
@@ -14,9 +15,11 @@ function renderWith(pitches: number[], engine = createFakeEngine()) {
   const initial: Session = { ...initialSession, workspace: { pitches: pitches.map(pitch) } }
   return render(
     <EngineProvider engine={engine}>
-      <SessionProvider initial={initial}>
-        <Shell />
-      </SessionProvider>
+      <SettingsProvider>
+        <SessionProvider initial={initial}>
+          <Shell />
+        </SessionProvider>
+      </SettingsProvider>
     </EngineProvider>,
   )
 }
