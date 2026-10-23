@@ -14,7 +14,7 @@ export function IntervalButtons() {
   return (
     <div className="interval-row" role="group" aria-label="Guess the interval">
       {INTERVALS.map((definition, index) => {
-        const inPool = pool.includes(definition.semitones)
+        const inPool = pool.includes(definition.semitones) || question?.interval === definition.semitones
         const tried = wrongMarks.includes(definition.semitones)
         const disabled = !active || !inPool || tried
         return (

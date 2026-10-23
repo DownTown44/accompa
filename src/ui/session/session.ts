@@ -7,6 +7,7 @@ import {
   type Workspace,
 } from '../../core/model'
 import type { Interval } from '../../core/pitch'
+import { INTERVALS } from '../../core/theory'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
 export type { Instrument }
@@ -25,6 +26,7 @@ export interface Session {
   readonly practice: Practice
   readonly pianoStart: number
   readonly feedback: Feedback | null
+  readonly setupOpen: boolean
 }
 
 export type SessionAction =
@@ -35,6 +37,9 @@ export type SessionAction =
   | { type: 'reveal' }
   | { type: 'guess'; interval: Interval }
   | { type: 'rightGuess'; interval: Interval }
+  | { type: 'toggleSetup' }
+  | { type: 'closeSetup' }
+  | { type: 'togglePool'; interval: Interval }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
@@ -44,6 +49,7 @@ export const initialSession: Session = {
   practice: initialPractice,
   pianoStart: DEFAULT_WINDOW_START,
   feedback: null,
+  setupOpen: false,
 }
 
 // A revealed question must be visible when the piano is showing.
@@ -86,6 +92,21 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     // Recorded after the next question is set, which clears the feedback.
     case 'rightGuess':
       return { ...state, feedback: { kind: 'right', interval: action.interval } }
+    case 'toggleSetup':
+      return { ...state, setupOpen: !state.setupOpen }
+    case 'closeSetup':
+      return state.setupOpen ? { ...state, setupOpen: false } : state
+    // The question in play is never touched; the next one draws from the new pool.
+    case 'togglePool': {
+      const { pool } = state.practice
+      const { interval } = action
+      if (!INTERVALS.some((definition) => definition.semitones === interval)) return state
+      const next = pool.includes(interval)
+        ? pool.filter((value) => value !== interval)
+        : INTERVALS.map((definition) => definition.semitones).filter((value) => value === interval || pool.includes(value))
+      if (next.length === 0) return state
+      return { ...state, practice: { ...state.practice, pool: next } }
+    }
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state
       const pianoStart = shiftWindow(state.pianoStart, action.direction)

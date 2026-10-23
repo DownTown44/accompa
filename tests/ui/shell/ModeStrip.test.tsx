@@ -16,14 +16,15 @@ describe('mode strip', () => {
     expect(radio('Guitar').checked).toBe(false)
   })
 
-  it('shows the wordmark, the two groups and the placeholder slots', () => {
+  it('shows the wordmark, the two groups, the opener and the placeholder slot', () => {
     render(<App engine={createFakeEngine()} />)
     expect(screen.getByRole('heading', { name: 'accompa' })).toBeTruthy()
     const mode = screen.getByRole('radiogroup', { name: 'Mode' })
     const instrument = screen.getByRole('radiogroup', { name: 'Instrument' })
     expect(within(mode).getAllByRole('radio')).toHaveLength(2)
     expect(within(instrument).getAllByRole('radio')).toHaveLength(2)
-    expect(document.querySelectorAll('.strip-slot[aria-hidden="true"]')).toHaveLength(2)
+    expect(document.querySelectorAll('.strip-slot[aria-hidden="true"]')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Setup' })).toBeTruthy()
   })
 
   it('switches mode and instrument on selection, one checked per group', () => {
@@ -39,9 +40,9 @@ describe('mode strip', () => {
 
   it('puts the mode group before the instrument group, then the keyboard and the Listen controls', () => {
     render(<App engine={createFakeEngine()} />)
-    const focusable = [...document.querySelectorAll<HTMLElement>('input, button, a[href], select, textarea, [tabindex]')]
-    expect(focusable.map((el) => (el as HTMLInputElement).value || el.textContent)).toEqual(['listen', 'explore', 'piano', 'guitar', 'C3C4C5', 'Play again Space', 'Reveal Enter', 'm21', 'M22', 'm33', 'M34', 'P45', 'A46', 'P57', 'm68', 'M69', 'm70', 'M7-', 'P8='])
-    for (const slot of document.querySelectorAll('.strip-slot')) expect(slot.querySelector('button, [tabindex]')).toBeNull()
+    const focusable = [...document.querySelectorAll<HTMLElement>('input, button, a[href], select, textarea, [tabindex]')].filter((el) => !el.closest('[hidden]'))
+    expect(focusable.map((el) => (el as HTMLInputElement).value || el.textContent)).toEqual(['listen', 'explore', 'piano', 'guitar', '⚙︎', 'C3C4C5', 'Play again Space', 'Reveal Enter', 'm21', 'M22', 'm33', 'M34', 'P45', 'A46', 'P57', 'm68', 'M69', 'm70', 'M7-', 'P8='])
+    for (const slot of document.querySelectorAll('.strip-slot[aria-hidden]')) expect(slot.querySelector('button, [tabindex]')).toBeNull()
   })
 })
 

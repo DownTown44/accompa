@@ -33,12 +33,14 @@ export function useShortcuts() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || hasModifier(event) || isTextField(event.target)) return
-      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano } = latest.current
+      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano, toggleSetup, closeSetup } = latest.current
       const key = event.key.toLowerCase()
       const keyIndex = INTERVAL_KEYS.indexOf(event.key)
       if (keyIndex >= 0) {
         if (!isControl(event.target)) guess(INTERVALS[keyIndex].semitones)
       } else if (key === 'm') toggleMode()
+      else if (key === 'p') toggleSetup()
+      else if (key === 'escape') closeSetup()
       else if (key === 'i') toggleInstrument()
       else if (key === ']' || event.code === 'BracketRight') shiftPiano(1)
       else if (key === '[' || event.code === 'BracketLeft') shiftPiano(-1)
