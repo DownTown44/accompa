@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { INSTRUMENT_RANGES } from '../../src/core/instruments'
+import { COMMON_RANGE, INSTRUMENT_RANGES } from '../../src/core/instruments'
 import { interval, pitch, pitchClass } from '../../src/core/pitch'
 import { INTERVALS } from '../../src/core/theory'
 
@@ -41,5 +41,11 @@ describe('INSTRUMENT_RANGES', () => {
 
   it('derives the guitar range from standard tuning and 22 frets', () => {
     expect(INSTRUMENT_RANGES.guitar).toEqual({ low: 40, high: 86 })
+  })
+})
+
+describe('COMMON_RANGE', () => {
+  it('is the span both instruments can show', () => {
+    expect(COMMON_RANGE).toEqual({ low: 40, high: 86 })
   })
 })

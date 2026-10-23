@@ -18,3 +18,9 @@ export const INSTRUMENT_RANGES: Readonly<Record<Instrument, PitchRange>> = {
     high: Math.max(...STANDARD_GUITAR_TUNING) + GUITAR_FRETS,
   },
 }
+
+// A practice question is kept when the instrument swaps, so it must fit both instruments.
+export const COMMON_RANGE: PitchRange = {
+  low: Math.max(...Object.values(INSTRUMENT_RANGES).map((range) => range.low)),
+  high: Math.min(...Object.values(INSTRUMENT_RANGES).map((range) => range.high)),
+}
