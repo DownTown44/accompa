@@ -1,6 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve, sep } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 // A layer may import only from the layers listed for it (AD-1).
 const allowed = {
@@ -22,7 +21,7 @@ function* walk(dir) {
 
 const layerOf = (srcDir, path) => relative(srcDir, path).split(sep)[0]
 
-export function findViolations(srcDir) {
+function findViolations(srcDir) {
   const violations = []
   for (const file of walk(srcDir)) {
     const from = layerOf(srcDir, file)
@@ -38,8 +37,6 @@ export function findViolations(srcDir) {
   return violations
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const violations = findViolations(resolve(process.argv[2] ?? 'src'))
-  for (const violation of violations) console.error(violation)
-  process.exit(violations.length > 0 ? 1 : 0)
-}
+const violations = findViolations(resolve(process.argv[2] ?? 'src'))
+for (const violation of violations) console.error(violation)
+process.exit(violations.length > 0 ? 1 : 0)
