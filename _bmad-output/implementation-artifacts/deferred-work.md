@@ -5,3 +5,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-guitar-fretboard-and-instrument-swap.md`
   summary: Decide what the user sees when lit workspace pitches fall outside the guitar range (below E2 or above D#6) after a swap from the piano.
   evidence: The fretboard draws only playable positions and the offscreen note is Piano-only, so those notes vanish silently; unreachable until Explore can light notes beyond 40 to 86 (medium, unverified in use).
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-9-set-direction.md`
+  summary: Root setting for Listen: a Root segmented control (Random, Fixed), choosing the fixed root by pressing a note on the active instrument, the root marker and `Click a note to set the root.` status note, fixed-root question generation (octave nearest the clicked note, kept across Random and back), and a random first fixed root.
+  evidence: Split from story 1.9 at the user's choice; it needs the first pointer wiring on the instruments in Listen and is independent of Direction. The epic's Root acceptance criteria stay open under story 1.9.

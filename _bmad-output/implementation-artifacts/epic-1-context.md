@@ -8,8 +8,8 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 
 ## Stories
 
-- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval
-- Next: 1.8 choose which intervals to practise, then 1.9 direction and root, 1.10 sound and theme, 1.11 shortcuts and help hint (see epics.md)
+- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise
+- Next: 1.9 direction (the Root half moved to deferred-work.md), then 1.10 sound and theme, 1.11 shortcuts and help hint (see epics.md)
 
 ## Requirements & Constraints
 
@@ -45,6 +45,6 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 - Session (`ui/session`): one reducer holds `mode`, `instrument`, `workspace`, `practice`, `pianoStart` and `feedback`. Playing sound is a command from `useSessionActions`, run inside the user's gesture.
 - What is lit comes from `useLitNotes`: a revealed question in Listen, otherwise the workspace. Both instruments take `lit` plus an optional `root` and report pointer press and release through optional callbacks; the app does not wire sound or lighting on click until Explore (Story 2.1).
 - Note names come only from `core/spelling` (`spellInterval` exists and is tested but not shown on screen yet); guitar positions come from `core/instruments` (`positionsForPitch`, `closestPair`); the piano window from `core/piano`.
-- Pool settings (1.8) must enable or disable the existing interval buttons through `practice.pool`; the buttons already render out-of-pool intervals at reduced opacity.
+- Setup (1.8): `Session.setupOpen` drives `ui/setup/SetupPanel` (pool chips) and the gear opener in `ModeStrip`; `P` and `Esc` live in `useShortcuts`. The pool saves to `localStorage` key `accompa.pool` via `ui/session/poolStorage.ts`, loaded in `App`. The current question's interval stays guessable after it leaves the pool. Later Setup controls (direction, sound, theme) go in the same panel under the chips.
 - Keyboard: digit keys, `Space`, `Enter`, `M`, `I`, `[` and `]` are handled in `shortcuts/useShortcuts.ts`; shortcuts yield to focused controls, and a pointer click on a Listen button releases focus (`listen/focus.ts`).
 - Layout: instruments fill the `.stage` box (absolute svg), so the whole Listen screen fits 1280 x 800. Check any new row or control in a real browser at that size.
