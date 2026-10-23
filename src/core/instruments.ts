@@ -1,7 +1,6 @@
+import type { Instrument } from './model'
 import type { Pitch } from './pitch'
 import { pitch } from './pitch'
-
-export type InstrumentName = 'piano' | 'guitar'
 
 export interface PitchRange {
   readonly low: number
@@ -12,7 +11,7 @@ export interface PitchRange {
 export const STANDARD_GUITAR_TUNING: readonly Pitch[] = [40, 45, 50, 55, 59, 64].map(pitch)
 export const GUITAR_FRETS = 22
 
-export const INSTRUMENT_RANGES: Readonly<Record<InstrumentName, PitchRange>> = {
+export const INSTRUMENT_RANGES: Readonly<Record<Instrument, PitchRange>> = {
   piano: { low: 36, high: 96 },
   guitar: {
     low: Math.min(...STANDARD_GUITAR_TUNING),
