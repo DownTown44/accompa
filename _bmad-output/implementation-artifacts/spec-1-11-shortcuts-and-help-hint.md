@@ -2,7 +2,8 @@
 title: 'Story 1.11: Shortcuts and help hint'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: 'dbfec6023937d5dc207ec293e0105baa3039fc32'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -69,9 +70,28 @@ context:
 
 ## Implementation Notes
 
+- Help state is `Session.helpOpen`; `dismiss` closes the list first, else the Setup panel. `?` matches on `event.key`.
+- `Corner` renders after `<main>` and holds the opener, the Setup panel and the Help hint; the strip keeps two `aria-hidden` spacers. The panel is anchored to the corner (`top: 100%; right: 0`), which lands where it was.
+- `focusInstrument` focuses `.piano` or `.fretboard` from a zero-delay timer after a pointer click; the instrument element is always mounted in both modes.
+- The hint has no click handler: hover and focus already open the list, and a click toggle closed it under the pointer.
+- The list's key caps are readable by assistive tech; the caps on buttons stay `aria-hidden`, and Play again and Reveal gained `aria-keyshortcuts`.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Finding | Verdict | Evidence / route |
+|---|---|---|
+| Clicking the hovered hint closes the list under the pointer | medium | Hover then focus then click toggled it shut. **patch**: removed the click handler; test pins the list open |
+| Click behavior of the hint was never asserted | medium | Folded into the patch above |
+| `focusInstrument` finds nothing in some mode | false | Both modes always mount one instrument; Explore shows it too |
+| It may pick the wrong instrument | false | Only the active instrument is mounted |
+| Opener and hint clicks skip `focusInstrument` | false | The spec keeps focus on the opener, the hint and the panel |
+| `hovering` and `focused` flags go stale after `Esc` | low | `mouseleave` and `blur` still reset them and every close is idempotent. Rejected |
+| Help list and Setup panel overlap when both open | low | Specified: the list sits above the panel. Rejected |
+| `?` on other layouts, narrow windows, no `role` on the list, rows duplicated by hand, `setTimeout` timing | low | Laptop only; `event.key` is layout-aware; refactors or cosmetics. Rejected |
+| Strip slots and the absolute corner could drift apart | low | Measured in a real browser at 1280 x 800 in both themes. Rejected |
+| CSS placement not covered by a test | low | Covered by the browser check, as in earlier stories. Rejected |
 
 ## Design Notes
 
