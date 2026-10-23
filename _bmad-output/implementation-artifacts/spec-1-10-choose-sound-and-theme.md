@@ -2,7 +2,8 @@
 title: 'Story 1.10: Choose sound and theme'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: '9cd5686757d1b8b1f895aa1152ed11c238102334'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -67,9 +68,30 @@ context:
 
 ## Implementation Notes
 
+- Settings are `Settings` in `core/model`, reduced by `ui/settings/settings.ts`; `SettingsProvider` wraps an `EngineHost` that builds the engine from `ENGINES[settings.sound]`, then `SessionProvider`. Practice and the session reducer hold no pool or direction; the pool check for a guess lives in `useSessionActions.guess` and `IntervalButtons`.
+- `index.html` has an inline script that sets `data-theme` from `accompa.theme` before first paint, which the spec's file list did not name; it is needed for the no-flash rule. A comment on `KEYS` ties the two together.
+- Saves run on mount, so the first visit writes the defaults for pool, sound and theme.
+- The manual Dark block repeats the media block's token list, as the spec asks; both are checked by `theme.test.ts` and by a browser check of each theme under both OS schemes.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Finding | Verdict | Evidence / route |
+|---|---|---|
+| Nothing asserts the sound map yields a working engine | medium | `App.test.tsx` renders without an engine but does not pin the map. **patch**: `tests/audio/engines.test.ts` |
+| Pre-paint script duplicates the theme key with nothing tying them | low | **patch**: comment on `KEYS`; a script test is more than a direct correction |
+| Engine made in `useMemo` leaks under StrictMode | false | The synth creates its `AudioContext` lazily on first play or unlock, so a discarded engine holds nothing |
+| Host stops an engine the caller supplied | low | Only tests supply one, and stopping on unmount is harmless. Rejected |
+| `data-theme` can leak between tests | false | The provider removes the attribute for System on mount, and `SetupPanel` tests clear it |
+| Mount effects write defaults and overwrite invalid values | low | Harmless normalisation, same call as story 1.8. Rejected |
+| Stale closure reads old pool or direction | false | Each dispatch re-renders before the next key event, as for the other settings |
+| Settings reducer has no `default` | false | The action union is closed by the type checker |
+| Manual Dark may differ from the media block | false | The media block holds only the token swap; both checked in a real browser |
+| Reducer `guess` no longer checks the pool | low | The hook is the only dispatcher and is tested through the buttons. Rejected |
+| Digit-yield test passes vacuously | false | A question is started and `1` would mark `m2` if it did not yield |
+| Dark tokens listed twice, context value not memoized, no cross-tab sync, no provider test file, sound list in four places, meta `color-scheme` | low | Refactors or out of scope for a single local app. Rejected |
+| Panel may overflow at 1280 x 800 | false | Measured: bottom edge 631 px, no scroll, in both themes |
 
 ## Design Notes
 
