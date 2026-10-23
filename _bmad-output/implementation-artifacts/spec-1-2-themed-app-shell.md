@@ -82,8 +82,8 @@ Mode and instrument are native radio inputs. Arrow-key selection and the single 
 | Finding | Verdict | Evidence / route |
 |---|---|---|
 | Arrow-key selection and Tab stops untested though tasks say done | low | Native radio behavior, not implementable in happy-dom; noted in Implementation Notes, manual check listed. Rejected |
-|  unsupported in some browsers | false | Target browsers (current Chrome, Edge, Firefox, Safari) all support it |
-|  and  clip at small or zoomed viewports | false | Design states one screen, no scroll, no reflow, behavior below the canvas unsupported |
+| `:has()` unsupported in some browsers | false | Target browsers (current Chrome, Edge, Firefox, Safari) all support it |
+| `overflow: hidden` and `100vh` clip at small or zoomed viewports | false | Design states one screen, no scroll, no reflow, behavior below the canvas unsupported |
 | Shortcuts undiscoverable; no key hints or aria-keyshortcuts | false | Help hint is a later story; spec forbids caps on the strip, matching the mocks |
 | isTextField allow-list misses date, time and role=textbox widgets | low | No such fields exist in v1; rejected |
 | IME composition, defaultPrevented, non-Latin layouts, undefined event.key | low | Only reachable inside text fields, which already return early, or on non-Latin layouts (target user is on a Latin layout). Rejected |
