@@ -39,7 +39,7 @@ export function useSessionActions() {
   function guess(interval: Interval) {
     const { question, revealed, pool, wrongMarks } = session.practice
     if (session.mode !== 'listen' || !question || revealed) return
-    if (!pool.includes(interval) || wrongMarks.includes(interval)) return
+    if (!(pool.includes(interval) || interval === question.interval) || wrongMarks.includes(interval)) return
     if (interval === question.interval) {
       engine.play(startQuestion().pitches, 'arpeggio')
       dispatch({ type: 'rightGuess', interval })
@@ -63,6 +63,9 @@ export function useSessionActions() {
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
+    toggleSetup: () => dispatch({ type: 'toggleSetup' }),
+    closeSetup: () => dispatch({ type: 'closeSetup' }),
+    togglePool: (interval: Interval) => dispatch({ type: 'togglePool', interval }),
     shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }
 }

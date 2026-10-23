@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pitch, interval } from '../../../src/core/pitch'
+import { INTERVALS } from '../../../src/core/theory'
 import { initialSession, sessionReducer } from '../../../src/ui/session/session'
 
 describe('sessionReducer', () => {
@@ -176,5 +177,40 @@ describe('guess', () => {
     const back = sessionReducer(sessionReducer(wrong, { type: 'setMode', mode: 'explore' }), { type: 'setMode', mode: 'listen' })
     expect(back.feedback).toEqual(wrong.feedback)
     expect(back.practice.wrongMarks).toEqual([3])
+  })
+})
+
+describe('setup and pool', () => {
+  const question = { root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+
+  it('opens and closes the panel', () => {
+    expect(initialSession.setupOpen).toBe(false)
+    const open = sessionReducer(initialSession, { type: 'toggleSetup' })
+    expect(open.setupOpen).toBe(true)
+    expect(sessionReducer(open, { type: 'closeSetup' }).setupOpen).toBe(false)
+    expect(sessionReducer(open, { type: 'toggleSetup' }).setupOpen).toBe(false)
+  })
+
+  it('removes and restores an interval in table order', () => {
+    const without = sessionReducer(initialSession, { type: 'togglePool', interval: interval(2) })
+    expect(without.practice.pool).not.toContain(2)
+    const back = sessionReducer(without, { type: 'togglePool', interval: interval(2) })
+    expect(back.practice.pool).toEqual(initialSession.practice.pool)
+  })
+
+  it('refuses to empty the pool', () => {
+    let state = initialSession
+    for (const { semitones } of INTERVALS.slice(1)) state = sessionReducer(state, { type: 'togglePool', interval: semitones })
+    expect(state.practice.pool).toEqual([1])
+    expect(sessionReducer(state, { type: 'togglePool', interval: interval(1) })).toBe(state)
+  })
+
+  it('keeps the question, reveal state and wrong marks', () => {
+    let state = sessionReducer(initialSession, { type: 'setQuestion', question })
+    state = sessionReducer(state, { type: 'guess', interval: interval(2) })
+    const next = sessionReducer(state, { type: 'togglePool', interval: interval(7) })
+    expect(next.practice.question).toBe(question)
+    expect(next.practice.revealed).toBe(false)
+    expect(next.practice.wrongMarks).toEqual([2])
   })
 })
