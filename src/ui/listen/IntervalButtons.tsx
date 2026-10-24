@@ -1,9 +1,11 @@
+import '../shared/shared.css'
 import './listen.css'
+import { canGuess, inPlay } from '../../core/guess'
 import { INTERVALS } from '../../core/theory'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
-import { focusInstrument } from './focus'
+import { focusInstrument } from '../shared/focus'
 import { INTERVAL_KEYS } from './intervalKeys'
 
 export function IntervalButtons() {
@@ -17,9 +19,9 @@ export function IntervalButtons() {
   return (
     <div className="interval-row" role="group" aria-label="Guess the interval">
       {INTERVALS.map((definition, index) => {
-        const inPool = pool.includes(definition.semitones) || question?.interval === definition.semitones
+        const inPool = question === null ? pool.includes(definition.semitones) : inPlay(definition.semitones, pool, question.interval)
         const tried = wrongMarks.includes(definition.semitones)
-        const disabled = !active || !inPool || tried
+        const disabled = !active || !question || !canGuess(definition.semitones, pool, question.interval, wrongMarks)
         return (
           <button
             key={definition.semitones}

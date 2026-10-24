@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { beyondFretboard, beyondFretboardNote } from '../../core/explore'
 import { offscreenLit, offscreenNote } from '../../core/piano'
 import { ENGINES } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
@@ -31,7 +32,12 @@ export function Shell() {
   const lit = useLitNotes()
   const { undoClear } = useSessionActions()
   const chooseRoot = session.mode === 'listen' && settings.rootMode === 'fixed' && session.practice.fixedRoot === null
-  const offscreen = session.instrument === 'piano' ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart)) : undefined
+  const offscreen =
+    session.instrument === 'piano'
+      ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart))
+      : session.mode === 'explore'
+        ? beyondFretboardNote(beyondFretboard(lit.pitches, session.workspace.positions))
+        : undefined
   const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
   const message =
     audio === 'blocked' ? 'Press any key to wake the sound.' : chooseRoot ? 'Click a note to set the root.' : undo ? 'Notes cleared.' : offscreen

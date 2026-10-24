@@ -6,6 +6,7 @@ import {
   type Question,
   type Workspace,
 } from '../../core/model'
+import { canGuess } from '../../core/guess'
 import { litPositions, toggleLit } from '../../core/explore'
 import type { FretPosition } from '../../core/instruments'
 import type { Interval, Pitch } from '../../core/pitch'
@@ -42,7 +43,7 @@ export type SessionAction =
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
-  | { type: 'guess'; interval: Interval }
+  | { type: 'guess'; interval: Interval; pool: readonly Interval[] }
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
   | { type: 'openHelp' }
@@ -117,9 +118,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     }
     case 'guess': {
       const { question, revealed, wrongMarks } = state.practice
-      const { interval } = action
+      const { interval, pool } = action
       if (!question || revealed || question.interval === interval) return state
-      if (wrongMarks.includes(interval)) return state
+      if (!canGuess(interval, pool, question.interval, wrongMarks)) return state
       return {
         ...state,
         practice: { ...state.practice, wrongMarks: [...wrongMarks, interval] },

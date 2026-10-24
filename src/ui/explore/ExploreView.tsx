@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import '../shared/shared.css'
 import './explore.css'
 import { exploreReadout } from '../../core/explore'
 import { useSession } from '../session/SessionContext'

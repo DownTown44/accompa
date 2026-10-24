@@ -4,6 +4,8 @@ import { INTERVALS } from '../../../src/core/theory'
 import { initialSession, sessionReducer, type SessionAction } from '../../../src/ui/session/session'
 import { listenSession } from '../support/sessions'
 
+const fullPool = INTERVALS.map((definition) => definition.semitones)
+
 describe('sessionReducer', () => {
   it('starts in Explore on the piano', () => {
     expect(initialSession.mode).toBe('explore')
@@ -146,24 +148,28 @@ describe('guess', () => {
   const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
 
   it('appends wrong marks and records the feedback', () => {
-    const one = sessionReducer(asked, { type: 'guess', interval: interval(3) })
-    const two = sessionReducer(one, { type: 'guess', interval: interval(9) })
+    const one = sessionReducer(asked, { type: 'guess', interval: interval(3), pool: fullPool })
+    const two = sessionReducer(one, { type: 'guess', interval: interval(9), pool: fullPool })
     expect(two.practice.wrongMarks).toEqual([3, 9])
     expect(two.feedback).toEqual({ kind: 'wrong', interval: 9 })
     expect(two.practice.question).toBe(question)
   })
 
   it('ignores repeats, the right answer, no question and revealed', () => {
-    const one = sessionReducer(asked, { type: 'guess', interval: interval(3) })
-    expect(sessionReducer(one, { type: 'guess', interval: interval(3) })).toBe(one)
-    expect(sessionReducer(asked, { type: 'guess', interval: interval(7) })).toBe(asked)
-    expect(sessionReducer(initialSession, { type: 'guess', interval: interval(3) })).toBe(initialSession)
+    const one = sessionReducer(asked, { type: 'guess', interval: interval(3), pool: fullPool })
+    expect(sessionReducer(one, { type: 'guess', interval: interval(3), pool: fullPool })).toBe(one)
+    expect(sessionReducer(asked, { type: 'guess', interval: interval(7), pool: fullPool })).toBe(asked)
+    expect(sessionReducer(initialSession, { type: 'guess', interval: interval(3), pool: fullPool })).toBe(initialSession)
     const revealed = sessionReducer(asked, { type: 'reveal' })
-    expect(sessionReducer(revealed, { type: 'guess', interval: interval(3) })).toBe(revealed)
+    expect(sessionReducer(revealed, { type: 'guess', interval: interval(3), pool: fullPool })).toBe(revealed)
+  })
+
+  it('ignores an interval outside the pool', () => {
+    expect(sessionReducer(asked, { type: 'guess', interval: interval(3), pool: [interval(2), interval(7)] })).toBe(asked)
   })
 
   it('reveal and a new question clear the feedback, and marks reset on a new question', () => {
-    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3), pool: fullPool })
     expect(sessionReducer(wrong, { type: 'reveal' }).feedback).toBeNull()
     const next = sessionReducer(wrong, { type: 'setQuestion', question })
     expect(next.feedback).toBeNull()
@@ -172,14 +178,14 @@ describe('guess', () => {
 
   it('clearQuestion drops the question, reveal, marks and feedback and keeps the fixed root', () => {
     const rooted = sessionReducer(asked, { type: 'setFixedRoot', pitch: pitch(57) })
-    const wrong = sessionReducer(rooted, { type: 'guess', interval: interval(3) })
+    const wrong = sessionReducer(rooted, { type: 'guess', interval: interval(3), pool: fullPool })
     const cleared = sessionReducer(wrong, { type: 'clearQuestion' })
     expect(cleared.practice).toEqual({ question: null, revealed: false, wrongMarks: [], fixedRoot: 57 })
     expect(cleared.feedback).toBeNull()
   })
 
   it('keeps the feedback and marks across mode and instrument changes', () => {
-    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3) })
+    const wrong = sessionReducer(asked, { type: 'guess', interval: interval(3), pool: fullPool })
     const back = sessionReducer(sessionReducer(wrong, { type: 'setMode', mode: 'explore' }), { type: 'setMode', mode: 'listen' })
     expect(back.feedback).toEqual(wrong.feedback)
     expect(back.practice.wrongMarks).toEqual([3])
@@ -204,7 +210,7 @@ describe('setup panel', () => {
 
   it('keeps the question, reveal state and wrong marks', () => {
     let state = sessionReducer(initialSession, { type: 'setQuestion', question })
-    state = sessionReducer(state, { type: 'guess', interval: interval(2) })
+    state = sessionReducer(state, { type: 'guess', interval: interval(2), pool: fullPool })
     const next = sessionReducer(state, { type: 'toggleSetup' })
     expect(next.practice.question).toBe(question)
     expect(next.practice.revealed).toBe(false)
@@ -299,7 +305,7 @@ describe('workspace and practice stay apart', () => {
     sessionReducer(initialSession, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } }),
     { type: 'toggleNote', pitch: pitch(67) },
   )
-  const asked = sessionReducer(sessionReducer(litBase, { type: 'setQuestion', question }), { type: 'guess', interval: interval(3) })
+  const asked = sessionReducer(sessionReducer(litBase, { type: 'setQuestion', question }), { type: 'guess', interval: interval(3), pool: fullPool })
   const withKept = sessionReducer(asked, { type: 'dismiss' })
 
   const workspaceActions: SessionAction[] = [
@@ -314,7 +320,7 @@ describe('workspace and practice stay apart', () => {
     { type: 'clearQuestion' },
     { type: 'setFixedRoot', pitch: pitch(57) },
     { type: 'reveal' },
-    { type: 'guess', interval: interval(2) },
+    { type: 'guess', interval: interval(2), pool: fullPool },
   ]
 
   it.each(workspaceActions)('workspace action $type keeps practice by reference', (action) => {

@@ -1,7 +1,8 @@
+import '../shared/shared.css'
 import './listen.css'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
-import { focusInstrument } from './focus'
+import { focusInstrument } from '../shared/focus'
 
 export function ListenControls() {
   const { session } = useSession()

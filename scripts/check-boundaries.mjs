@@ -8,6 +8,14 @@ const allowed = {
   ui: ['core', 'audio'],
 }
 
+// Inside ui, the feature folders (listen, explore, shell) share code only through ui/shared.
+const feature = {
+  listen: ['explore'],
+  explore: ['listen'],
+  shell: ['listen', 'explore'],
+  shared: ['listen', 'explore', 'shell'],
+}
+
 const sourceFile = /\.(?:[cm]?[jt]s|[jt]sx)$/
 const specifier = /(?:\bfrom\s*|\bimport\s*\(?\s*)(['"])([^'"]+)\1/g
 
@@ -20,6 +28,10 @@ function* walk(dir) {
 }
 
 const layerOf = (srcDir, path) => relative(srcDir, path).split(sep)[0]
+const featureOf = (srcDir, path) => {
+  const parts = relative(srcDir, path).split(sep)
+  return parts[0] === 'ui' ? parts[1] : undefined
+}
 
 function findViolations(srcDir) {
   const violations = []
@@ -28,7 +40,13 @@ function findViolations(srcDir) {
     if (!(from in allowed)) continue
     for (const [, , spec] of readFileSync(file, 'utf8').matchAll(specifier)) {
       if (!spec.startsWith('.')) continue
-      const to = layerOf(srcDir, resolve(dirname(file), spec))
+      const target = resolve(dirname(file), spec)
+      const to = layerOf(srcDir, target)
+      const fromFeature = featureOf(srcDir, file)
+      const toFeature = featureOf(srcDir, target)
+      if (from === 'ui' && to === 'ui' && fromFeature in feature && feature[fromFeature].includes(toFeature)) {
+        violations.push(`${relative(srcDir, file).split(sep).join('/')} imports ${spec}: ui/${fromFeature} must not import from ui/${toFeature}`)
+      }
       if (to in allowed && to !== from && !allowed[from].includes(to)) {
         violations.push(`${relative(srcDir, file).split(sep).join('/')} imports ${spec}: ${from} must not import from ${to}`)
       }

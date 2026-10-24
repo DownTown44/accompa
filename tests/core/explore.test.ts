@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
 import { pitch } from '../../src/core/pitch'
 
 const p = pitch
@@ -66,5 +66,35 @@ describe('litPositions', () => {
 
   it('has no position for a pitch the guitar cannot play', () => {
     expect(litPositions([p(96)], {})).toEqual([null])
+  })
+})
+
+describe('beyondFretboard', () => {
+  it('counts none when every note has a place', () => {
+    expect(beyondFretboard([], {})).toBe(0)
+    expect(beyondFretboard([p(60), p(67)], {})).toBe(0)
+  })
+
+  it('counts one or two notes beyond the fretboard', () => {
+    expect(beyondFretboard([p(90)], {})).toBe(1)
+    expect(beyondFretboard([p(90), p(93)], {})).toBe(2)
+  })
+
+  it('counts only the notes beyond when the other is in range', () => {
+    expect(beyondFretboard([p(60), p(90)], {})).toBe(1)
+    expect(beyondFretboard([p(30), p(60)], {})).toBe(1)
+  })
+
+  it('does not count a note with a remembered position', () => {
+    expect(beyondFretboard([p(60), p(90)], { 60: { string: 2, fret: 1 } })).toBe(1)
+    expect(beyondFretboard([p(60)], { 60: { string: 2, fret: 1 } })).toBe(0)
+  })
+})
+
+describe('beyondFretboardNote', () => {
+  it('words one and two, and says nothing for none', () => {
+    expect(beyondFretboardNote(0)).toBeUndefined()
+    expect(beyondFretboardNote(1)).toBe('1 note lit beyond the fretboard')
+    expect(beyondFretboardNote(2)).toBe('2 notes lit beyond the fretboard')
   })
 })

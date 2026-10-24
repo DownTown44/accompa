@@ -58,6 +58,32 @@ describe('check-boundaries', () => {
     expect(check({ 'core/a.ts': source }).code).toBe(1)
   })
 
+  it.each([
+    ['listen imports explore', 'ui/listen/a.ts', "import { x } from '../explore/x'", '../explore/x'],
+    ['explore imports listen', 'ui/explore/a.ts', "import { x } from '../listen/x'", '../listen/x'],
+    ['shell imports listen', 'ui/shell/a.ts', "import { x } from '../listen/x'", '../listen/x'],
+    ['shell imports explore', 'ui/shell/a.ts', "import { x } from '../explore/x'", '../explore/x'],
+    ['shared imports listen', 'ui/shared/a.ts', "import { x } from '../listen/x'", '../listen/x'],
+    ['shared imports explore', 'ui/shared/a.ts', "import { x } from '../explore/x'", '../explore/x'],
+    ['shared imports shell', 'ui/shared/a.ts', "import { x } from '../shell/x'", '../shell/x'],
+  ])('fails when %s', (_name, file, source, spec) => {
+    const { code, stderr } = check({ [file]: source })
+    expect(code).toBe(1)
+    expect(stderr).toContain(file)
+    expect(stderr).toContain(spec)
+  })
+
+  it('allows the feature folders to import ui/shared, and a feature to import its own files', () => {
+    const { code } = check({
+      'ui/shared/x.ts': 'export const x = 1',
+      'ui/listen/a.ts': "import { x } from '../shared/x'\nimport { b } from './b'",
+      'ui/listen/b.ts': 'export const b = 1',
+      'ui/explore/a.ts': "import { x } from '../shared/x'",
+      'ui/shell/a.ts': "import { x } from '../shared/x'",
+    })
+    expect(code).toBe(0)
+  })
+
   it('does not check files outside src', () => {
     const { code } = check({ 'core/a.ts': 'export const a = 1', '../tests/a.test.ts': "import { x } from '../src/ui/x'" })
     expect(code).toBe(0)
