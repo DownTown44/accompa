@@ -3,14 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
+import { click, key, lit } from '../support/dom'
+import { press } from '../support/keys'
 
-const key = (n: number) => document.querySelector(`[data-pitch="${n}"]`)!
-const click = (el: Element) => {
-  fireEvent.pointerDown(el)
-  fireEvent.pointerUp(el)
-}
-const lit = () => [...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit')).sort()
-const press = (k: string, target: Element = document.body) => fireEvent.keyDown(target, { key: k })
 const playBtn = () => screen.getByRole('button', { name: /^Play/ })
 const blockBtn = () => screen.getByRole('button', { name: /^Block/ })
 const note = () => document.querySelector('.status-note')!

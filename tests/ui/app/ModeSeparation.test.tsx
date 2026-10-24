@@ -2,17 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
+import { click, key, lit, opener, radio, rooted } from '../support/dom'
+import { press } from '../support/keys'
 
-const key = (n: number) => document.querySelector(`[data-pitch="${n}"]`)!
-const click = (el: Element) => {
-  fireEvent.pointerDown(el)
-  fireEvent.pointerUp(el)
-}
-const lit = () => [...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit')).sort()
-const rooted = () => [...document.querySelectorAll('[data-root]')].map((n) => n.getAttribute('data-lit'))
-const press = (k: string) => fireEvent.keyDown(document.body, { key: k })
-const radio = (name: string) => screen.getByRole('radio', { name, hidden: true }) as HTMLInputElement
-const opener = () => screen.getByRole('button', { name: 'Setup' })
 const chip = (name: string) => [...document.querySelectorAll<HTMLButtonElement>('.setup-chip')].find((c) => c.textContent === name)!
 const wrong = () => document.querySelectorAll('.interval-button.wrong').length
 const lastPlay = (engine: FakeEngine) => engine.plays[engine.plays.length - 1]

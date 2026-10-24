@@ -4,9 +4,9 @@ import { pitch } from '../../../src/core/pitch'
 import { App } from '../../../src/ui/app/App'
 import { initialSession, type Session } from '../../../src/ui/session/session'
 import { createFakeEngine } from '../support/fakeEngine'
+import { press } from '../support/keys'
 
 const note = () => document.querySelector('.status-note')!.textContent
-const press = (k: string) => fireEvent.keyDown(document.body, { key: k })
 const readout = () => document.querySelector('.readout-interval')?.textContent ?? ''
 const litCount = () => document.querySelectorAll('.fretboard [data-lit]').length
 

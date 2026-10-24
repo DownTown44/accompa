@@ -3,18 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
+import { click, key, lit, radio, rooted } from '../support/dom'
+import { press } from '../support/keys'
 
-const key = (n: number) => document.querySelector(`[data-pitch="${n}"]`)!
 const cell = (string: number, fret: number) => document.querySelector(`.fb-cell[data-string="${string}"][data-fret="${fret}"]`)!
-const click = (el: Element) => {
-  fireEvent.pointerDown(el)
-  fireEvent.pointerUp(el)
-}
-const lit = () => [...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit')).sort()
-const rooted = () => [...document.querySelectorAll('[data-root]')].map((n) => n.getAttribute('data-lit'))
 const readout = () => document.querySelector('.readout-interval')?.textContent
-const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
-const press = (k: string) => fireEvent.keyDown(document.body, { key: k })
 
 describe('Explore', () => {
   it('opens in Explore on the piano with the prompt and nothing lit', () => {

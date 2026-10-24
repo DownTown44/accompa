@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { interval } from '../../../src/core/pitch'
 import { INTERVALS } from '../../../src/core/theory'
@@ -13,14 +13,7 @@ import { useShortcuts } from '../../../src/ui/shortcuts/useShortcuts'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
-
-function press(init: KeyboardEventInit, target: EventTarget = document.body) {
-  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
-  event.getModifierState = () => false
-  act(() => {
-    target.dispatchEvent(event)
-  })
-}
+import { press } from '../support/keys'
 
 const button = (name: string | RegExp) => screen.getByRole('button', { name })
 const hint = () => document.querySelector('.guess-hint')!.textContent
