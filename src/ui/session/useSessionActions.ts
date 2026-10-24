@@ -73,6 +73,10 @@ export function useSessionActions() {
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
     toggleSetup: () => dispatch({ type: 'toggleSetup' }),
     closeSetup: () => dispatch({ type: 'closeSetup' }),
+    openHelp: () => dispatch({ type: 'openHelp' }),
+    closeHelp: () => dispatch({ type: 'closeHelp' }),
+    toggleHelp: () => dispatch({ type: 'toggleHelp' }),
+    dismiss: () => dispatch({ type: 'dismiss' }),
     shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }
 }

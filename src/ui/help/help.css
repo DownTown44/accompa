@@ -1,0 +1,78 @@
+.help-hint {
+  width: var(--spacing-help-size);
+  height: var(--spacing-help-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rounded-full);
+  background: var(--color-chip);
+  color: var(--color-muted);
+  font: inherit;
+  font-size: 22px;
+  font-style: italic;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help-hint:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}
+
+/* The transparent top border bridges the gap so the pointer can travel from the hint to the list. */
+.help-list {
+  position: absolute;
+  top: calc(50% + var(--spacing-help-size) / 2);
+  right: 0;
+  z-index: 20;
+  box-sizing: border-box;
+  width: 420px;
+  padding: 20px 24px;
+  border-top: 8px solid transparent;
+  border-radius: var(--rounded-interval);
+  background: var(--color-surface);
+  background-clip: padding-box;
+  color: var(--color-ink);
+  font-style: normal;
+}
+
+.help-list[hidden] {
+  display: none;
+}
+
+.help-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: var(--type-legend-size);
+  font-weight: var(--type-legend-weight);
+}
+
+.help-keys {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  width: 170px;
+}
+
+.help-cap {
+  padding: 2px 10px;
+  border-radius: var(--rounded-full);
+  background: var(--color-chip);
+  color: var(--color-ink);
+}
+
+.help-note {
+  margin: 14px 0 0;
+  color: var(--color-muted);
+  font-size: var(--type-legend-size);
+  font-weight: var(--type-legend-weight);
+}

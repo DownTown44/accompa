@@ -203,3 +203,22 @@ describe('setup panel', () => {
     expect(next.practice.wrongMarks).toEqual([2])
   })
 })
+
+describe('help state', () => {
+  it('opens, closes and toggles', () => {
+    let s = sessionReducer(initialSession, { type: 'openHelp' })
+    expect(s.helpOpen).toBe(true)
+    s = sessionReducer(s, { type: 'closeHelp' })
+    expect(s.helpOpen).toBe(false)
+    expect(sessionReducer(s, { type: 'toggleHelp' }).helpOpen).toBe(true)
+  })
+
+  it('dismiss closes help first, then the Setup panel', () => {
+    let s = { ...initialSession, helpOpen: true, setupOpen: true }
+    s = sessionReducer(s, { type: 'dismiss' })
+    expect(s).toMatchObject({ helpOpen: false, setupOpen: true })
+    s = sessionReducer(s, { type: 'dismiss' })
+    expect(s).toMatchObject({ helpOpen: false, setupOpen: false })
+    expect(sessionReducer(s, { type: 'dismiss' })).toBe(s)
+  })
+})

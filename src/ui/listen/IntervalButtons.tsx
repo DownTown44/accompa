@@ -3,7 +3,7 @@ import { INTERVALS } from '../../core/theory'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
-import { releaseFocusAfterPointer } from './focus'
+import { focusInstrument } from './focus'
 import { INTERVAL_KEYS } from './intervalKeys'
 
 export function IntervalButtons() {
@@ -30,7 +30,7 @@ export function IntervalButtons() {
             aria-keyshortcuts={INTERVAL_KEYS[index]}
             data-out-of-pool={inPool ? undefined : true}
             onClick={(event) => {
-              releaseFocusAfterPointer(event)
+              focusInstrument(event)
               if (!disabled) guess(definition.semitones)
             }}
           >

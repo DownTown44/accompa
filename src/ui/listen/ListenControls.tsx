@@ -1,7 +1,7 @@
 import './listen.css'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
-import { releaseFocusAfterPointer } from './focus'
+import { focusInstrument } from './focus'
 
 export function ListenControls() {
   const { session } = useSession()
@@ -13,23 +13,25 @@ export function ListenControls() {
       <button
         type="button"
         className="action-button"
+        aria-keyshortcuts="Space"
         onClick={(event) => {
-          releaseFocusAfterPointer(event)
+          focusInstrument(event)
           play()
         }}
       >
-        Play again <span className="key-hint">Space</span>
+        Play again <span className="key-hint" aria-hidden="true">Space</span>
       </button>
       <button
         type="button"
         className="action-button action-primary"
         aria-disabled={question ? undefined : true}
+        aria-keyshortcuts="Enter"
         onClick={(event) => {
-          releaseFocusAfterPointer(event)
+          focusInstrument(event)
           revealOrNext()
         }}
       >
-        {revealed ? 'Next' : 'Reveal'} <span className="key-hint">Enter</span>
+        {revealed ? 'Next' : 'Reveal'} <span className="key-hint" aria-hidden="true">Enter</span>
       </button>
     </div>
   )

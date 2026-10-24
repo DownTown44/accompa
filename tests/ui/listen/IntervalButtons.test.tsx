@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { interval } from '../../../src/core/pitch'
 import { INTERVALS } from '../../../src/core/theory'
@@ -206,20 +206,21 @@ describe('key rules', () => {
     expect(hint()).toBe('')
   })
 
-  it('releases focus after a pointer click on Listen buttons, keeps it for the keyboard', () => {
+  it('moves focus to the instrument after a pointer click on Listen buttons, keeps it for the keyboard', async () => {
     open()
     ask()
     const m3 = button('m3')
     m3.focus()
     fireEvent.click(m3, { detail: 1 })
-    expect(document.activeElement).toBe(document.body)
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('.piano')))
     const play = button(/Play again/)
     play.focus()
     fireEvent.click(play, { detail: 0 })
+    await new Promise((resolve) => setTimeout(resolve, 20))
     expect(document.activeElement).toBe(play)
     fireEvent.click(play, { detail: 1 })
-    expect(document.activeElement).toBe(document.body)
-    press({ key: '2' })
+    await waitFor(() => expect(document.activeElement).toBe(document.querySelector('.piano')))
+    press({ key: '2' }, document.activeElement!)
     expect(hint()).toBe('M2 is not it — try another.')
   })
 })

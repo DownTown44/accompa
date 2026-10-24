@@ -7,10 +7,10 @@ import { GuitarStage } from '../instruments/guitar/GuitarStage'
 import { IntervalButtons } from '../listen/IntervalButtons'
 import { ListenControls } from '../listen/ListenControls'
 import { ListenView } from '../listen/ListenView'
+import { Corner } from '../shell/Corner'
 import { ModeStrip } from '../shell/ModeStrip'
 import { PianoStage } from '../instruments/piano/PianoStage'
 import { SessionProvider, useSession } from '../session/SessionContext'
-import { SetupPanel } from '../setup/SetupPanel'
 import { SettingsProvider, useSettings } from '../settings/SettingsContext'
 import { loadSettings } from '../settings/settingsStorage'
 import { StatusNote } from '../shell/StatusNote'
@@ -28,7 +28,6 @@ export function Shell() {
   return (
     <div className="page">
       <ModeStrip />
-      <SetupPanel />
       <main className="body">
         <ListenView />
         <PianoStage />
@@ -37,6 +36,7 @@ export function Shell() {
         <IntervalButtons />
         <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : offscreen} />
       </main>
+      <Corner />
     </div>
   )
 }

@@ -1,0 +1,27 @@
+.corner {
+  position: absolute;
+  top: 0;
+  right: var(--spacing-strip-padding-x);
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  height: var(--spacing-strip-height);
+}
+
+.setup-opener {
+  width: var(--spacing-help-size);
+  height: var(--spacing-help-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rounded-full);
+  background: var(--color-chip);
+  color: var(--color-ink);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.setup-opener:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}
