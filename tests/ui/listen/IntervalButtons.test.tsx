@@ -75,26 +75,34 @@ describe('the row', () => {
 })
 
 describe('guessing', () => {
-  it('right guess with a key names the interval, plays the next question and clears marks', () => {
+  function expectRevealed() {
+    expect(hint()).toBe('')
+    expect(engine.plays).toHaveLength(1)
+    expect(document.querySelector('.readout-question')!.textContent).toBe('P5')
+    expect(document.querySelectorAll('.interval-button[aria-disabled="true"]')).toHaveLength(12)
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(2)
+  }
+
+  it('right guess with a key reveals as Reveal does, plays nothing, and Enter plays the next', () => {
     open()
     ask()
     press({ key: '3' })
     expect(marked()).toEqual(['m33'])
-    vi.spyOn(Math, 'random').mockReturnValue(0.1)
     press({ key: '7' })
-    expect(hint()).toBe('P5. Next interval is playing.')
+    expectRevealed()
+    expect(marked()).toEqual(['m33'])
+    vi.spyOn(Math, 'random').mockReturnValue(0.1)
+    press({ key: 'Enter' })
     expect(engine.plays).toHaveLength(2)
     expect(engine.plays[1].pitches).not.toEqual(engine.plays[0].pitches)
-    expect(marked()).toEqual([])
     expect(screen.getByText('Which interval?')).toBeTruthy()
   })
 
-  it('right guess with a click works', () => {
+  it('right guess with a click works the same', () => {
     open()
     ask()
     fireEvent.click(button('P5'), { detail: 1 })
-    expect(hint()).toBe('P5. Next interval is playing.')
-    expect(engine.plays).toHaveLength(2)
+    expectRevealed()
   })
 
   it('wrong guess marks the button, keeps the question and plays nothing', () => {
@@ -161,7 +169,7 @@ describe('key rules', () => {
     open()
     ask()
     press({ key: '=' })
-    expect(hint()).not.toBe('')
+    expect(document.querySelector('.readout-question')!.textContent).toBe('P8')
   })
 
   it('ignores repeat and Ctrl, Alt, Meta', () => {

@@ -8,23 +8,26 @@ import { useSessionActions } from '../session/useSessionActions'
 // and is placed over the strip's right edge by CSS.
 export function Corner() {
   const { session } = useSession()
-  const { toggleSetup } = useSessionActions()
+  const { toggleSetup, closeSetup } = useSessionActions()
   return (
-    <div className="corner">
-      <button
-        type="button"
-        id={SETUP_OPENER_ID}
-        className="setup-opener"
-        aria-label="Setup"
-        aria-expanded={session.setupOpen}
-        aria-controls={SETUP_PANEL_ID}
-        aria-keyshortcuts="P"
-        onClick={toggleSetup}
-      >
-        <span aria-hidden="true">{'⚙︎'}</span>
-      </button>
-      <SetupPanel />
-      <HelpHint />
-    </div>
+    <>
+      {session.setupOpen && <div className="corner-backdrop" onClick={closeSetup} />}
+      <div className="corner">
+        <button
+          type="button"
+          id={SETUP_OPENER_ID}
+          className="setup-opener"
+          aria-label="Setup"
+          aria-expanded={session.setupOpen}
+          aria-controls={SETUP_PANEL_ID}
+          aria-keyshortcuts="P"
+          onClick={toggleSetup}
+        >
+          <span aria-hidden="true">{'⚙︎'}</span>
+        </button>
+        <SetupPanel />
+        <HelpHint />
+      </div>
+    </>
   )
 }

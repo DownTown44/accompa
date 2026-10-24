@@ -98,12 +98,14 @@ describe('setup panel', () => {
     fireEvent.click(opener())
     fireEvent.click(chip('P5'))
     fireEvent.click(answer('P5'))
-    expect(document.querySelector('.guess-hint')!.textContent).toBe('P5. Next interval is playing.')
-    expect(engine.plays).toHaveLength(2)
+    expect(document.querySelector('.guess-hint')!.textContent).toBe('')
+    expect(engine.plays).toHaveLength(1)
     expect(answer('P5').getAttribute('aria-disabled')).toBe('true')
 
     press({ key: 'Escape' })
     ;(document.activeElement as HTMLElement).blur()
+    press({ key: 'Enter' })
+    expect(engine.plays).toHaveLength(2)
     const next = engine.plays[1].pitches
     const semitones = next[1] - next[0]
     const key = String(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='][[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].indexOf(semitones)])
@@ -111,7 +113,8 @@ describe('setup panel', () => {
     fireEvent.click(chips()[[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].indexOf(semitones)])
     press({ key: 'Escape' })
     press({ key })
-    expect(engine.plays).toHaveLength(3)
+    expect(engine.plays).toHaveLength(2)
+    expect(document.querySelector('.readout-question')!.textContent).not.toBe('Which interval?')
   })
 
   it('draws questions only from the saved pool', () => {
@@ -122,7 +125,8 @@ describe('setup panel', () => {
     const [root, top] = engine.plays[0].pitches
     expect(top - root).toBe(12)
     press({ key: '=' })
-    expect(document.querySelector('.guess-hint')!.textContent).toBe('P8. Next interval is playing.')
+    expect(engine.plays).toHaveLength(1)
+    press({ key: 'Enter' })
     const [nextRoot, nextTop] = engine.plays[1].pitches
     expect(nextTop - nextRoot).toBe(12)
   })
@@ -206,29 +210,64 @@ describe('direction', () => {
     press({ key: 'Escape' })
     ;(document.activeElement as HTMLElement).blur()
     press({ key: ' ' })
-    expect(engine.plays[2]).toEqual(first)
-    press({ key: 'Enter' })
-    press({ key: 'Enter' })
-    const harmonic = engine.plays.at(-1)!
+    const harmonic = engine.plays[2]
     expect(harmonic.mode).toBe('block')
     expect(harmonic.pitches[0]).toBeLessThan(harmonic.pitches[1])
   })
 
-  it('keeps the question in play and applies a new direction from the next one', () => {
+  it('replaces the question in play at once and silently when direction changes', () => {
     const engine = createFakeEngine()
     render(<App engine={engine} />)
     press({ key: ' ' })
-    const first = engine.plays[0]
+    press({ key: '3' })
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
     fireEvent.click(opener())
     fireEvent.click(radio('Descending'), { detail: 1 })
+    expect(engine.plays).toHaveLength(1)
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(0)
+    expect(document.querySelector('.guess-hint')!.textContent).toBe('')
     press({ key: 'Escape' })
     ;(document.activeElement as HTMLElement).blur()
     press({ key: ' ' })
-    expect(engine.plays[1]).toEqual(first)
-    press({ key: 'Enter' })
-    press({ key: 'Enter' })
-    const next = engine.plays.at(-1)!
+    const next = engine.plays[1]
     expect(next.pitches[0]).toBeGreaterThan(next.pitches[1])
+  })
+
+  it('replaces a revealed question too', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    press({ key: ' ' })
+    press({ key: 'Enter' })
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(2)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Harmonic'), { detail: 1 })
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(0)
+    expect(screen.getByText('Which interval?')).toBeTruthy()
+  })
+
+  it('only changes the setting when there is no question yet', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Harmonic'), { detail: 1 })
+    expect(engine.plays).toHaveLength(0)
+    press({ key: 'Escape' })
+    press({ key: ' ' })
+    expect(engine.plays[0].mode).toBe('block')
+  })
+
+  it('does nothing when the same direction is picked again', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    press({ key: ' ' })
+    press({ key: '3' })
+    fireEvent.click(opener())
+    fireEvent.click(radio('Ascending'), { detail: 1 })
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
+    press({ key: 'Escape' })
+    ;(document.activeElement as HTMLElement).blur()
+    press({ key: ' ' })
+    expect(engine.plays[1]).toEqual(engine.plays[0])
   })
 
   it.each(['piano', 'guitar'] as const)('marks the higher note as the root of a descending question on the %s', (instrument) => {
@@ -411,6 +450,22 @@ describe('root control', () => {
     expect(rooted()).toEqual(['3:2'])
   })
 
+  it('keeps the question, its marks and the stored root when Random is chosen again', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fixed()
+    fireEvent.pointerDown(key(57))
+    press({ key: '1' })
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
+    fireEvent.click(radio('Random'))
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
+    expect(engine.plays).toHaveLength(1)
+    expect(lit()).toEqual([])
+    fireEvent.click(radio('Fixed'))
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(0)
+    expect(rooted()).toEqual(['57'])
+  })
+
   it('sets the root from the guitar and rings the lowest fret', () => {
     const engine = createFakeEngine()
     render(<App engine={engine} />)
@@ -436,10 +491,58 @@ describe('root control', () => {
     fireEvent.pointerDown(key(50))
     expect(engine.plays).toHaveLength(2)
     fireEvent.keyDown(document.body, { key: ' ' })
-    expect(engine.plays[2]!.pitches).toEqual(first)
+    expect(engine.plays[2]!.pitches[0]).toBe(50)
     fireEvent.keyDown(document.body, { key: 'Enter' })
     fireEvent.keyDown(document.body, { key: 'Enter' })
     expect(engine.plays[3]!.pitches[0]).toBe(50)
+  })
+
+  it('replaces the question silently when Fixed is chosen with a root, or a note is pressed', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fixed()
+    fireEvent.pointerDown(key(57))
+    fireEvent.click(radio('Random'))
+    fireEvent.keyDown(document.body, { key: ' ' })
+    fireEvent.keyDown(document.body, { key: '3' })
+    engine.plays.length = 0
+    vi.spyOn(Math, 'random').mockReturnValue(0.9)
+    fireEvent.click(radio('Fixed'))
+    expect(engine.plays).toEqual([])
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(0)
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    fireEvent.keyDown(document.body, { key: ' ' })
+    expect(engine.plays[0]!.pitches[0]! % 12).toBe(9)
+    fireEvent.pointerDown(key(60))
+    expect(engine.plays).toHaveLength(2)
+    fireEvent.keyDown(document.body, { key: ' ' })
+    expect(engine.plays[2]!.pitches[0]).toBe(60)
+  })
+
+  it('drops the question when Fixed is chosen with no root, then roots a new one on the next press', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fireEvent.keyDown(document.body, { key: ' ' })
+    engine.plays.length = 0
+    fixed()
+    expect(screen.getByText('Which interval?')).toBeTruthy()
+    expect(note()).toBe('Click a note to set the root.')
+    fireEvent.pointerDown(key(57))
+    expect(engine.plays).toEqual([{ pitches: [57], mode: 'block' }])
+    expect(note()).toBe('')
+    fireEvent.keyDown(document.body, { key: ' ' })
+    expect(engine.plays[1]!.pitches[0]).toBe(57)
+  })
+
+  it('changes nothing when Random is chosen again', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    fireEvent.keyDown(document.body, { key: ' ' })
+    fireEvent.keyDown(document.body, { key: '3' })
+    fireEvent.click(opener())
+    fireEvent.click(radio('Random'))
+    expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
+    expect(engine.plays).toHaveLength(1)
   })
 
   it('draws a random root first when none was chosen and keeps it', () => {

@@ -1,5 +1,12 @@
+.corner-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
 .corner {
   position: absolute;
+  z-index: 11;
   top: 0;
   right: var(--spacing-strip-padding-x);
   display: flex;

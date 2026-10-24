@@ -8,7 +8,7 @@
   color: var(--color-muted);
   font: inherit;
   font-size: 22px;
-  font-style: italic;
+  font-style: normal;
   line-height: 1;
   cursor: pointer;
 }

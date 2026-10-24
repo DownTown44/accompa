@@ -1,4 +1,4 @@
-import type { Question } from '../../core/model'
+import type { Direction, Question, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
@@ -10,21 +10,38 @@ import type { Instrument, Mode } from './session'
 // Every action that can make sound runs here, synchronously inside the user's gesture.
 export function useSessionActions() {
   const { session, dispatch } = useSession()
-  const { settings } = useSettings()
+  const { settings, dispatch: dispatchSettings } = useSettings()
   const engine = useEngine()
 
-  function startQuestion() {
-    const fixed = settings.rootMode === 'fixed'
+  // A setting that was just changed is passed in, as the closure still holds the old value.
+  function startQuestion(override: { direction?: Direction; fixedRoot?: Pitch | null } = {}) {
+    const fixed = settings.rootMode === 'fixed' || override.fixedRoot !== undefined
+    const fixedRoot = override.fixedRoot !== undefined ? override.fixedRoot : session.practice.fixedRoot
     const question = generateQuestion({
       pool: settings.pool,
       range: COMMON_RANGE,
       random: Math.random,
-      direction: settings.direction,
-      fixedRoot: fixed ? session.practice.fixedRoot : null,
+      direction: override.direction ?? settings.direction,
+      fixedRoot: fixed ? fixedRoot : null,
     })
     dispatch({ type: 'setQuestion', question })
-    if (fixed && session.practice.fixedRoot === null) dispatch({ type: 'setFixedRoot', pitch: question.root })
+    if (fixed && fixedRoot === null) dispatch({ type: 'setFixedRoot', pitch: question.root })
     return question
+  }
+
+  function setDirection(direction: Direction) {
+    if (direction === settings.direction) return
+    dispatchSettings({ type: 'setDirection', direction })
+    if (session.practice.question) startQuestion({ direction })
+  }
+
+  function setRootMode(rootMode: RootMode) {
+    if (rootMode === settings.rootMode) return
+    dispatchSettings({ type: 'setRootMode', rootMode })
+    if (rootMode !== 'fixed' || !session.practice.question) return
+    const { fixedRoot } = session.practice
+    if (fixedRoot === null) dispatch({ type: 'clearQuestion' })
+    else startQuestion({ fixedRoot })
   }
 
   function playQuestion(question: Question) {
@@ -57,18 +74,18 @@ export function useSessionActions() {
     if (session.mode !== 'listen' || !question || revealed) return
     if (!(pool.includes(interval) || interval === question.interval) || wrongMarks.includes(interval)) return
     if (interval === question.interval) {
-      playQuestion(startQuestion())
-      dispatch({ type: 'rightGuess', interval })
+      dispatch({ type: 'reveal' })
     } else {
       dispatch({ type: 'guess', interval })
     }
   }
 
-  // Sets the root for later questions; the question in play is untouched.
+  // Sounds the note, makes it the root and replaces the question with one on it, silently.
   function pressNote(pitch: Pitch) {
     if (session.mode !== 'listen' || settings.rootMode !== 'fixed') return
     engine.play([pitch], 'block')
     dispatch({ type: 'setFixedRoot', pitch })
+    startQuestion({ fixedRoot: pitch })
   }
 
   function selectMode(mode: Mode) {
@@ -82,6 +99,8 @@ export function useSessionActions() {
     play,
     revealOrNext,
     guess,
+    setDirection,
+    setRootMode,
     pressNote,
     selectMode,
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),

@@ -9,9 +9,18 @@
   touch-action: none;
 }
 
+.piano:focus {
+  outline: none;
+}
+
 .piano:focus-visible {
   outline: var(--spacing-focus-ring-width) solid var(--color-focus);
   outline-offset: var(--spacing-focus-ring-offset);
+}
+
+/* Set by pointer focus, cleared by the next Tab. */
+:root[data-pointer-focus] .piano:focus-visible {
+  outline: none;
 }
 
 .key-white {

@@ -5,6 +5,7 @@ import type { Interval } from '../../core/pitch'
 import { INTERVALS } from '../../core/theory'
 import { SegmentedGroup } from '../shell/SegmentedGroup'
 import { useSession } from '../session/SessionContext'
+import { useSessionActions } from '../session/useSessionActions'
 import { useSettings } from '../settings/SettingsContext'
 
 export const SETUP_PANEL_ID = 'setup-panel'
@@ -32,6 +33,7 @@ const THEMES: readonly { value: Theme; label: string }[] = [
 export function SetupPanel() {
   const { session } = useSession()
   const { settings, dispatch } = useSettings()
+  const { setDirection, setRootMode } = useSessionActions()
   const open = session.setupOpen
   const { pool } = settings
   const [keepNote, setKeepNote] = useState(false)
@@ -90,7 +92,7 @@ export function SetupPanel() {
         variant="setup"
         options={DIRECTIONS}
         value={settings.direction}
-        onChange={(direction) => dispatch({ type: 'setDirection', direction })}
+        onChange={setDirection}
       />
       <h3 id="root-label" className="setup-sublabel">
         Root
@@ -102,7 +104,7 @@ export function SetupPanel() {
         variant="setup"
         options={ROOT_MODES}
         value={settings.rootMode}
-        onChange={(rootMode) => dispatch({ type: 'setRootMode', rootMode })}
+        onChange={setRootMode}
       />
       <h3 id="sound-label" className="setup-sublabel">
         Sound
