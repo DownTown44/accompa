@@ -1,4 +1,5 @@
 import { pitchClass, type Interval, type Pitch } from './pitch'
+import type { ChordReading } from './chords'
 
 // Label for a C key, with C4 = MIDI 60 and C3 = 48.
 export const octaveLabel = (p: Pitch): string => `C${Math.floor(p / 12) - 1}`
@@ -46,4 +47,34 @@ export function spellInterval(root: Pitch, semitones: Interval): SpelledInterval
   if (offset > 6) offset -= 12
   if (offset < -6) offset += 12
   return { root: rootName, upper: `${NATURALS[letter]}${ACCIDENTALS[offset] ?? ''}` }
+}
+
+const CHORD_STEPS = [0, 2, 4, 6]
+
+// The tones of a reading, each spelled by stepping letters from the spelled root.
+export function spellChord(reading: ChordReading): string[] {
+  const rootLetter = NATURALS.indexOf(ROOT_NAMES[reading.root]![0]!)
+  return reading.quality.intervals.map((semitones, i) => {
+    const letter = (rootLetter + (CHORD_STEPS[i] ?? 0)) % 7
+    let offset = ((reading.root + semitones) % 12) - NATURAL_CLASSES[letter]!
+    if (offset > 6) offset -= 12
+    if (offset < -6) offset += 12
+    return `${NATURALS[letter]}${ACCIDENTALS[offset] ?? ''}`
+  })
+}
+
+// Root, quality symbol and, for an inversion, the bass after a slash.
+export function chordSymbol(reading: ChordReading): string {
+  const bass = reading.bass === undefined ? '' : `/${ROOT_NAMES[reading.bass]!}`
+  return `${ROOT_NAMES[reading.root]!}${reading.quality.symbol}${bass}`
+}
+
+// Distinct note names, low to high, for a set no chord name fits.
+export function spellNotes(pitches: readonly Pitch[]): string[] {
+  const names: string[] = []
+  for (const p of [...pitches].sort((a, b) => a - b)) {
+    const name = noteName(p)
+    if (!names.includes(name)) names.push(name)
+  }
+  return names
 }

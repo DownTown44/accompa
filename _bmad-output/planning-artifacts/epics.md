@@ -829,42 +829,28 @@ So that Epic 3's tests start from shared code.
 
 Apor clicks notes on the keyboard and the app marks the root, names the chord live and plays it as a block or an arpeggio. He can switch between alternative readings.
 
-### Story 3.1: See the chord named as I click notes
+### Story 3.1: Name chords in core
 
 As Apor,
-I want the app to name the chord as I click notes on the keyboard,
-So that I learn what the notes I picked make.
+I want the app to know how to name any set of notes as a chord,
+So that the readout can trust the name it shows.
 
-**Covers:** FR12, FR14; AD-3, AD-4, AD-10; NFR11; UX-DR7, UX-DR22
+**Covers:** FR12, FR14; AD-3, AD-4, AD-10; NFR11
 
 **Acceptance Criteria:**
 
 **Given** the chord quality table in `core/theory`
 **When** I inspect it
-**Then** it holds major, minor, diminished, augmented, maj7, dom7, min7, m7b5 and dim7, each as one entry (name, symbol, interval stack) in one place, and the UI reads from it.
+**Then** it holds major, minor, diminished, augmented, maj7, dom7, min7, m7b5 and dim7, each as one entry (name, symbol, interval stack) in one place, and the UI reads from it, with the symbols `m`, `dim`, `aug`, `maj7`, `7`, `m7`, `m7♭5`, `dim7` and none for major.
 
 **Given** the namer in `core/`
 **When** it is given a set of pitches
 **Then** it returns all matching readings as root, quality and optional bass note, ranked with the lowest sounding note as root first (root-position first, then inversions as slash chords), and an empty list for no match
-**And** the tests cover every supported quality in root position, inversions, C6 vs Am7/C, and unknown sets.
+**And** the tests cover every supported quality in root position, inversions, sets with several readings (augmented, diminished 7), C E G A reading only as `Am7/C` (there is no sixth quality in v1), and unknown sets.
 
 **Given** chord tones
 **When** a reading is spelled
 **Then** `core/spelling` spells them by letter stepping from the spelled root (3rd = +2 letters, 5th = +4, 7th = +6) with the default root table (Db, Eb, Gb, Ab, Bb flat; C#, F# sharp) where no reading exists, and dim7 is spelled correctly (tested).
-
-**Given** I click C, E and G on the piano in Explore
-**When** the third note lights
-**Then** the notes are no longer limited to two and the readout shows `C major` large
-**And** the chord name is announced politely after a debounce.
-
-**Given** lit notes that form no known chord
-**When** the readout updates
-**Then** it shows the note names with no chord name
-**And** the lowest note keeps the root marker and every other note shows the no-role dot.
-
-**Given** a chord of three or more notes
-**When** notes are added or removed
-**Then** the name updates live.
 
 ### Story 3.2: Root marker, role shapes and legend
 
@@ -963,6 +949,32 @@ So that I can connect the name and shape with the sound.
 **Given** the Action buttons
 **When** they render
 **Then** each shows a key-hint cap in solid colour and exposes `aria-keyshortcuts`, and `Space` or `Enter` on a focused button activates that button.
+
+### Story 3.5: See the chord named as I click notes
+
+As Apor,
+I want the app to name the chord as I click notes on the keyboard,
+So that I learn what the notes I picked make.
+
+**Covers:** FR12, FR14; UX-DR7, UX-DR22
+
+Built after Story 3.1 and before Story 3.2; it was split from 3.1 so the naming core and the readout ship apart.
+
+**Acceptance Criteria:**
+
+**Given** I click C, E and G on the piano in Explore
+**When** the third note lights
+**Then** the notes are no longer limited to two and the readout shows `C` large (the chord symbol; a major triad is the bare letter)
+**And** the chord name is announced politely after a debounce.
+
+**Given** lit notes that form no known chord
+**When** the readout updates
+**Then** it shows the note names with no chord name
+**And** the lowest note keeps the root marker and every other note shows the no-role dot.
+
+**Given** a chord of three or more notes
+**When** notes are added or removed
+**Then** the name updates live.
 
 ## Epic 4: Find the chord on guitar
 

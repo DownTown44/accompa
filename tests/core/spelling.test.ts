@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
-import { INTERVALS } from '../../src/core/theory'
+import type { ChordReading } from '../../src/core/chords'
+import { CHORD_QUALITIES, INTERVALS } from '../../src/core/theory'
 import { interval, pitch, pitchClass } from '../../src/core/pitch'
-import { octaveLabel, spellInterval, stringNames } from '../../src/core/spelling'
+import { chordSymbol, octaveLabel, spellChord, spellInterval, stringNames } from '../../src/core/spelling'
 
 describe('octaveLabel', () => {
   it('labels C keys', () => {
@@ -68,5 +69,49 @@ describe('spellInterval', () => {
 
   it('allows double accidentals', () => {
     expect(spellInterval(pitch(61), interval(6)).upper).toBe('F𝄪')
+  })
+})
+
+describe('spellChord and chordSymbol', () => {
+  const major = CHORD_QUALITIES[0]!
+  const reading = (root: number, name: string, bass?: number): ChordReading => ({
+    root: pitchClass(pitch(root)),
+    quality: CHORD_QUALITIES.find((q) => q.name === name)!,
+    ...(bass === undefined ? {} : { bass: pitchClass(pitch(bass)) }),
+  })
+
+  it('spells a flat key root by stepping', () => {
+    expect(spellChord({ root: pitchClass(pitch(63)), quality: major })).toEqual(['E♭', 'G', 'B♭'])
+  })
+
+  it('spells a sharp key root with the default table', () => {
+    expect(spellChord({ root: pitchClass(pitch(66)), quality: major })).toEqual(['F♯', 'A♯', 'C♯'])
+  })
+
+  it('spells dim7 with double flats', () => {
+    expect(spellChord(reading(63, 'dim7'))).toEqual(['E♭', 'G♭', 'B𝄫', 'D𝄫'])
+  })
+
+  it('spells every quality on every root with at most a double accidental and the right pitch classes', () => {
+    const SHIFT: Record<string, number> = { '': 0, '♯': 1, '♭': -1, '𝄪': 2, '𝄫': -2 }
+    const BASE: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
+    for (let root = 0; root < 12; root++) {
+      for (const quality of CHORD_QUALITIES) {
+        const tones = spellChord({ root: pitchClass(pitch(root)), quality })
+        tones.forEach((tone, i) => {
+          expect(tone.slice(1) in SHIFT).toBe(true)
+          const sounded = (((BASE[tone[0]!]! + SHIFT[tone.slice(1)]!) % 12) + 12) % 12
+          expect(sounded).toBe((root + quality.intervals[i]!) % 12)
+        })
+      }
+    }
+  })
+
+  it('builds symbol strings', () => {
+    expect(chordSymbol(reading(60, 'major'))).toBe('C')
+    expect(chordSymbol(reading(60, 'm7b5'))).toBe('Cm7♭5')
+    expect(chordSymbol(reading(60, 'major', 64))).toBe('C/E')
+    expect(chordSymbol(reading(69, 'min7', 60))).toBe('Am7/C')
+    expect(chordSymbol(reading(64, 'augmented', 60))).toBe('Eaug/C')
   })
 })
