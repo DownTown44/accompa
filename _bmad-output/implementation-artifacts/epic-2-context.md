@@ -58,3 +58,5 @@ In Explore, Apor clicks any two notes on the piano or the fretboard and the app 
 - `useLitNotes` returns the workspace with exact guitar positions and the root (lowest pitch) in Explore, and nothing but a revealed question or the Fixed root in Listen.
 - `ui/explore/ExploreView` shows the prompt or the 84px interval, with the full name visually hidden and a polite live region debounced 400 ms. The prompt and the readout share one height so the instrument never jumps.
 - Open: lit notes beyond the guitar range or wider than one piano window after a swap (see `deferred-work.md`).
+- Play and Block (2.2): `ui/explore/ExploreControls` reuses the Listen `action-button` look; `play` and `revealOrNext` in `useSessionActions` are mode-aware (Explore sounds the lit pitches low to high as arpeggio or block). `Esc` (`dismiss`) closes the shortcuts list, then Setup, then clears the lit Explore notes into `Session.cleared`; `undoClear` restores them silently and refits the piano. `StatusNote` takes an optional `action` button; `App` picks the message in the order audio blocked, Fixed-root prompt, clear note with Undo, offscreen.
+
