@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { STANDARD_GUITAR_TUNING } from '../../../src/core/instruments'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
+import { listenSession } from '../support/sessions'
 
 function press(init: KeyboardEventInit, target: EventTarget = document.body) {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
@@ -31,14 +32,14 @@ afterEach(() => {
 
 describe('setup panel', () => {
   it('is hidden at first and the opener describes it', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(panel().hidden).toBe(true)
     expect(opener().getAttribute('aria-expanded')).toBe('false')
     expect(opener().getAttribute('aria-controls')).toBe('setup-panel')
   })
 
   it('opens with the opener, focuses the first chip, and shows 12 pressed chips with a label', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     expect(panel().hidden).toBe(false)
     expect(opener().getAttribute('aria-expanded')).toBe('true')
@@ -50,7 +51,7 @@ describe('setup panel', () => {
   })
 
   it('toggles with P and closes with Esc and with P, returning focus to the opener', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: 'p' })
     expect(panel().hidden).toBe(false)
     expect(document.activeElement).toBe(chips()[0])
@@ -64,14 +65,14 @@ describe('setup panel', () => {
   })
 
   it('ignores P with a modifier or repeat', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: 'p', ctrlKey: true })
     press({ key: 'p', repeat: true })
     expect(panel().hidden).toBe(true)
   })
 
   it('unticks a chip, disables its answer button, and persists the pool', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: ' ' })
     fireEvent.click(opener())
     fireEvent.click(chip('m2'))
@@ -82,7 +83,7 @@ describe('setup panel', () => {
   })
 
   it('keeps the current answer guessable after it leaves the pool', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: ' ' }) // P5
     fireEvent.click(opener())
     fireEvent.click(chip('P5'))
@@ -93,7 +94,7 @@ describe('setup panel', () => {
 
   it('accepts the right answer after its chip is unticked, by click and by key', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' }) // P5
     fireEvent.click(opener())
     fireEvent.click(chip('P5'))
@@ -120,7 +121,7 @@ describe('setup panel', () => {
   it('draws questions only from the saved pool', () => {
     localStorage.setItem('accompa.pool', '[12]')
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     const [root, top] = engine.plays[0].pitches
     expect(top - root).toBe(12)
@@ -133,7 +134,7 @@ describe('setup panel', () => {
 
   it('does not untick the last chip and says why', () => {
     localStorage.setItem('accompa.pool', '[12]')
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     const last = chip('P8')
     expect(last.getAttribute('aria-disabled')).toBe('true')
@@ -151,19 +152,19 @@ describe('setup panel', () => {
 
   it('restores a saved pool and disables the other buttons', () => {
     localStorage.setItem('accompa.pool', '[7, 12]')
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(answer('P5').hasAttribute('data-out-of-pool')).toBe(false)
     expect(answer('m2').hasAttribute('data-out-of-pool')).toBe(true)
   })
 
   it('falls back to all 12 for bad storage', () => {
     localStorage.setItem('accompa.pool', '[99]')
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(document.querySelectorAll('[data-out-of-pool]')).toHaveLength(0)
   })
 
   it('does not guess when a digit is pressed inside the panel', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: ' ' })
     fireEvent.click(opener())
     press({ key: '1' }, chips()[0])
@@ -171,7 +172,7 @@ describe('setup panel', () => {
   })
 
   it('keeps focus on the opener after a pointer click', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     opener().focus()
     fireEvent.click(opener(), { detail: 1 })
     expect(opener().getAttribute('aria-expanded')).toBe('true')
@@ -185,7 +186,7 @@ describe('direction', () => {
   const radio = (name: string) => screen.getByRole('radio', { name, hidden: true }) as HTMLInputElement
 
   it('shows a labelled Direction group with Ascending selected', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     expect(screen.getByRole('radiogroup', { name: 'Direction' })).toBeTruthy()
     expect(radio('Ascending').checked).toBe(true)
@@ -195,7 +196,7 @@ describe('direction', () => {
 
   it('plays the question with the matrix list and mode, and replays it identically', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.click(opener())
     fireEvent.click(radio('Descending'), { detail: 1 })
     press({ key: 'Escape' })
@@ -217,7 +218,7 @@ describe('direction', () => {
 
   it('replaces the question in play at once and silently when direction changes', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     press({ key: '3' })
     expect(document.querySelectorAll('.interval-button.wrong')).toHaveLength(1)
@@ -235,7 +236,7 @@ describe('direction', () => {
 
   it('replaces a revealed question too', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     press({ key: 'Enter' })
     expect(document.querySelectorAll('[data-lit]')).toHaveLength(2)
@@ -247,7 +248,7 @@ describe('direction', () => {
 
   it('only changes the setting when there is no question yet', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.click(opener())
     fireEvent.click(radio('Harmonic'), { detail: 1 })
     expect(engine.plays).toHaveLength(0)
@@ -258,7 +259,7 @@ describe('direction', () => {
 
   it('does nothing when the same direction is picked again', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     press({ key: '3' })
     fireEvent.click(opener())
@@ -271,7 +272,7 @@ describe('direction', () => {
   })
 
   it.each(['piano', 'guitar'] as const)('marks the higher note as the root of a descending question on the %s', (instrument) => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     fireEvent.click(radio('Descending'), { detail: 1 })
     press({ key: 'Escape' })
@@ -293,7 +294,7 @@ describe('direction', () => {
 
   it('yields digit keys while a radio has focus', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     fireEvent.click(opener())
     const r = radio('Harmonic')
@@ -310,7 +311,7 @@ describe('sound and theme', () => {
   const theme = () => document.documentElement.getAttribute('data-theme')
 
   it('shows Synthesized as the only sound, selected, and the three themes', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     const sound = screen.getByRole('radiogroup', { name: 'Sound' })
     expect(sound.querySelectorAll('input')).toHaveLength(1)
@@ -322,7 +323,7 @@ describe('sound and theme', () => {
   })
 
   it('applies a theme at once and saves it, and System removes the attribute', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     fireEvent.click(radio('Dark'), { detail: 1 })
     expect(theme()).toBe('dark')
@@ -337,12 +338,12 @@ describe('sound and theme', () => {
   it('restores theme and pool on reload but not direction', () => {
     localStorage.setItem('accompa.theme', '"dark"')
     localStorage.setItem('accompa.pool', '[7, 12]')
-    const first = render(<App engine={createFakeEngine()} />)
+    const first = render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(theme()).toBe('dark')
     fireEvent.click(opener())
     fireEvent.click(radio('Descending'), { detail: 1 })
     first.unmount()
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(theme()).toBe('dark')
     expect(answer('m2').hasAttribute('data-out-of-pool')).toBe(true)
     expect(answer('P5').hasAttribute('data-out-of-pool')).toBe(false)
@@ -354,7 +355,7 @@ describe('sound and theme', () => {
 
   it.each(['"purple"', '[]', '"x"'])('falls back to defaults for a bad saved theme %s', (raw) => {
     localStorage.setItem('accompa.theme', raw)
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(theme()).toBeNull()
     fireEvent.click(opener())
     expect(radio('System').checked).toBe(true)
@@ -368,7 +369,7 @@ describe('sound and theme', () => {
       throw new Error('denied')
     })
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.click(opener())
     fireEvent.click(radio('Dark'), { detail: 1 })
     expect(theme()).toBe('dark')
@@ -379,7 +380,7 @@ describe('sound and theme', () => {
 
   it('leaves the question, marks and replay alone when settings change', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     const first = engine.plays[0]
     fireEvent.click(opener())
@@ -394,13 +395,13 @@ describe('sound and theme', () => {
 
   it('stops the engine when it is replaced or the app leaves', () => {
     const engine = createFakeEngine()
-    const view = render(<App engine={engine} />)
+    const view = render(<App session={listenSession} engine={engine} />)
     view.unmount()
     expect(engine.stops).toBeGreaterThan(0)
   })
 
   it('yields digit keys while a Sound or Theme radio has focus', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     press({ key: ' ' })
     fireEvent.click(opener())
     for (const name of ['Synthesized', 'Light']) {
@@ -424,7 +425,7 @@ describe('root control', () => {
   }
 
   it('is a labelled radiogroup under Direction, Random by default', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     const group = screen.getByRole('radiogroup', { name: 'Root', hidden: true })
     expect(group).toBeTruthy()
     expect(radio('Random').checked).toBe(true)
@@ -437,7 +438,7 @@ describe('root control', () => {
 
   it('shows the status note until a root is chosen by a press, which sounds once on the piano', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     expect(note()).toBe('Click a note to set the root.')
     fireEvent.pointerDown(key(57))
@@ -452,7 +453,7 @@ describe('root control', () => {
 
   it('keeps the question, its marks and the stored root when Random is chosen again', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.pointerDown(key(57))
     press({ key: '1' })
@@ -468,7 +469,7 @@ describe('root control', () => {
 
   it('sets the root from the guitar and rings the lowest fret', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.keyDown(document.body, { key: 'i' })
     fireEvent.pointerDown(cell(2, 7))
@@ -480,7 +481,7 @@ describe('root control', () => {
 
   it('roots every later question on the chosen pitch class and leaves the question in play alone', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.pointerDown(key(57))
     engine.plays.length = 0
@@ -499,7 +500,7 @@ describe('root control', () => {
 
   it('replaces the question silently when Fixed is chosen with a root, or a note is pressed', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.pointerDown(key(57))
     fireEvent.click(radio('Random'))
@@ -521,7 +522,7 @@ describe('root control', () => {
 
   it('drops the question when Fixed is chosen with no root, then roots a new one on the next press', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.keyDown(document.body, { key: ' ' })
     engine.plays.length = 0
     fixed()
@@ -536,7 +537,7 @@ describe('root control', () => {
 
   it('changes nothing when Random is chosen again', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.keyDown(document.body, { key: ' ' })
     fireEvent.keyDown(document.body, { key: '3' })
     fireEvent.click(opener())
@@ -547,7 +548,7 @@ describe('root control', () => {
 
   it('draws a random root first when none was chosen and keeps it', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.keyDown(document.body, { key: ' ' })
     const root = engine.plays[0]!.pitches[0]!
@@ -560,7 +561,7 @@ describe('root control', () => {
 
   it('shows the question notes once revealed', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fixed()
     fireEvent.pointerDown(key(57))
     fireEvent.keyDown(document.body, { key: ' ' })
@@ -569,9 +570,9 @@ describe('root control', () => {
     expect(rooted()).toEqual(['57'])
   })
 
-  it('does nothing on a press in Random or Explore, and keeps the root through Random and back', () => {
+  it('does nothing on a press in Random, and keeps the root through Random and back', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.pointerDown(key(57))
     expect(engine.plays).toEqual([])
     fixed()
@@ -584,19 +585,17 @@ describe('root control', () => {
     expect(rooted()).toEqual(['57'])
     fireEvent.keyDown(document.body, { key: 'm' })
     expect(lit()).toEqual([])
-    fireEvent.pointerDown(key(60))
-    expect(engine.plays).toHaveLength(1)
   })
 
   it('is not saved', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fixed()
     expect(Object.keys(localStorage).join()).not.toMatch(/root/i)
   })
 
   it('yields digit keys to a focused radio', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     fireEvent.click(opener())
     radio('Fixed').focus()
     press({ key: '1' }, radio('Fixed'))

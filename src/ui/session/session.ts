@@ -6,6 +6,8 @@ import {
   type Question,
   type Workspace,
 } from '../../core/model'
+import { litPositions, toggleLit } from '../../core/explore'
+import type { FretPosition } from '../../core/instruments'
 import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
@@ -33,6 +35,7 @@ export type SessionAction =
   | { type: 'setMode'; mode: Mode }
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
+  | { type: 'toggleNote'; pitch: Pitch; position?: FretPosition }
   | { type: 'setQuestion'; question: Question }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
@@ -47,7 +50,7 @@ export type SessionAction =
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
-  mode: 'listen',
+  mode: 'explore',
   instrument: 'piano',
   workspace: initialWorkspace,
   practice: initialPractice,
@@ -57,11 +60,13 @@ export const initialSession: Session = {
   helpOpen: false,
 }
 
-// A revealed question must be visible when the piano is showing.
+// A revealed question, or the lit Explore notes, must be visible when the piano is showing.
 function fitRevealed(state: Session): Session {
+  if (state.instrument !== 'piano') return state
   const { question, revealed } = state.practice
-  if (state.mode !== 'listen' || state.instrument !== 'piano' || !revealed || !question) return state
-  const pianoStart = fitWindow(state.pianoStart, question.pitches)
+  const shown = state.mode === 'explore' ? state.workspace.pitches : revealed && question ? question.pitches : null
+  if (shown === null) return state
+  const pianoStart = fitWindow(state.pianoStart, shown)
   return pianoStart === state.pianoStart ? state : { ...state, pianoStart }
 }
 
@@ -73,6 +78,21 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return fitRevealed({ ...state, instrument: action.instrument })
     case 'toggleInstrument':
       return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' })
+    case 'toggleNote': {
+      const { pitch, position } = action
+      const { pitches, positions } = state.workspace
+      const keep = (list: readonly Pitch[]) =>
+        Object.fromEntries(Object.entries(positions).filter(([key]) => list.includes(Number(key) as Pitch)))
+      if (pitches.includes(pitch) && position !== undefined) {
+        const shown = litPositions(pitches, positions)[pitches.indexOf(pitch)]
+        if (!shown || shown.string !== position.string || shown.fret !== position.fret) {
+          return { ...state, workspace: { pitches, positions: { ...positions, [pitch]: position } } }
+        }
+      }
+      const next = toggleLit(pitches, pitch)
+      const remembered = position !== undefined && next.includes(pitch) ? { ...keep(next), [pitch]: position } : keep(next)
+      return { ...state, workspace: { pitches: next, positions: remembered } }
+    }
     case 'setQuestion':
       return {
         ...state,

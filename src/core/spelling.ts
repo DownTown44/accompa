@@ -23,6 +23,9 @@ const NATURAL_CLASSES = [0, 2, 4, 5, 7, 9, 11]
 // Root spellings by pitch class; the table keeps C♯ and F♯ where a flat twin exists.
 const ROOT_NAMES = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B']
 
+// The note's name without an octave.
+export const noteName = (p: Pitch): string => ROOT_NAMES[pitchClass(p)]!
+
 // Letters spanned by each interval, counting both ends (a fifth spans five).
 const SIZES = [1, 2, 2, 3, 3, 4, 4, 5, 6, 6, 7, 7, 8]
 

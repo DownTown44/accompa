@@ -1,5 +1,6 @@
 import type { Direction, Question, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
+import type { FretPosition } from '../../core/instruments'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
@@ -82,10 +83,19 @@ export function useSessionActions() {
 
   // Sounds the note, makes it the root and replaces the question with one on it, silently.
   function pressNote(pitch: Pitch) {
-    if (session.mode !== 'listen' || settings.rootMode !== 'fixed') return
+    if (session.mode === 'explore') {
+      engine.play([pitch], 'block')
+      return
+    }
+    if (settings.rootMode !== 'fixed') return
     engine.play([pitch], 'block')
     dispatch({ type: 'setFixedRoot', pitch })
     startQuestion({ fixedRoot: pitch })
+  }
+
+  // Releasing a pressed note lights it, or unlights it when it is already lit.
+  function releaseNote(pitch: Pitch, position?: FretPosition) {
+    if (session.mode === 'explore') dispatch({ type: 'toggleNote', pitch, position })
   }
 
   function selectMode(mode: Mode) {
@@ -102,6 +112,7 @@ export function useSessionActions() {
     setDirection,
     setRootMode,
     pressNote,
+    releaseNote,
     selectMode,
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),

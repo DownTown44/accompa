@@ -1,3 +1,4 @@
+import type { FretPosition } from './instruments'
 import type { Interval, Pitch } from './pitch'
 import { INTERVALS } from './theory'
 
@@ -16,7 +17,10 @@ export interface Question {
 
 // Written only by Explore actions (builder, free play, voicing editing).
 export interface Workspace {
+  // Lit notes, oldest first.
   readonly pitches: readonly Pitch[]
+  // The guitar position each pitch was lit at, where it was lit on the guitar.
+  readonly positions: Readonly<Record<number, FretPosition>>
 }
 
 // Written only by practice rounds; never touches the workspace.
@@ -28,7 +32,7 @@ export interface Practice {
   readonly fixedRoot: Pitch | null
 }
 
-export const initialWorkspace: Workspace = { pitches: [] }
+export const initialWorkspace: Workspace = { pitches: [], positions: {} }
 
 export const initialPractice: Practice = {
   question: null,

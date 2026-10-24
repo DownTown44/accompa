@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
+import { listenSession } from '../support/sessions'
 
 function press(init: KeyboardEventInit, target: EventTarget = document.body, altGraph = false) {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
@@ -24,7 +25,7 @@ let engine: FakeEngine
 beforeEach(() => {
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
   engine = createFakeEngine()
-  render(<App engine={engine} />)
+  render(<App session={listenSession} engine={engine} />)
 })
 
 afterEach(() => {

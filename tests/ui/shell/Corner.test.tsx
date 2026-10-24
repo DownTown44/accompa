@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
+import { listenSession } from '../support/sessions'
 
 const opener = () => screen.getByRole('button', { name: 'Setup' })
 const panel = () => document.getElementById('setup-panel') as HTMLElement
@@ -22,7 +23,7 @@ afterEach(() => {
 
 describe('setup backdrop', () => {
   it('exists only while the panel is open', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(backdrop()).toBeNull()
     fireEvent.click(opener())
     expect(backdrop()).not.toBeNull()
@@ -30,7 +31,7 @@ describe('setup backdrop', () => {
 
   it('closes the panel on a click, returns focus to the opener and does nothing else', () => {
     const engine = createFakeEngine()
-    render(<App engine={engine} />)
+    render(<App session={listenSession} engine={engine} />)
     press({ key: ' ' })
     fireEvent.click(opener())
     fireEvent.click(backdrop()!)
@@ -42,7 +43,7 @@ describe('setup backdrop', () => {
   })
 
   it('does not close on a click inside the panel or on the gear action beyond its toggle', () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     fireEvent.click(panel())
     expect(panel().hidden).toBe(false)
@@ -70,7 +71,7 @@ describe('instrument focus ring', () => {
   const flag = () => document.documentElement.hasAttribute('data-pointer-focus')
 
   it('is suppressed after a pointer click, kept through shortcut keys, and restored by Tab', async () => {
-    render(<App engine={createFakeEngine()} />)
+    render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(screen.getByRole('radio', { name: 'Guitar' }), { detail: 1 })
     await waitFor(() => expect(document.activeElement).toBe(document.querySelector('.fretboard')))
     expect(flag()).toBe(true)
