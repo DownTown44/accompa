@@ -478,7 +478,7 @@ As Apor,
 I want to choose ascending, descending or harmonic, and a random or fixed root,
 So that I can practise each way I hear music.
 
-**Covers:** FR8, FR9
+**Covers:** FR8 (FR9 and the Root criteria below moved to Story 1.12)
 
 **Acceptance Criteria:**
 
@@ -591,6 +591,46 @@ So that I can run Listen from the keyboard.
 **Given** a control with a shortcut
 **When** it renders
 **Then** it shows a solid-color key hint cap, hidden from assistive tech, and exposes `aria-keyshortcuts`.
+
+### Story 1.12: Fix the root
+
+As Apor,
+I want a random or fixed root for the interval questions,
+So that I can practise from one note when I choose to.
+
+**Covers:** FR9; carries the Root criteria split from Story 1.9
+
+**Acceptance Criteria:**
+
+**Given** the Setup panel
+**When** I look at it
+**Then** it holds a Root segmented control (Random, Fixed), labelled, with the shared selected treatment.
+
+**Given** Root is Random
+**When** a question is generated
+**Then** the root is picked with the injected random function and the whole interval fits the active instrument's range.
+
+**Given** Root is Fixed in Listen
+**When** I press a note on the active instrument (no panel needed) [ASSUMPTION: the UX spec does not place this control]
+**Then** that note sounds, becomes the fixed root, and shows the root marker on both instruments, and the Status note `Click a note to set the root.` shows until one is chosen
+**And** the click changes only the practice state, never the workspace.
+
+**Given** a fixed root
+**When** questions are generated
+**Then** every question uses that pitch class, the octave is the one nearest the clicked note in which the whole interval fits the instrument range, and the root changes only when I click another note
+**And** if no root has been chosen yet, the first question picks one with the injected random function and shows it as the fixed root.
+
+**Given** Root is Fixed and the fixed root is chosen
+**When** I switch to Random and back
+**Then** the previously chosen root is kept for the session.
+
+**Given** I change the root mode
+**When** a question is in progress
+**Then** it applies from the next question and the current one stays answerable.
+
+**Given** a reload
+**When** the app starts
+**Then** root mode returns to Random, as it is not persisted.
 
 ## Epic 2: Explore intervals on the instruments
 

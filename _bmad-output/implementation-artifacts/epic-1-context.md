@@ -9,7 +9,7 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 ## Stories
 
 - Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint
-- Open: the Root half of 1.9 (Root control, fixed root) is in deferred-work.md; nothing else is left in the epic
+- Open: Story 1.12 fix the root (the Root half split from 1.9) is the last story in the epic
 
 ## Requirements & Constraints
 

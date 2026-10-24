@@ -8,4 +8,4 @@
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-9-set-direction.md`
   summary: Root setting for Listen: a Root segmented control (Random, Fixed), choosing the fixed root by pressing a note on the active instrument, the root marker and `Click a note to set the root.` status note, fixed-root question generation (octave nearest the clicked note, kept across Random and back), and a random first fixed root.
-  evidence: Split from story 1.9 at the user's choice; it needs the first pointer wiring on the instruments in Listen and is independent of Direction. The epic's Root acceptance criteria stay open under story 1.9.
+  evidence: Split from story 1.9 at the user's choice; it needs the first pointer wiring on the instruments in Listen and is independent of Direction. The Root criteria moved to Story 1.12 in epics.md.
