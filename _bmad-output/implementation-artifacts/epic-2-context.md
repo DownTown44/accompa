@@ -50,3 +50,11 @@ In Explore, Apor clicks any two notes on the piano or the fretboard and the app 
 - 2.2 builds on 2.1 (lit notes exist, readout shows the pair) and adds the Action buttons and Status note behavior.
 - 2.3 verifies the workspace and practice separation across both modes; it should be checked against 2.1 and 2.2 behavior.
 - Epic 3 lifts the two-note cap and replaces the interval readout with chord naming, so keep the lit-notes cap in one place.
+
+## Patterns Built So Far
+
+- Explore (2.1): the app opens in Explore. `Workspace` holds `pitches` (oldest first) and `positions` (guitar position remembered per pitch). `core/explore.ts` owns `MAX_LIT` (the one place the two-note cap lives), `toggleLit`, `pairInterval`, `exploreReadout` and `litPositions` (remembered position, else lowest fret, else the closest pair for two unknown pitches).
+- `toggleNote` (session reducer) lights, unlights or moves a note. `pressNote` sounds a one-pitch block in Explore; `releaseNote` toggles. A lit pitch clicked at another guitar position moves there.
+- `useLitNotes` returns the workspace with exact guitar positions and the root (lowest pitch) in Explore, and nothing but a revealed question or the Fixed root in Listen.
+- `ui/explore/ExploreView` shows the prompt or the 84px interval, with the full name visually hidden and a polite live region debounced 400 ms. The prompt and the readout share one height so the instrument never jumps.
+- Open: lit notes beyond the guitar range or wider than one piano window after a swap (see `deferred-work.md`).

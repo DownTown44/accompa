@@ -3,6 +3,7 @@ import { offscreenLit, offscreenNote } from '../../core/piano'
 import { ENGINES } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
 import { EngineProvider } from '../engine/EngineContext'
+import { ExploreControls } from '../explore/ExploreControls'
 import { ExploreView } from '../explore/ExploreView'
 import { GuitarStage } from '../instruments/guitar/GuitarStage'
 import { IntervalButtons } from '../listen/IntervalButtons'
@@ -18,6 +19,7 @@ import { loadSettings } from '../settings/settingsStorage'
 import { StatusNote } from '../shell/StatusNote'
 import { useAudioStatus, useAudioWake } from '../engine/useAudioStatus'
 import { useLitNotes } from '../session/useLitNotes'
+import { useSessionActions } from '../session/useSessionActions'
 import { useShortcuts } from '../shortcuts/useShortcuts'
 
 export function Shell() {
@@ -27,8 +29,12 @@ export function Shell() {
   const { session } = useSession()
   const { settings } = useSettings()
   const lit = useLitNotes()
+  const { undoClear } = useSessionActions()
   const chooseRoot = session.mode === 'listen' && settings.rootMode === 'fixed' && session.practice.fixedRoot === null
   const offscreen = session.instrument === 'piano' ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart)) : undefined
+  const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
+  const message =
+    audio === 'blocked' ? 'Press any key to wake the sound.' : chooseRoot ? 'Click a note to set the root.' : undo ? 'Notes cleared.' : offscreen
   return (
     <div className="page">
       <ModeStrip />
@@ -37,9 +43,10 @@ export function Shell() {
         <ListenView />
         <PianoStage />
         <GuitarStage />
+        <ExploreControls />
         <ListenControls />
         <IntervalButtons />
-        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : chooseRoot ? 'Click a note to set the root.' : offscreen} />
+        <StatusNote message={message} action={undo ? { label: 'Undo', onClick: undoClear } : undefined} />
       </main>
       <Corner />
     </div>

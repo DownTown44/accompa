@@ -1,6 +1,7 @@
 import type { Direction, Question, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
 import type { FretPosition } from '../../core/instruments'
+import type { PlayMode } from '../../audio/engine'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
@@ -49,8 +50,14 @@ export function useSessionActions() {
     engine.play(question.pitches, question.direction === 'harmonic' ? 'block' : 'arpeggio')
   }
 
+  // The lit Explore notes, low to high; nothing lit plays nothing.
+  function playLit(mode: PlayMode) {
+    const pitches = [...session.workspace.pitches].sort((a, b) => a - b)
+    if (pitches.length > 0) engine.play(pitches, mode)
+  }
+
   function play() {
-    if (session.mode !== 'listen') return
+    if (session.mode === 'explore') return playLit('arpeggio')
     const question = session.practice.question ?? startQuestion()
     playQuestion(question)
   }
@@ -65,6 +72,7 @@ export function useSessionActions() {
 
   // One button: Reveal while a question waits, Next once it is revealed.
   function revealOrNext() {
+    if (session.mode === 'explore') return playLit('block')
     if (session.practice.revealed) next()
     else reveal()
   }
@@ -123,6 +131,7 @@ export function useSessionActions() {
     closeHelp: () => dispatch({ type: 'closeHelp' }),
     toggleHelp: () => dispatch({ type: 'toggleHelp' }),
     dismiss: () => dispatch({ type: 'dismiss' }),
+    undoClear: () => dispatch({ type: 'undoClear' }),
     shiftPiano: (direction: 1 | -1) => dispatch({ type: 'shiftPiano', direction }),
   }
 }

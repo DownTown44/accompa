@@ -127,3 +127,19 @@
   font-size: var(--type-hint-size);
   font-weight: var(--type-hint-weight);
 }
+
+.status-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font: inherit;
+  line-height: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.status-action:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}
