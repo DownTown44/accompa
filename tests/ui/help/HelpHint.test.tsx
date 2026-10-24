@@ -90,14 +90,14 @@ describe('help hint', () => {
       row.querySelector('.help-meaning')!.textContent,
     ])
     expect(rows).toEqual([
-      [['Space'], 'Play and replay'],
-      [['Enter'], 'Reveal, then next'],
+      [['Space'], 'Play, or replay'],
+      [['Enter'], 'Reveal, then next; Block in Explore'],
       [['1–9', '0', '-', '='], 'Pick m2 to P8'],
       [['M'], 'Listen or Explore'],
       [['I'], 'Piano or Guitar'],
       [['P'], 'Setup'],
       [['[', ']'], 'Piano octave down, up'],
-      [['Esc'], 'Close panel or list'],
+      [['Esc'], 'Close panel or list; clear notes in Explore'],
       [['?'], 'This list'],
     ])
     expect(list().textContent).toContain('Space and Enter on a focused button activate that button.')

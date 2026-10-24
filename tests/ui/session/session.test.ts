@@ -298,3 +298,66 @@ describe('toggleNote', () => {
     expect(state.pianoStart).toBe(36)
   })
 })
+
+describe('clear and undo', () => {
+  const lit = sessionReducer(
+    sessionReducer(initialSession, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } }),
+    { type: 'toggleNote', pitch: pitch(67) },
+  )
+
+  it('Esc clears the notes and keeps them; undo restores them', () => {
+    const cleared = sessionReducer(lit, { type: 'dismiss' })
+    expect(cleared.workspace.pitches).toEqual([])
+    expect(cleared.cleared).toEqual(lit.workspace)
+    const back = sessionReducer(cleared, { type: 'undoClear' })
+    expect(back.workspace).toEqual(lit.workspace)
+    expect(back.cleared).toBeNull()
+  })
+
+  it('closes a panel first and leaves the notes', () => {
+    const s = sessionReducer({ ...lit, setupOpen: true }, { type: 'dismiss' })
+    expect(s.workspace).toEqual(lit.workspace)
+    expect(s.cleared).toBeNull()
+  })
+
+  it('does nothing with nothing lit or in Listen', () => {
+    expect(sessionReducer(initialSession, { type: 'dismiss' })).toBe(initialSession)
+    const l = { ...lit, mode: 'listen' as const }
+    expect(sessionReducer(l, { type: 'dismiss' })).toBe(l)
+  })
+
+  it('drops the kept notes on the next note change', () => {
+    const cleared = sessionReducer(lit, { type: 'dismiss' })
+    const s = sessionReducer(cleared, { type: 'toggleNote', pitch: pitch(64) })
+    expect(s.cleared).toBeNull()
+    expect(sessionReducer(s, { type: 'undoClear' })).toBe(s)
+  })
+
+  it('survives an instrument swap', () => {
+    const swapped = sessionReducer(sessionReducer(lit, { type: 'dismiss' }), { type: 'toggleInstrument' })
+    expect(sessionReducer(swapped, { type: 'undoClear' }).workspace).toEqual(lit.workspace)
+  })
+
+  it('closes the shortcuts list first and leaves the notes', () => {
+    const s = sessionReducer({ ...lit, helpOpen: true }, { type: 'dismiss' })
+    expect(s.helpOpen).toBe(false)
+    expect(s.workspace).toEqual(lit.workspace)
+    expect(s.cleared).toBeNull()
+  })
+
+  it('brings the piano window to the restored notes after the window moved', () => {
+    const high = sessionReducer(initialSession, { type: 'toggleNote', pitch: pitch(40) })
+    const away = sessionReducer(sessionReducer(high, { type: 'dismiss' }), { type: 'shiftPiano', direction: 1 })
+    expect(away.pianoStart).toBeGreaterThan(40)
+    const back = sessionReducer(away, { type: 'undoClear' })
+    expect(back.pianoStart).toBeLessThanOrEqual(40)
+    expect(back.pianoStart + 36).toBeGreaterThan(40)
+  })
+
+  it('keeps the kept notes through a visit to Listen, since the workspace is unchanged', () => {
+    const cleared = sessionReducer(lit, { type: 'dismiss' })
+    const trip = sessionReducer(sessionReducer(cleared, { type: 'setMode', mode: 'listen' }), { type: 'setMode', mode: 'explore' })
+    expect(trip.cleared).toEqual(lit.workspace)
+    expect(sessionReducer(trip, { type: 'undoClear' }).workspace).toEqual(lit.workspace)
+  })
+})

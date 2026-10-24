@@ -24,6 +24,8 @@ export interface Session {
   readonly mode: Mode
   readonly instrument: Instrument
   readonly workspace: Workspace
+  // What Esc cleared, kept for Undo until the next note change.
+  readonly cleared: Workspace | null
   readonly practice: Practice
   readonly pianoStart: number
   readonly feedback: Feedback | null
@@ -47,12 +49,14 @@ export type SessionAction =
   | { type: 'closeHelp' }
   | { type: 'toggleHelp' }
   | { type: 'dismiss' }
+  | { type: 'undoClear' }
   | { type: 'shiftPiano'; direction: 1 | -1 }
 
 export const initialSession: Session = {
   mode: 'explore',
   instrument: 'piano',
   workspace: initialWorkspace,
+  cleared: null,
   practice: initialPractice,
   pianoStart: DEFAULT_WINDOW_START,
   feedback: null,
@@ -86,12 +90,12 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       if (pitches.includes(pitch) && position !== undefined) {
         const shown = litPositions(pitches, positions)[pitches.indexOf(pitch)]
         if (!shown || shown.string !== position.string || shown.fret !== position.fret) {
-          return { ...state, workspace: { pitches, positions: { ...positions, [pitch]: position } } }
+          return { ...state, cleared: null, workspace: { pitches, positions: { ...positions, [pitch]: position } } }
         }
       }
       const next = toggleLit(pitches, pitch)
       const remembered = position !== undefined && next.includes(pitch) ? { ...keep(next), [pitch]: position } : keep(next)
-      return { ...state, workspace: { pitches: next, positions: remembered } }
+      return { ...state, cleared: null, workspace: { pitches: next, positions: remembered } }
     }
     case 'setQuestion':
       return {
@@ -132,10 +136,16 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return state.helpOpen ? { ...state, helpOpen: false } : state
     case 'toggleHelp':
       return { ...state, helpOpen: !state.helpOpen }
-    // Esc closes the shortcuts list first, else the Setup panel.
+    // Esc closes the shortcuts list first, then the Setup panel, then clears the lit Explore notes.
     case 'dismiss':
       if (state.helpOpen) return { ...state, helpOpen: false }
-      return state.setupOpen ? { ...state, setupOpen: false } : state
+      if (state.setupOpen) return { ...state, setupOpen: false }
+      if (state.mode === 'explore' && state.workspace.pitches.length > 0) {
+        return { ...state, cleared: state.workspace, workspace: initialWorkspace }
+      }
+      return state
+    case 'undoClear':
+      return state.cleared ? fitRevealed({ ...state, workspace: state.cleared, cleared: null }) : state
     case 'shiftPiano': {
       if (state.instrument !== 'piano') return state
       const pianoStart = shiftWindow(state.pianoStart, action.direction)
