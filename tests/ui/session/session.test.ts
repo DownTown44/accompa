@@ -221,4 +221,15 @@ describe('help state', () => {
     expect(s).toMatchObject({ helpOpen: false, setupOpen: false })
     expect(sessionReducer(s, { type: 'dismiss' })).toBe(s)
   })
+
+  it('records a fixed root in practice only, and keeps it across questions', () => {
+    const set = sessionReducer(initialSession, { type: 'setFixedRoot', pitch: pitch(57) })
+    expect(set.practice.fixedRoot).toBe(57)
+    expect(set.workspace).toBe(initialSession.workspace)
+    expect(sessionReducer(set, { type: 'setFixedRoot', pitch: pitch(57) })).toBe(set)
+    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    const next = sessionReducer(set, { type: 'setQuestion', question })
+    expect(next.practice.fixedRoot).toBe(57)
+    expect(sessionReducer(next, { type: 'reveal' }).practice.fixedRoot).toBe(57)
+  })
 })

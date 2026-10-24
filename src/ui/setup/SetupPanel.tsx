@@ -1,6 +1,6 @@
 import './setup.css'
 import { useEffect, useRef, useState } from 'react'
-import type { Direction, Sound, Theme } from '../../core/model'
+import type { Direction, RootMode, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { INTERVALS } from '../../core/theory'
 import { SegmentedGroup } from '../shell/SegmentedGroup'
@@ -14,6 +14,11 @@ const DIRECTIONS: readonly { value: Direction; label: string }[] = [
   { value: 'ascending', label: 'Ascending' },
   { value: 'descending', label: 'Descending' },
   { value: 'harmonic', label: 'Harmonic' },
+]
+
+const ROOT_MODES: readonly { value: RootMode; label: string }[] = [
+  { value: 'random', label: 'Random' },
+  { value: 'fixed', label: 'Fixed' },
 ]
 
 const SOUNDS: readonly { value: Sound; label: string }[] = [{ value: 'synthesized', label: 'Synthesized' }]
@@ -86,6 +91,18 @@ export function SetupPanel() {
         options={DIRECTIONS}
         value={settings.direction}
         onChange={(direction) => dispatch({ type: 'setDirection', direction })}
+      />
+      <h3 id="root-label" className="setup-sublabel">
+        Root
+      </h3>
+      <SegmentedGroup<RootMode>
+        label="Root"
+        labelledBy="root-label"
+        name="root"
+        variant="setup"
+        options={ROOT_MODES}
+        value={settings.rootMode}
+        onChange={(rootMode) => dispatch({ type: 'setRootMode', rootMode })}
       />
       <h3 id="sound-label" className="setup-sublabel">
         Sound

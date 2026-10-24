@@ -23,7 +23,9 @@ export function Shell() {
   useAudioWake()
   const audio = useAudioStatus()
   const { session } = useSession()
+  const { settings } = useSettings()
   const lit = useLitNotes()
+  const chooseRoot = session.mode === 'listen' && settings.rootMode === 'fixed' && session.practice.fixedRoot === null
   const offscreen = session.instrument === 'piano' ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart)) : undefined
   return (
     <div className="page">
@@ -34,7 +36,7 @@ export function Shell() {
         <GuitarStage />
         <ListenControls />
         <IntervalButtons />
-        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : offscreen} />
+        <StatusNote message={audio === 'blocked' ? 'Press any key to wake the sound.' : chooseRoot ? 'Click a note to set the root.' : offscreen} />
       </main>
       <Corner />
     </div>
