@@ -52,3 +52,14 @@ export function litPositions(lit: readonly Pitch[], remembered: RememberedPositi
     return lowestFret(p)
   })
 }
+
+// How many lit pitches have no place on the guitar, beyond its lowest and highest note.
+export function beyondFretboard(lit: readonly Pitch[], remembered: RememberedPositions): number {
+  return litPositions(lit, remembered).filter((position) => position === null).length
+}
+
+// The Status note for lit notes beyond the guitar; undefined when there are none.
+export function beyondFretboardNote(count: number): string | undefined {
+  if (count <= 0) return undefined
+  return `${count} ${count === 1 ? 'note' : 'notes'} lit beyond the fretboard`
+}

@@ -2,11 +2,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-readout-gap);
+  box-sizing: content-box;
+  height: var(--spacing-readout-block-height);
   padding-top: 24px;
 }
 
-/* The prompt and the readout share one height so the instrument below never moves. */
+/* The block matches Listen's, so the instrument stays put on a mode switch; the prompt and the readout share one height inside it. */
 .readout-interval,
 .explore-prompt {
   display: flex;

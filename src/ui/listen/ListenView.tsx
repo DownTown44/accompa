@@ -1,3 +1,4 @@
+import '../shared/shared.css'
 import './listen.css'
 import { INTERVALS } from '../../core/theory'
 import { useSession } from '../session/SessionContext'

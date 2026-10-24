@@ -1,4 +1,4 @@
-import { focusInstrument } from '../listen/focus'
+import { focusInstrument } from '../shared/focus'
 
 interface Option<T extends string> {
   value: T

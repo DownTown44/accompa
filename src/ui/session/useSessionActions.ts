@@ -2,6 +2,7 @@ import type { Direction, Question, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
 import type { FretPosition } from '../../core/instruments'
 import type { PlayMode } from '../../audio/engine'
+import { canGuess } from '../../core/guess'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
@@ -82,11 +83,11 @@ export function useSessionActions() {
     const { question, revealed, wrongMarks } = session.practice
     const { pool } = settings
     if (session.mode !== 'listen' || !question || revealed) return
-    if (!(pool.includes(interval) || interval === question.interval) || wrongMarks.includes(interval)) return
+    if (!canGuess(interval, pool, question.interval, wrongMarks)) return
     if (interval === question.interval) {
       dispatch({ type: 'reveal' })
     } else {
-      dispatch({ type: 'guess', interval })
+      dispatch({ type: 'guess', interval, pool })
     }
   }
 
