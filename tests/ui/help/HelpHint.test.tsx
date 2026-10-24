@@ -3,19 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
-
-function press(init: KeyboardEventInit, target: EventTarget = document.body, altGraph = false) {
-  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
-  event.getModifierState = (key: string) => key === 'AltGraph' && altGraph
-  act(() => {
-    target.dispatchEvent(event)
-  })
-}
+import { opener, panel } from '../support/dom'
+import { press } from '../support/keys'
 
 const hintButton = () => screen.getByRole('button', { name: 'Shortcuts' })
 const list = () => document.getElementById('help-list') as HTMLElement
-const opener = () => screen.getByRole('button', { name: 'Setup' })
-const panel = () => document.getElementById('setup-panel') as HTMLElement
 const guessHint = () => document.querySelector('.guess-hint')!.textContent
 const settle = () => new Promise((resolve) => setTimeout(resolve, 20))
 const stops = () => [...document.querySelectorAll<HTMLElement>('input, button, [tabindex]')].filter((el) => !el.closest('[hidden]'))

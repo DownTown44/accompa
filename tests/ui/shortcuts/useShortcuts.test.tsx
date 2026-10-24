@@ -1,19 +1,10 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
-
-const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
-
-// happy-dom reports AltGraph whenever Alt is down, which browsers do not.
-function press(init: KeyboardEventInit, altGraph = false) {
-  const event = new KeyboardEvent('keydown', { bubbles: true, ...init })
-  event.getModifierState = (key: string) => key === 'AltGraph' && altGraph
-  act(() => {
-    document.body.dispatchEvent(event)
-  })
-}
+import { radio } from '../support/dom'
+import { press } from '../support/keys'
 
 describe('M and I shortcuts', () => {
   it('M toggles the mode, I toggles the instrument', () => {
@@ -49,7 +40,7 @@ describe('M and I shortcuts', () => {
 
   it('accepts AltGr, which reports Ctrl and Alt together', () => {
     render(<App session={listenSession} engine={createFakeEngine()} />)
-    press({ key: 'm', ctrlKey: true, altKey: true }, true)
+    press({ key: 'm', ctrlKey: true, altKey: true }, document.body, true)
     expect(radio('Explore').checked).toBe(true)
   })
 

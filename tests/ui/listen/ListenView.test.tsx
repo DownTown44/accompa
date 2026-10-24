@@ -1,20 +1,11 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { COMMON_RANGE } from '../../../src/core/instruments'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
-
-const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
-
-function press(init: KeyboardEventInit, target: EventTarget = document.body) {
-  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
-  event.getModifierState = () => false
-  act(() => {
-    target.dispatchEvent(event)
-  })
-  return event
-}
+import { radio } from '../support/dom'
+import { press } from '../support/keys'
 
 let engine: FakeEngine
 

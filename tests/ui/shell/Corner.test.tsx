@@ -1,21 +1,13 @@
 import { readFileSync } from 'node:fs'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
+import { opener, panel } from '../support/dom'
+import { press } from '../support/keys'
 
-const opener = () => screen.getByRole('button', { name: 'Setup' })
-const panel = () => document.getElementById('setup-panel') as HTMLElement
 const backdrop = () => document.querySelector('.corner-backdrop')
-
-function press(init: KeyboardEventInit, target: EventTarget = document.body) {
-  const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
-  event.getModifierState = () => false
-  act(() => {
-    target.dispatchEvent(event)
-  })
-}
 
 afterEach(() => {
   vi.restoreAllMocks()

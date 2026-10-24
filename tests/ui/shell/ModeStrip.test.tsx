@@ -5,8 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine } from '../support/fakeEngine'
 import { listenSession } from '../support/sessions'
-
-const radio = (name: string) => screen.getByRole('radio', { name }) as HTMLInputElement
+import { radio } from '../support/dom'
 
 describe('mode strip', () => {
   it('opens on Listen and Piano', () => {
