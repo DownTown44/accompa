@@ -34,13 +34,14 @@ export function useSessionActions() {
   function setDirection(direction: Direction) {
     if (direction === settings.direction) return
     dispatchSettings({ type: 'setDirection', direction })
-    if (session.practice.question) startQuestion({ direction })
+    // In Explore the waiting question stays; the setting applies from the next one.
+    if (session.mode === 'listen' && session.practice.question) startQuestion({ direction })
   }
 
   function setRootMode(rootMode: RootMode) {
     if (rootMode === settings.rootMode) return
     dispatchSettings({ type: 'setRootMode', rootMode })
-    if (rootMode !== 'fixed' || !session.practice.question) return
+    if (session.mode !== 'listen' || rootMode !== 'fixed' || !session.practice.question) return
     const { fixedRoot } = session.practice
     if (fixedRoot === null) dispatch({ type: 'clearQuestion' })
     else startQuestion({ fixedRoot })
