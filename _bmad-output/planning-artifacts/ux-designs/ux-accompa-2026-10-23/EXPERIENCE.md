@@ -85,7 +85,7 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 | Piano keyboard | Instrument | Three octaves. Click key: sounds on press, toggles lit on release. Root marked differently. `[` and `]` shift one octave. |
 | Fretboard | Instrument | Click a fret position: sounds and toggles that note (one per string in a voicing). Shows open and muted markers; an open string is its role shape inside a ring at the nut. Chord shapes show every chord-note position, filtered by fret region. |
 | Role marker | On piano keys and frets | Root is ringed and filled; 3rd, 5th, 7th are distinct shapes, always shape plus color. A lit note with no role gets the no-role dot. |
-| Action button | Play and reveal controls | Click or its key-hint key. One primary per row. Explore: Block (`Enter`), Arpeggio (`A`). Listen: Play again (`Space`), Reveal (`Enter`). After Reveal, a Next button takes the primary slot; `Enter` again = Next. |
+| Action button | Play and reveal controls | Click or its key-hint key. One primary per row. Explore: Play (`Space`, an arpeggio low to high), Block (`Enter`, primary). Listen: Play again (`Space`), Reveal (`Enter`). After Reveal, a Next button takes the primary slot; `Enter` again = Next. |
 | Interval button | Listen, 12 of them (m2 to P8) | Click or keys `1`-`9`, `0`, `-`, `=`. Correct: advances to the next question and auto-plays it. Wrong: the button is marked and disabled until the next question; the question stays. Disabled while revealed. Only intervals in the pool are enabled; [ASSUMPTION] pool-excluded buttons are shown disabled, not hidden. A wrong button keeps focusability for assistive tech (`aria-disabled`), and its accessible name carries the state (for example `m3, tried`). |
 | Voicing stepper | Guitar view | `◀ Voicing 1 of N ▶`; `Left` / `Right` or the arrows step. [ASSUMPTION] No wrap: the arrow at either end is inert (`aria-disabled`, replaced visually by `·`). If a focused arrow goes inert, focus moves to the remaining stepper arrow; if the stepper hides, to the instrument if no stepper control is left. Best playable shape ranks first. Guitar only; piano voicings and inversions are Phase 2 (FR-21 withdrawn). |
 | Fret-region bar | Guitar view | Defaults to the whole neck. Set by dragging over the fret numbers; the quiet clear control restores the whole neck. It sits outside the track, to the right of the bar, on the page background. It is a real button, accessible name `Clear fret region`, keyboard-focusable with the standard focus ring, and operable by keyboard even though the region is set by drag. It is disabled (visually unchanged) when the region is already the whole neck; its hit area stays at least 28px. Stepper recomputes for the region. |
@@ -128,10 +128,9 @@ Key map (approved; after review, `Tab` is native, mode switch is `M`, and `[` `]
 
 | Key | Listen | Explore |
 |---|---|---|
-| `Space` | Play and replay (unlimited) | Play selected |
+| `Space` | Play and replay (unlimited) | Play selected, as an arpeggio |
 | `Enter` | Reveal; pressed again = Next | Play block |
 | `1`-`9`, `0`, `-`, `=` | Pick interval m2 to P8 | n/a |
-| `A` | n/a | Arpeggio |
 | `R` | n/a | Set root |
 | `Left` / `Right` | n/a | Step voicings |
 | `M` | Switch Listen / Explore | same |

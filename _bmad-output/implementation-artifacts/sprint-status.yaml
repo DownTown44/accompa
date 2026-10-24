@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-24-2026 12:21
+last_updated: 10-24-2026 12:28
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -51,11 +51,12 @@ development_status:
   1-13-fixes-from-the-epic-1-review: done
   epic-1-retrospective: done
 
-  epic-2: done
+  epic-2: in-progress
   2-1-name-an-interval-from-two-clicked-notes: done
   2-2-hear-the-interval-and-clear-the-notes: done
   2-3-keep-explore-and-listen-separate: done
-  epic-2-retrospective: optional
+  2-4-tidy-up-before-chords: backlog
+  epic-2-retrospective: done
 
   epic-3: backlog
   3-1-see-the-chord-named-as-i-click-notes: backlog
@@ -129,3 +130,39 @@ action_items:
     owner: "dev (Amelia), spec first"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-2-retro-item-8-build-story-2-4-tidy-up-before-chords-mo"
+    epic: 2
+    action: "Build Story 2.4, Tidy up before chords: mode-switch jump, shared Explore/Listen
+      styles and focus helper, one guess-validity rule, shared test helpers and split
+      SetupPanel.test.tsx, favicon"
+    owner: "dev (Amelia), spec first"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
+  - id: "epic-2-retro-item-9-decide-what-the-user-sees-for-lit-notes"
+    epic: 2
+    action: "Decide what the user sees for lit notes beyond the guitar range or wider
+      than one piano window, before Epic 4"
+    owner: "Apor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
+  - id: "epic-2-retro-item-10-push-main-or-branch-the-docs-after-house"
+    epic: 2
+    action: "Push main (or branch the docs) after housekeeping docs commits, before
+      cutting the next story branch"
+    owner: "Apor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
+  - id: "epic-2-retro-item-11-put-the-story-key-in-feature-and-fix-com"
+    epic: 2
+    action: "Put the story key in feature and fix commit subjects so evidence tools
+      can attribute them"
+    owner: "dev"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
+  - id: "epic-2-retro-item-12-keep-the-matrix-row-for-the-instrument-n"
+    epic: 2
+    action: "Keep the matrix row for the instrument not moving in every spec that
+      touches the readout or controls"
+    owner: "Apor (planning)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"

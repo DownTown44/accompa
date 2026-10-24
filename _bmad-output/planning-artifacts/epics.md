@@ -90,7 +90,7 @@ UX-DR5: Fretboard component: surface slab, 2px fret wires, 7px nut, string names
 UX-DR6: Role marker shapes plus color: root (ringed circle), 3rd (diamond), 5th (square, green), 7th (triangle), no-role small ink dot. 1.8px ink outline, minimum 18px. On piano keys, an 80% role tint plus the marker.
 UX-DR7: Readout component: chord or interval name (84px; 56px for the Listen question), live updating. The first reading is large and alternatives are small clickable italic text. Clicking an alternative changes name and root. Empty, single-note and unresolved states per the State Patterns table.
 UX-DR8: Role legend under the readout (`root C`, `3rd E`, `5th G`, `7th`) updating with the chord; lists only the root for unresolved sets and is absent for an empty chord.
-UX-DR9: Action button component with a key-hint cap and a primary variant (apricot). One primary per row. Explore: Block (`Enter`), Arpeggio (`A`). Listen: Play again (`Space`), Reveal (`Enter`), which becomes Next after Reveal (`Enter` again).
+UX-DR9: Action button component with a key-hint cap and a primary variant (apricot). One primary per row. Explore: Play (`Space`, an arpeggio low to high), Block (`Enter`, primary). Listen: Play again (`Space`), Reveal (`Enter`), which becomes Next after Reveal (`Enter` again).
 UX-DR10: Interval button row (12 buttons, m2 to P8, keys `1`-`9`, `0`, `-`, `=`). Wrong state: wrong fill, inset 2px muted ring, struck-through label, `aria-disabled`, accessible name like `m3, tried`. Pool-excluded buttons are disabled and at least 55% opacity. Correct advances and auto-plays.
 UX-DR11: Voicing stepper `◀ Voicing 1 of N ▶` (40 x 40px arrow targets, Left / Right keys, no wrap, inert end arrow shown as `·` with `aria-disabled`, with the focus-move rules). Hidden when there are fewer than two notes or no voicing.
 UX-DR12: Fret-region bar: drag across fret numbers to set the region; quiet `Clear fret region` button outside the track (hit area at least 28px, disabled when the region is the whole neck); stepper recomputes for the region.
@@ -777,6 +777,36 @@ So that practice never wipes out my work.
 **When** the reveal renders
 **Then** it draws from practice state and not from the workspace.
 
+### Story 2.4: Tidy up before chords
+
+As Apor,
+I want the small carry-overs from Epics 1 and 2 cleared,
+So that Epic 3 builds on shared code and a steady screen.
+
+**Covers:** Epic 2 retrospective items
+
+**Acceptance Criteria:**
+
+**Given** the Listen and Explore screens
+**When** I switch mode with `M` or the tabs
+**Then** the instrument's top edge stays at the same place in both, so it does not jump.
+
+**Given** the shared button, key-hint, controls-row and visually-hidden styles and the pointer-focus helper
+**When** Explore renders
+**Then** they come from a shared place and no `ui/explore` file imports from `ui/listen`.
+
+**Given** a guess
+**When** the hook, the interval buttons and the reducer decide whether it is allowed
+**Then** one rule in one place (in the pool or the current answer, and not already tried) serves all three.
+
+**Given** the UI tests
+**When** a test needs `press`, `radio` or the panel opener
+**Then** it imports them from `tests/ui/support`, and `SetupPanel.test.tsx` is split by story concern.
+
+**Given** the built app loads in a browser
+**When** it requests the favicon
+**Then** it gets an icon and the console shows no 404.
+
 ## Epic 3: Build and name chords on the piano
 
 Apor clicks notes on the keyboard and the app marks the root, names the chord live and plays it as a block or an arpeggio. He can switch between alternative readings.
@@ -899,13 +929,10 @@ So that I can connect the name and shape with the sound.
 **When** I press `Enter` or click Block (the primary action)
 **Then** all notes sound together.
 
-**Given** a chord is lit
-**When** I press `A` or click Arpeggio
-**Then** the notes sound one after another from low to high, in list order.
-
-**Given** `Space` in Explore
-**When** a chord is lit
-**Then** it plays the selected notes as an arpeggio.
+**Given** a chord is lit (three or more notes, once the two-note cap is lifted)
+**When** I press `Space` or click Play (both built in Story 2.2)
+**Then** the notes sound one after another from low to high, in list order
+**And** there is no separate Arpeggio button or `A` key.
 
 **Given** no notes are lit
 **When** I press the play keys
@@ -1146,7 +1173,7 @@ So that I can check it against my own guitar.
 **Then** the voicing strums, bass to treble, with a short even spread.
 
 **Given** a voicing is shown
-**When** I press `A` or click Arpeggio
+**When** I press `Space` or click Play
 **Then** the notes sound one at a time from bass to treble in list order.
 
 **Given** muted strings
