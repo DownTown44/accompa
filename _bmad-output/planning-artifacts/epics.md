@@ -780,7 +780,7 @@ So that practice never wipes out my work.
 ### Story 2.4: Tidy up before chords
 
 As Apor,
-I want the small carry-overs from Epics 1 and 2 cleared,
+I want the small carry-overs from Epics 1 and 2 cleared in the app,
 So that Epic 3 builds on shared code and a steady screen.
 
 **Covers:** Epic 2 retrospective items
@@ -799,13 +799,31 @@ So that Epic 3 builds on shared code and a steady screen.
 **When** the hook, the interval buttons and the reducer decide whether it is allowed
 **Then** one rule in one place (in the pool or the current answer, and not already tried) serves all three.
 
-**Given** the UI tests
-**When** a test needs `press`, `radio` or the panel opener
-**Then** it imports them from `tests/ui/support`, and `SetupPanel.test.tsx` is split by story concern.
-
 **Given** the built app loads in a browser
 **When** it requests the favicon
 **Then** it gets an icon and the console shows no 404.
+
+**Given** Explore on the guitar with a lit note the fretboard cannot show (below E2 or above D6)
+**When** the view renders
+**Then** a Status note says how many notes are lit beyond the fretboard (for example `1 note lit beyond the fretboard`), in the same quiet style as the piano's offscreen note, and the readout is unchanged.
+
+### Story 2.5: Share the test helpers
+
+As Apor,
+I want the UI tests to share their helpers and the long Setup test file split,
+So that Epic 3's tests start from shared code.
+
+**Covers:** Epic 2 retrospective item (Epic 1 item 2)
+
+**Acceptance Criteria:**
+
+**Given** the UI tests
+**When** a test needs `press`, `radio` or the Setup panel opener
+**Then** it imports them from `tests/ui/support` and no test file defines its own copy.
+
+**Given** `tests/ui/setup/SetupPanel.test.tsx`
+**When** it is split by story concern (panel, direction, sound and theme, root)
+**Then** every test moves unchanged, no test is deleted or weakened, and the passing count does not drop.
 
 ## Epic 3: Build and name chords on the piano
 

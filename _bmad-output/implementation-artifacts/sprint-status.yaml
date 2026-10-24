@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-24-2026 12:28
+last_updated: 10-24-2026 12:42
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -55,7 +55,8 @@ development_status:
   2-1-name-an-interval-from-two-clicked-notes: done
   2-2-hear-the-interval-and-clear-the-notes: done
   2-3-keep-explore-and-listen-separate: done
-  2-4-tidy-up-before-chords: backlog
+  2-4-tidy-up-before-chords: review
+  2-5-share-the-test-helpers: backlog
   epic-2-retrospective: done
 
   epic-3: backlog
@@ -113,7 +114,7 @@ action_items:
     action: "Add pictured-use matrix rows to specs (hover then click, change a setting
       then use it) and name one owner when a rule moves between layers"
     owner: "Apor (planning)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-1-retro-item-6-keep-carrying-the-deferred-items-ci-work"
     epic: 1
@@ -128,7 +129,7 @@ action_items:
       guess, no pointer focus border, immediate direction and root changes, upright
       help icon, backdrop closes Setup)"
     owner: "dev (Amelia), spec first"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-2-retro-item-8-build-story-2-4-tidy-up-before-chords-mo"
     epic: 2
