@@ -7,12 +7,13 @@ import { SettingsProvider } from '../../../../src/ui/settings/SettingsContext'
 import { SessionProvider } from '../../../../src/ui/session/SessionContext'
 import { initialSession, type Session } from '../../../../src/ui/session/session'
 import { createFakeEngine } from '../../support/fakeEngine'
+import { listenSession } from '../../support/sessions'
 
 const labels = (container: HTMLElement) => [...container.querySelectorAll('.octave-label')].map((t) => t.textContent)
 const note = (container: HTMLElement) => container.querySelector('.status-note')?.textContent
 
 function renderWith(pitches: number[], engine = createFakeEngine()) {
-  const initial: Session = { ...initialSession, workspace: { pitches: pitches.map(pitch) } }
+  const initial: Session = { ...initialSession, workspace: { pitches: pitches.map(pitch), positions: {} } }
   return render(
     <EngineProvider engine={engine}>
       <SettingsProvider>
@@ -34,6 +35,15 @@ describe('piano stage', () => {
     expect(container.querySelector('.piano')).toBeNull()
     fireEvent.keyDown(document.body, { key: 'i' })
     expect(container.querySelector('.piano')).not.toBeNull()
+  })
+
+  it('lights no workspace notes in Listen', () => {
+    const { container } = renderWith([60, 67])
+    expect(container.querySelectorAll('[data-lit]')).toHaveLength(2)
+    fireEvent.keyDown(document.body, { key: 'm' })
+    expect(container.querySelectorAll('[data-lit]')).toHaveLength(0)
+    fireEvent.keyDown(document.body, { key: 'm' })
+    expect(container.querySelectorAll('[data-lit]')).toHaveLength(2)
   })
 
   it('shifts with ] and [ and stops at the ends', () => {
@@ -75,7 +85,7 @@ describe('piano stage', () => {
 
   it('does not light or play on click', () => {
     const engine = createFakeEngine()
-    const { container } = render(<App engine={engine} />)
+    const { container } = render(<App session={listenSession} engine={engine} />)
     fireEvent.pointerDown(container.querySelector('[data-pitch="48"]')!)
     expect(container.querySelectorAll('[data-lit]')).toHaveLength(0)
     expect(engine.plays).toHaveLength(0)

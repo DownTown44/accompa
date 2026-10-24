@@ -3,6 +3,7 @@ import { offscreenLit, offscreenNote } from '../../core/piano'
 import { ENGINES } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
 import { EngineProvider } from '../engine/EngineContext'
+import { ExploreView } from '../explore/ExploreView'
 import { GuitarStage } from '../instruments/guitar/GuitarStage'
 import { IntervalButtons } from '../listen/IntervalButtons'
 import { ListenControls } from '../listen/ListenControls'
@@ -11,6 +12,7 @@ import { Corner } from '../shell/Corner'
 import { ModeStrip } from '../shell/ModeStrip'
 import { PianoStage } from '../instruments/piano/PianoStage'
 import { SessionProvider, useSession } from '../session/SessionContext'
+import type { Session } from '../session/session'
 import { SettingsProvider, useSettings } from '../settings/SettingsContext'
 import { loadSettings } from '../settings/settingsStorage'
 import { StatusNote } from '../shell/StatusNote'
@@ -31,6 +33,7 @@ export function Shell() {
     <div className="page">
       <ModeStrip />
       <main className="body">
+        <ExploreView />
         <ListenView />
         <PianoStage />
         <GuitarStage />
@@ -51,12 +54,12 @@ function EngineHost({ override, children }: { override?: AudioEngine; children: 
   return <EngineProvider engine={engine}>{children}</EngineProvider>
 }
 
-export function App({ engine }: { engine?: AudioEngine }) {
+export function App({ engine, session }: { engine?: AudioEngine; session?: Session }) {
   const [initial] = useState(loadSettings)
   return (
     <SettingsProvider initial={initial}>
       <EngineHost override={engine}>
-        <SessionProvider>
+        <SessionProvider initial={session}>
           <Shell />
         </SessionProvider>
       </EngineHost>

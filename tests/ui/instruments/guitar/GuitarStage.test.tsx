@@ -1,14 +1,15 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fireEvent, render } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { pitch } from '../../../../src/core/pitch'
 import { App, Shell } from '../../../../src/ui/app/App'
 import { EngineProvider } from '../../../../src/ui/engine/EngineContext'
 import { SettingsProvider } from '../../../../src/ui/settings/SettingsContext'
 import { SessionProvider } from '../../../../src/ui/session/SessionContext'
-import { initialSession } from '../../../../src/ui/session/session'
 import { createFakeEngine } from '../../support/fakeEngine'
+import { initialSession } from '../../../../src/ui/session/session'
+import { listenSession } from '../../support/sessions'
 
 describe('guitar stage', () => {
   it('shows only on Guitar, and hides the piano', () => {
@@ -22,8 +23,8 @@ describe('guitar stage', () => {
     expect(container.querySelector('.piano')).not.toBeNull()
   })
 
-  it('lights every position of each workspace pitch', () => {
-    const initial = { ...initialSession, instrument: 'guitar' as const, workspace: { pitches: [pitch(64)] } }
+  it('lights the lowest-fret position of a workspace pitch with no remembered position', () => {
+    const initial = { ...initialSession, instrument: 'guitar' as const, workspace: { pitches: [pitch(64)], positions: {} } }
     const { container } = render(
       <EngineProvider engine={createFakeEngine()}>
         <SettingsProvider>
@@ -33,24 +34,7 @@ describe('guitar stage', () => {
         </SettingsProvider>
       </EngineProvider>,
     )
-    expect([...container.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit')).sort()).toEqual(['1:19', '2:14', '3:9', '4:5', '5:0'])
-  })
-
-  it('draws each position once for a repeated pitch, without key warnings', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const initial = { ...initialSession, instrument: 'guitar' as const, workspace: { pitches: [pitch(64), pitch(64)] } }
-    const { container } = render(
-      <EngineProvider engine={createFakeEngine()}>
-        <SettingsProvider>
-          <SessionProvider initial={initial}>
-            <Shell />
-          </SessionProvider>
-        </SettingsProvider>
-      </EngineProvider>,
-    )
-    expect(container.querySelectorAll('[data-lit]')).toHaveLength(5)
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
+    expect([...container.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit'))).toEqual(['5:0'])
   })
 
   it('fades the piano in when swapping back', () => {
@@ -62,7 +46,7 @@ describe('guitar stage', () => {
 
   it('does not light or play on click', () => {
     const engine = createFakeEngine()
-    const { container } = render(<App engine={engine} />)
+    const { container } = render(<App session={listenSession} engine={engine} />)
     fireEvent.keyDown(document.body, { key: 'i' })
     fireEvent.pointerDown(container.querySelector('.fb-cell')!)
     expect(container.querySelectorAll('[data-lit]')).toHaveLength(0)

@@ -1,0 +1,54 @@
+import { closestPair, positionsForPitch, type FretPosition } from './instruments'
+import { pitch, type Pitch } from './pitch'
+import { noteName } from './spelling'
+import { INTERVALS, type IntervalDefinition } from './theory'
+
+// The most notes Explore keeps lit; the oldest unlights when one more is added.
+export const MAX_LIT = 2
+
+// Lights the pitch, or unlights it when it is already lit. The list is ordered oldest first.
+export function toggleLit(lit: readonly Pitch[], p: Pitch): Pitch[] {
+  if (lit.includes(p)) return lit.filter((q) => q !== p)
+  return [...lit, p].slice(-MAX_LIT)
+}
+
+// The simple interval between two pitches, lower note first; a multiple of 12 is the octave.
+export function pairInterval(a: Pitch, b: Pitch): IntervalDefinition | null {
+  const span = Math.abs(a - b)
+  if (span === 0) return null
+  const simple = span % 12 === 0 ? 12 : span % 12
+  return INTERVALS.find((i) => i.semitones === simple) ?? null
+}
+
+export interface ExploreReadout {
+  readonly label: string
+  readonly name?: string
+}
+
+// The note's name for one lit note, the interval for two; null when nothing is lit.
+export function exploreReadout(lit: readonly Pitch[]): ExploreReadout | null {
+  if (lit.length === 0) return null
+  if (lit.length === 1) return { label: noteName(lit[0]!) }
+  const found = pairInterval(lit[0]!, lit[1]!)
+  return found ? { label: found.abbreviation, name: found.name } : null
+}
+
+// Remembered fret positions by pitch; plain data.
+export type RememberedPositions = Readonly<Record<number, FretPosition>>
+
+const lowestFret = (p: Pitch): FretPosition | null =>
+  positionsForPitch(p).reduce<FretPosition | null>((best, pos) => (best === null || pos.fret < best.fret ? pos : best), null)
+
+// Where each lit pitch sits on the guitar, aligned with the pitches: the remembered position,
+// else the lowest fret, and the closest pair when two pitches have no remembered position.
+export function litPositions(lit: readonly Pitch[], remembered: RememberedPositions): (FretPosition | null)[] {
+  const unknown = lit.filter((p) => remembered[p] === undefined)
+  const lower = Math.min(...unknown)
+  const pair = unknown.length === 2 ? closestPair(pitch(lower), pitch(Math.max(...unknown))) : null
+  return lit.map((p) => {
+    const known = remembered[p]
+    if (known !== undefined) return known
+    if (pair) return p === lower ? pair.root : pair.upper
+    return lowestFret(p)
+  })
+}

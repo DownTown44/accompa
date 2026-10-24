@@ -9,3 +9,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-9-set-direction.md`
   summary: Root setting for Listen: a Root segmented control (Random, Fixed), choosing the fixed root by pressing a note on the active instrument, the root marker and `Click a note to set the root.` status note, fixed-root question generation (octave nearest the clicked note, kept across Random and back), and a random first fixed root.
   evidence: Split from story 1.9 at the user's choice; it needs the first pointer wiring on the instruments in Listen and is independent of Direction. The Root criteria moved to Story 1.12 in epics.md.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-name-an-interval-from-two-clicked-notes.md`
+  summary: Decide what the user sees in Explore when a lit note is outside the guitar range (above E6) or the two lit notes span more than one piano window after a swap.
+  evidence: The earlier guitar-range item is now reachable: piano keys 87 to 96 can be lit, then the swap draws no dot while the readout still names the note; two lit notes wider than 36 semitones cannot both show on the piano (medium, seen by reading the code, not in the browser).

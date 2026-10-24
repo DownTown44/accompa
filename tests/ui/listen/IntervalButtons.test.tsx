@@ -12,6 +12,7 @@ import { initialSession } from '../../../src/ui/session/session'
 import { useShortcuts } from '../../../src/ui/shortcuts/useShortcuts'
 import { App } from '../../../src/ui/app/App'
 import { createFakeEngine, type FakeEngine } from '../support/fakeEngine'
+import { listenSession } from '../support/sessions'
 
 function press(init: KeyboardEventInit, target: EventTarget = document.body) {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
@@ -37,7 +38,7 @@ afterEach(() => {
 })
 
 function open() {
-  render(<App engine={engine} />)
+  render(<App session={listenSession} engine={engine} />)
 }
 
 function ask() {
@@ -242,7 +243,7 @@ describe('pool', () => {
   it('disables an out-of-pool interval at readable opacity and ignores its key', () => {
     const question = { direction: 'ascending', root: 60, interval: interval(7), pitches: [60, 67] } as never
     const pool = INTERVALS.map((i) => i.semitones).filter((s) => s !== 1)
-    const initial = { ...initialSession, practice: { ...initialSession.practice, question } }
+    const initial = { ...listenSession, practice: { ...initialSession.practice, question } }
     render(
       <EngineProvider engine={engine}>
         <SettingsProvider initial={{ ...initialSettings, pool }}>

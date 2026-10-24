@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { pitch, interval } from '../../../src/core/pitch'
 import { INTERVALS } from '../../../src/core/theory'
 import { initialSession, sessionReducer } from '../../../src/ui/session/session'
+import { listenSession } from '../support/sessions'
 
 describe('sessionReducer', () => {
-  it('starts in Listen on the piano', () => {
-    expect(initialSession.mode).toBe('listen')
+  it('starts in Explore on the piano', () => {
+    expect(initialSession.mode).toBe('explore')
     expect(initialSession.instrument).toBe('piano')
     expect(initialSession.practice.question).toBeNull()
   })
@@ -31,8 +32,8 @@ describe('sessionReducer', () => {
   })
 
   it('does not mutate the previous state', () => {
-    sessionReducer(initialSession, { type: 'setMode', mode: 'explore' })
-    expect(initialSession.mode).toBe('listen')
+    sessionReducer(initialSession, { type: 'setMode', mode: 'listen' })
+    expect(initialSession.mode).toBe('explore')
   })
 
   it('stores a question in the practice part and leaves the workspace untouched', () => {
@@ -91,7 +92,7 @@ describe('piano window in the session', () => {
 describe('window refit on mode and instrument change', () => {
   const question = { direction: 'ascending' as const, root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
   const revealed = () => {
-    let state = sessionReducer(initialSession, { type: 'setQuestion', question })
+    let state = sessionReducer(listenSession, { type: 'setQuestion', question })
     state = sessionReducer(state, { type: 'reveal' })
     state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
     state = sessionReducer(state, { type: 'shiftPiano', direction: 1 })
@@ -114,7 +115,7 @@ describe('window refit on mode and instrument change', () => {
 
 describe('reveal', () => {
   const question = { direction: 'ascending' as const, root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
-  const asked = sessionReducer(initialSession, { type: 'setQuestion', question })
+  const asked = sessionReducer(listenSession, { type: 'setQuestion', question })
 
   it('does nothing without a question', () => {
     expect(sessionReducer(initialSession, { type: 'reveal' })).toBe(initialSession)
@@ -238,5 +239,62 @@ describe('help state', () => {
     const next = sessionReducer(set, { type: 'setQuestion', question })
     expect(next.practice.fixedRoot).toBe(57)
     expect(sessionReducer(next, { type: 'reveal' }).practice.fixedRoot).toBe(57)
+  })
+})
+
+describe('toggleNote', () => {
+  const toggle = (state: typeof initialSession, n: number, position?: { string: number; fret: number }) =>
+    sessionReducer(state, { type: 'toggleNote', pitch: pitch(n), position })
+
+  it('lights and unlights a note', () => {
+    const lit = toggle(initialSession, 60)
+    expect(lit.workspace.pitches).toEqual([60])
+    expect(toggle(lit, 60).workspace.pitches).toEqual([])
+  })
+
+  it('unlights the oldest on a third note', () => {
+    const state = toggle(toggle(toggle(initialSession, 60), 67), 64)
+    expect(state.workspace.pitches).toEqual([67, 64])
+  })
+
+  it('unlights a note lit without a position when its shown position is clicked, and moves it from another', () => {
+    const lit = toggle(initialSession, 64)
+    expect(toggle(lit, 64, { string: 5, fret: 0 }).workspace.pitches).toEqual([])
+    const moved = toggle(lit, 64, { string: 4, fret: 5 })
+    expect(moved.workspace.pitches).toEqual([64])
+    expect(moved.workspace.positions).toEqual({ 64: { string: 4, fret: 5 } })
+  })
+
+  it('remembers a position and forgets it with the note', () => {
+    const lit = toggle(initialSession, 64, { string: 4, fret: 5 })
+    expect(lit.workspace.positions).toEqual({ 64: { string: 4, fret: 5 } })
+    expect(toggle(lit, 64, { string: 4, fret: 5 }).workspace).toEqual({ pitches: [], positions: {} })
+  })
+
+  it('moves a lit pitch to another position instead of unlighting it', () => {
+    const lit = toggle(initialSession, 64, { string: 5, fret: 0 })
+    const moved = toggle(lit, 64, { string: 4, fret: 5 })
+    expect(moved.workspace.pitches).toEqual([64])
+    expect(moved.workspace.positions).toEqual({ 64: { string: 4, fret: 5 } })
+  })
+
+  it('drops the position of the note that falls off', () => {
+    let state = toggle(initialSession, 60, { string: 3, fret: 5 })
+    state = toggle(state, 67)
+    state = toggle(state, 64)
+    expect(state.workspace.positions).toEqual({})
+  })
+
+  it('leaves practice untouched, and a practice action leaves the workspace', () => {
+    const lit = toggle(initialSession, 60)
+    expect(lit.practice).toBe(initialSession.practice)
+    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
+    expect(sessionReducer(lit, { type: 'setQuestion', question }).workspace).toBe(lit.workspace)
+  })
+
+  it('fits the piano window to the lit notes when the instrument changes', () => {
+    let state = toggle({ ...initialSession, instrument: 'guitar' }, 40, { string: 0, fret: 0 })
+    state = sessionReducer(state, { type: 'setInstrument', instrument: 'piano' })
+    expect(state.pianoStart).toBe(36)
   })
 })
