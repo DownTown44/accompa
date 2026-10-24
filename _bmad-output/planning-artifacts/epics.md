@@ -472,49 +472,31 @@ So that I can focus on the ones I'm learning.
 **When** the click lands on a panel control
 **Then** focus stays inside the panel.
 
-### Story 1.9: Set direction and root
+### Story 1.9: Set direction
 
 As Apor,
-I want to choose ascending, descending or harmonic, and a random or fixed root,
+I want to choose ascending, descending or harmonic,
 So that I can practise each way I hear music.
 
-**Covers:** FR8 (FR9 and the Root criteria below moved to Story 1.12)
+**Covers:** FR8 (the Root half, FR9, moved to Story 1.12)
 
 **Acceptance Criteria:**
 
 **Given** the Setup panel
 **When** I look at it
-**Then** it holds a Direction segmented control (Ascending, Descending, Harmonic) and a Root segmented control (Random, Fixed), with labels and the shared selected treatment.
+**Then** it holds a Direction segmented control (Ascending, Descending, Harmonic), with a label and the shared selected treatment.
 
 **Given** Ascending, Descending or Harmonic
 **When** an interval plays
 **Then** the engine receives the ordered pitch list (low to high, high to low, or both as a block) and replays it identically.
 
-**Given** Root is Random
-**When** a question is generated
-**Then** the root is picked with the injected random function and the whole interval fits the active instrument's range.
-
-**Given** Root is Fixed in Listen
-**When** I press a note on the active instrument (no panel needed) [ASSUMPTION: the UX spec does not place this control]
-**Then** that note sounds, becomes the fixed root, and shows the root marker on both instruments, and the Status note `Click a note to set the root.` shows until one is chosen
-**And** the click changes only the practice state, never the workspace.
-
-**Given** a fixed root
-**When** questions are generated
-**Then** every question uses that pitch class, the octave is the one nearest the clicked note in which the whole interval fits the instrument range, and the root changes only when I click another note
-**And** if no root has been chosen yet, the first question picks one with the injected random function and shows it as the fixed root.
-
-**Given** Root is Fixed and the fixed root is chosen
-**When** I switch to Random and back
-**Then** the previously chosen root is kept for the session.
-
-**Given** I change direction or root
+**Given** I change direction
 **When** a question is in progress
-**Then** it applies from the next question and the current one stays answerable.
+**Then** it applies from the next question and the current one stays answerable (superseded by Story 1.13).
 
 **Given** a reload
 **When** the app starts
-**Then** direction and root mode return to defaults (Ascending, Random), as they are not persisted.
+**Then** direction returns to the default (Ascending), as it is not persisted.
 
 ### Story 1.10: Choose sound and theme
 
@@ -574,9 +556,10 @@ So that I can run Listen from the keyboard.
 **When** key repeat fires
 **Then** only one action runs.
 
-**Given** focus is on a tab, radio, pool chip, text field or (for `Space` and `Enter`) a button
-**When** I press a shortcut key
-**Then** the native behavior wins.
+**Given** focus is on a tab, radio, pool chip, text field or button
+**When** I press a digit, `Space` or `Enter`
+**Then** the native behavior wins (for a text field, every shortcut key yields)
+**And** the other shortcut keys (`M`, `I`, `P`, `[`, `]`, `?`, `Esc`) still fire from a focused control, as the UX key map says.
 
 **Given** I click a control outside the Setup panel with the pointer
 **When** the click ends
@@ -631,6 +614,50 @@ So that I can practise from one note when I choose to.
 **Given** a reload
 **When** the app starts
 **Then** root mode returns to Random, as it is not persisted.
+
+### Story 1.13: Fixes from the Epic 1 review
+
+As Apor,
+I want the practice flow and look to match how I use it,
+So that I can drill intervals without extra clicks or visual noise.
+
+**Covers:** user findings from the Epic 1 retrospective; supersedes parts of Stories 1.7, 1.9 and 1.12
+
+**Acceptance Criteria:**
+
+**Given** a correct guess
+**When** I click the interval or press its key
+**Then** the question is revealed exactly as the Reveal button does (name in the readout, notes lit, buttons disabled) and the next interval does not play
+**And** `Enter` then moves to the next interval.
+
+**Given** I change Direction
+**When** the change is made
+**Then** the question in progress is dropped and a new one is drawn with the new direction, silently, and `Space` plays it.
+
+**Given** I switch Root to Fixed with a root already chosen
+**When** the change is made
+**Then** the question in progress is dropped and a new one is drawn on that root, silently, and `Space` plays it.
+
+**Given** I switch Root to Fixed with no root chosen
+**When** the change is made
+**Then** the question in progress is dropped, `Click a note to set the root.` shows, and the next click on a note sounds it, sets the root and draws a new question on that root, silently, with `Space` playing it.
+
+**Given** Root is Fixed and I click another note
+**When** the root changes
+**Then** the question in progress is dropped and a new one is drawn on the new root, silently.
+
+**Given** I click the piano or the fretboard with the pointer
+**When** the instrument takes focus
+**Then** no large focus border shows; keyboard focus still shows the visible ring.
+
+**Given** the Help hint
+**When** it renders
+**Then** the `?` is upright, not italic.
+
+**Given** the Setup panel is open
+**When** I click anywhere outside it
+**Then** a transparent backdrop under the panel catches the click, the panel closes and focus returns to the opener, and the click does nothing else
+**And** `Esc`, `P` and the gear still close it.
 
 ## Epic 2: Explore intervals on the instruments
 

@@ -167,7 +167,14 @@ describe('guess', () => {
     const next = sessionReducer(wrong, { type: 'setQuestion', question })
     expect(next.feedback).toBeNull()
     expect(next.practice.wrongMarks).toEqual([])
-    expect(sessionReducer(next, { type: 'rightGuess', interval: interval(7) }).feedback).toEqual({ kind: 'right', interval: 7 })
+  })
+
+  it('clearQuestion drops the question, reveal, marks and feedback and keeps the fixed root', () => {
+    const rooted = sessionReducer(asked, { type: 'setFixedRoot', pitch: pitch(57) })
+    const wrong = sessionReducer(rooted, { type: 'guess', interval: interval(3) })
+    const cleared = sessionReducer(wrong, { type: 'clearQuestion' })
+    expect(cleared.practice).toEqual({ question: null, revealed: false, wrongMarks: [], fixedRoot: 57 })
+    expect(cleared.feedback).toBeNull()
   })
 
   it('keeps the feedback and marks across mode and instrument changes', () => {

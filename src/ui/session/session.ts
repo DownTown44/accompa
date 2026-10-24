@@ -14,7 +14,7 @@ export type Mode = 'listen' | 'explore'
 
 // The last guess result; the wording is derived from the interval when shown.
 export interface Feedback {
-  readonly kind: 'right' | 'wrong'
+  readonly kind: 'wrong'
   readonly interval: Interval
 }
 
@@ -34,10 +34,10 @@ export type SessionAction =
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
+  | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
   | { type: 'guess'; interval: Interval }
-  | { type: 'rightGuess'; interval: Interval }
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
   | { type: 'openHelp' }
@@ -79,6 +79,12 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
         feedback: null,
       }
+    case 'clearQuestion':
+      return {
+        ...state,
+        practice: { ...state.practice, question: null, revealed: false, wrongMarks: [] },
+        feedback: null,
+      }
     case 'setFixedRoot':
       return state.practice.fixedRoot === action.pitch ? state : { ...state, practice: { ...state.practice, fixedRoot: action.pitch } }
     case 'reveal': {
@@ -96,9 +102,6 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         feedback: { kind: 'wrong', interval },
       }
     }
-    // Recorded after the next question is set, which clears the feedback.
-    case 'rightGuess':
-      return { ...state, feedback: { kind: 'right', interval: action.interval } }
     case 'toggleSetup':
       return { ...state, setupOpen: !state.setupOpen }
     case 'closeSetup':
