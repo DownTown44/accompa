@@ -8,8 +8,8 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 
 ## Stories
 
-- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint, 1.12 fix the root
-- Open: Story 1.13 fixes from the Epic 1 review (reveal on a correct guess, no pointer focus border, immediate direction and root changes, upright help icon, backdrop closes Setup); the retro is in epic-1-retro-2026-10-24.md
+- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint, 1.12 fix the root, 1.13 fixes from the Epic 1 review
+- Epic 1 is done and retrospected (epic-1-retro-2026-10-24.md). Open retro items: shared guess-validity rule, shared test helpers under tests/ui/support, favicon, project-context pitfalls
 
 ## Requirements & Constraints
 
@@ -49,3 +49,4 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 - Keyboard: digit keys, `Space`, `Enter`, `M`, `I`, `[` and `]` are handled in `shortcuts/useShortcuts.ts`; shortcuts yield to focused controls, and a pointer click on a Listen button releases focus (`listen/focus.ts`).
 - Layout: instruments fill the `.stage` box (absolute svg), so the whole Listen screen fits 1280 x 800. Check any new row or control in a real browser at that size.
 - Corner (1.11): `ui/shell/Corner` renders after `<main>` and holds the Setup opener, `SetupPanel` and `ui/help/HelpHint`, placed over the strip by CSS so they come last in the Tab order. `Session.helpOpen` plus `dismiss` (Esc closes the list first, else the panel). `focusInstrument` (`ui/listen/focus.ts`) moves focus to the instrument after a pointer click on mode, instrument, Listen and interval controls.
+- Fixes (1.13): a correct guess dispatches `reveal` (nothing plays; no right-guess feedback). `setDirection`, `setRootMode` and `pressNote` in `useSessionActions` replace the question in play silently with `startQuestion(override)` (the render closure holds the old setting); Fixed with no root uses `clearQuestion` and waits for a note press. Pointer focus on an instrument sets `data-pointer-focus` on `<html>` (`ui/listen/focus.ts`); `piano.css` and `guitar.css` hide the ring while it is set and only `Tab` clears it. A transparent backdrop in `ui/shell/Corner` closes Setup.
