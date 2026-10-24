@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { pitch, interval } from '../../../src/core/pitch'
 import { INTERVALS } from '../../../src/core/theory'
-import { initialSession, sessionReducer } from '../../../src/ui/session/session'
+import { initialSession, sessionReducer, type SessionAction } from '../../../src/ui/session/session'
 import { listenSession } from '../support/sessions'
 
 describe('sessionReducer', () => {
@@ -285,17 +285,70 @@ describe('toggleNote', () => {
     expect(state.workspace.positions).toEqual({})
   })
 
-  it('leaves practice untouched, and a practice action leaves the workspace', () => {
-    const lit = toggle(initialSession, 60)
-    expect(lit.practice).toBe(initialSession.practice)
-    const question = { direction: 'ascending' as const, root: pitch(60), interval: interval(7), pitches: [pitch(60), pitch(67)] }
-    expect(sessionReducer(lit, { type: 'setQuestion', question }).workspace).toBe(lit.workspace)
-  })
 
   it('fits the piano window to the lit notes when the instrument changes', () => {
     let state = toggle({ ...initialSession, instrument: 'guitar' }, 40, { string: 0, fret: 0 })
     state = sessionReducer(state, { type: 'setInstrument', instrument: 'piano' })
     expect(state.pianoStart).toBe(36)
+  })
+})
+
+describe('workspace and practice stay apart', () => {
+  const question = { direction: 'ascending' as const, root: pitch(40), interval: interval(7), pitches: [pitch(40), pitch(47)] }
+  const litBase = sessionReducer(
+    sessionReducer(initialSession, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } }),
+    { type: 'toggleNote', pitch: pitch(67) },
+  )
+  const asked = sessionReducer(sessionReducer(litBase, { type: 'setQuestion', question }), { type: 'guess', interval: interval(3) })
+  const withKept = sessionReducer(asked, { type: 'dismiss' })
+
+  const workspaceActions: SessionAction[] = [
+    { type: 'toggleNote', pitch: pitch(64) },
+    { type: 'toggleNote', pitch: pitch(60) },
+    { type: 'toggleNote', pitch: pitch(60), position: { string: 1, fret: 5 } },
+    { type: 'dismiss' },
+    { type: 'undoClear' },
+  ]
+  const practiceActions: SessionAction[] = [
+    { type: 'setQuestion', question },
+    { type: 'clearQuestion' },
+    { type: 'setFixedRoot', pitch: pitch(57) },
+    { type: 'reveal' },
+    { type: 'guess', interval: interval(2) },
+  ]
+
+  it.each(workspaceActions)('workspace action $type keeps practice by reference', (action) => {
+    for (const state of [asked, withKept]) {
+      expect(sessionReducer(state, action).practice).toBe(state.practice)
+    }
+  })
+
+  it.each(practiceActions)('practice action $type keeps workspace and cleared by reference', (action) => {
+    for (const state of [asked, withKept]) {
+      const next = sessionReducer(state, action)
+      expect(next.workspace).toBe(state.workspace)
+      expect(next.cleared).toBe(state.cleared)
+    }
+  })
+
+  it('a mode switch changes neither part, and Listen only reads the practice', () => {
+    for (const mode of ['listen', 'explore'] as const) {
+      const next = sessionReducer(withKept, { type: 'setMode', mode })
+      expect(next.workspace).toBe(withKept.workspace)
+      expect(next.cleared).toBe(withKept.cleared)
+      expect(next.practice).toBe(withKept.practice)
+    }
+  })
+
+  it('refits the piano to the Explore notes after a reveal in Listen moved the window', () => {
+    const high = sessionReducer(sessionReducer(asked, { type: 'toggleNote', pitch: pitch(80) }), { type: 'toggleNote', pitch: pitch(84) })
+    let state = sessionReducer(high, { type: 'setMode', mode: 'listen' })
+    state = sessionReducer(state, { type: 'reveal' })
+    expect(state.pianoStart).toBe(36)
+    state = sessionReducer(state, { type: 'setMode', mode: 'explore' })
+    expect(state.pianoStart).toBeGreaterThan(48)
+    expect(state.pianoStart + 36).toBeGreaterThan(84)
+    expect(state.workspace).toBe(high.workspace)
   })
 })
 
