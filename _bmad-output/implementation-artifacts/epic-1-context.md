@@ -8,8 +8,8 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 
 ## Stories
 
-- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme
-- Next: 1.11 shortcuts and help hint (see epics.md); the Root half of 1.9 is in deferred-work.md sound and theme, 1.11 shortcuts and help hint (see epics.md)
+- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint
+- Open: the Root half of 1.9 (Root control, fixed root) is in deferred-work.md; nothing else is left in the epic
 
 ## Requirements & Constraints
 
@@ -48,3 +48,4 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 - Setup (1.8): `Session.setupOpen` drives `ui/setup/SetupPanel` (pool chips) and the gear opener in `ModeStrip`; `P` and `Esc` live in `useShortcuts`. The pool saves to `localStorage` key `accompa.pool` via `ui/session/poolStorage.ts`, loaded in `App`. The current question's interval stays guessable after it leaves the pool. Direction (1.9) is `Session.direction`; each `Question` records its `direction` and `playQuestion` picks `block` for Harmonic. Descending's root is the higher, first-heard note. The Direction group is a `SegmentedGroup` with the `setup` variant; sound and theme go under it. Settings (1.10) live in `ui/settings` (`SettingsProvider`, `settingsReducer`, `settingsStorage`): pool, direction, sound and theme, apart from the session; pool, sound and theme persist under `accompa.pool`, `accompa.sound`, `accompa.theme`. `App` builds the engine from `audio/engines.ts` inside `EngineHost`, and `SettingsProvider` sets `data-theme` (an inline script in `index.html` does it before first paint). Tests that render `Shell` or its parts need a `SettingsProvider`.
 - Keyboard: digit keys, `Space`, `Enter`, `M`, `I`, `[` and `]` are handled in `shortcuts/useShortcuts.ts`; shortcuts yield to focused controls, and a pointer click on a Listen button releases focus (`listen/focus.ts`).
 - Layout: instruments fill the `.stage` box (absolute svg), so the whole Listen screen fits 1280 x 800. Check any new row or control in a real browser at that size.
+- Corner (1.11): `ui/shell/Corner` renders after `<main>` and holds the Setup opener, `SetupPanel` and `ui/help/HelpHint`, placed over the strip by CSS so they come last in the Tab order. `Session.helpOpen` plus `dismiss` (Esc closes the list first, else the panel). `focusInstrument` (`ui/listen/focus.ts`) moves focus to the instrument after a pointer click on mode, instrument, Listen and interval controls.
