@@ -2,7 +2,8 @@
 title: 'Story 1.13: Fixes from the Epic 1 review'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: 'a49c531745cf1d5fda0eb263957c23d59282e646'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -71,9 +72,29 @@ context:
 
 ## Implementation Notes
 
+- A correct guess dispatches `reveal`; `rightGuess`, `Feedback.kind: 'right'` and the right-guess hint are removed. The hidden live region in `ListenView` still announces the revealed interval name.
+- `setDirection` and `setRootMode` in `useSessionActions` apply the change and replace the question with `startQuestion(override)`, because the render closure still holds the old setting; Fixed with no root drops the question with `clearQuestion`. `pressNote` sounds the note, sets the root and draws silently.
+- Pointer focus ring: `focus.ts` sets `data-pointer-focus` on the root element; `piano.css` and `guitar.css` set `outline: none` on `:focus` and on `:focus-visible` while the flag is set. The browser check showed Chrome's default focus outline still drew the border after a click when only the `:focus-visible` rule was set, so the `:focus` rule was added.
+- Deviation from the spec text: the flag is cleared by `Tab` only, not by the first key after a click. In a browser, `Space` and the digit shortcuts, pressed right after a click, brought the border back; the user's request is to not see it after a click.
+- The backdrop is a transparent fixed `div` at `z-index: 10` under `.corner` (`z-index: 11`); a browser check closed the panel with an outside click and left focus on the opener.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Finding | Verdict | Evidence / route |
+|---|---|---|
+| No test switches Fixed to Random while a question is in play | medium | Inverting the `rootMode !== 'fixed'` guard kept tests green. **patch**: test asserts marks, plays and the stored root survive |
+| Pointer focus border still showed after a click | high | Found in the browser check, not by reviewers: Chrome's `:focus` default outline. **patch**: `outline: none` on `:focus` |
+| First key after a click brought the border back | medium | Seen in the browser check with `Space`. **patch**: flag cleared by `Tab` only; deviation recorded above |
+| Duplicate `clearQuestion` case in the reducer | low | Direct deletion. **patch** |
+| Corner fragment indentation | low | Direct correction. **patch** |
+| Only `Tab` clears the ring flag; module-level listeners | low | Deliberate; one flag for one app. Rejected |
+| `pressNote` redraws when the pressed note is already the root, or with no question yet | low | Specified (a note press replaces the question; with none it draws on that root). Rejected |
+| Correct guess has no screen-reader confirmation | false | The hidden live region in `ListenView` announces the interval name on reveal |
+| `:focus { outline: none }` hides the ring in forced colors | false | `:focus-visible` sets an explicit outline that forced-colors keeps |
+| Weakened assertions in updated tests | low | Replays and play counts changed because a right guess no longer plays; the pool test's final check now proves a reveal. Rejected |
+| Backdrop semantics, touch, CSS tested by text, stale closures, `kind` single value, README copy | low | Out of intent, laptop only, or checked in the browser. Rejected |
 
 ## Design Notes
 
