@@ -1,9 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { INSTRUMENT_RANGES } from '../../src/core/instruments'
+import { COMMON_RANGE, INSTRUMENT_RANGES } from '../../src/core/instruments'
 import { initialPractice, initialWorkspace } from '../../src/core/model'
 import { generateQuestion, type Random } from '../../src/core/practice'
+import { pitch } from '../../src/core/pitch'
 import { INTERVALS } from '../../src/core/theory'
 
 function seeded(seed: number): Random {
@@ -93,6 +94,7 @@ describe('session model parts', () => {
     expect(initialPractice.question).toBeNull()
     expect(initialPractice.revealed).toBe(false)
     expect(initialPractice.wrongMarks).toEqual([])
+    expect(initialPractice.fixedRoot).toBeNull()
   })
 
   it('starts with an empty workspace', () => {
@@ -102,5 +104,54 @@ describe('session model parts', () => {
   it('is plain serializable data', () => {
     const data = { workspace: initialWorkspace, practice: initialPractice }
     expect(JSON.parse(JSON.stringify(data))).toEqual(data)
+  })
+})
+
+describe('generateQuestion with a fixed root', () => {
+  const range = COMMON_RANGE
+  const A3 = pitch(57)
+
+  it('keeps the pitch class and fits the interval, for every interval and direction', () => {
+    for (const direction of ['ascending', 'descending', 'harmonic'] as const) {
+      for (const semitones of allIntervals) {
+        for (let target = range.low; target <= range.high; target++) {
+          const q = generateQuestion({ pool: [semitones], range, random: seeded(target), direction, fixedRoot: pitch(target) })
+          expect(q.pitches[0]).toBe(q.root)
+          expect(q.root % 12).toBe(target % 12)
+          for (const p of q.pitches) {
+            expect(p).toBeGreaterThanOrEqual(range.low)
+            expect(p).toBeLessThanOrEqual(range.high)
+          }
+          const octaves = [q.root - 12, q.root + 12]
+          const fits = (r: number) => (direction === 'descending' ? r - semitones >= range.low && r <= range.high : r >= range.low && r + semitones <= range.high)
+          for (const other of octaves) {
+            if (!fits(other)) continue
+            expect(Math.abs(other - target)).toBeGreaterThanOrEqual(Math.abs(q.root - target))
+            if (Math.abs(other - target) === Math.abs(q.root - target)) expect(other).toBeGreaterThan(q.root)
+          }
+        }
+      }
+    }
+  })
+
+  it('uses the clicked octave when it fits', () => {
+    const up = generateQuestion({ pool: [7 as never], range, random: seeded(1), direction: 'ascending', fixedRoot: A3 })
+    expect(up.pitches).toEqual([57, 64])
+    const down = generateQuestion({ pool: [7 as never], range, random: seeded(1), direction: 'descending', fixedRoot: A3 })
+    expect(down.pitches).toEqual([57, 50])
+  })
+
+  it('moves the octave down when a perfect octave would not fit', () => {
+    const q = generateQuestion({ pool: [12 as never], range, random: seeded(1), direction: 'ascending', fixedRoot: pitch(range.high) })
+    expect(q.root + 12).toBeLessThanOrEqual(range.high)
+  })
+
+  it('breaks a tie toward the lower octave', () => {
+    const q = generateQuestion({ pool: [1 as never], range, random: seeded(1), direction: 'ascending', fixedRoot: pitch(48 + 6) })
+    expect(q.root).toBe(54)
+    const tie = generateQuestion({ pool: [1 as never], range: { low: 48, high: 72 }, random: seeded(1), direction: 'ascending', fixedRoot: pitch(60) })
+    expect(tie.root).toBe(60)
+    const half = generateQuestion({ pool: [1 as never], range: { low: 40, high: 70 }, random: seeded(1), direction: 'ascending', fixedRoot: pitch(55) })
+    expect(half.root).toBe(55)
   })
 })

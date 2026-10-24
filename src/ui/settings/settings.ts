@@ -1,10 +1,11 @@
-import type { Direction, Settings, Sound, Theme } from '../../core/model'
+import type { Direction, RootMode, Settings, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { INTERVALS } from '../../core/theory'
 
 export type SettingsAction =
   | { type: 'togglePool'; interval: Interval }
   | { type: 'setDirection'; direction: Direction }
+  | { type: 'setRootMode'; rootMode: RootMode }
   | { type: 'setSound'; sound: Sound }
   | { type: 'setTheme'; theme: Theme }
 
@@ -24,6 +25,9 @@ export function settingsReducer(state: Settings, action: SettingsAction): Settin
     // Applies from the next question; the one in play keeps the direction it was drawn with.
     case 'setDirection':
       return state.direction === action.direction ? state : { ...state, direction: action.direction }
+    // Applies from the next question; never saved.
+    case 'setRootMode':
+      return state.rootMode === action.rootMode ? state : { ...state, rootMode: action.rootMode }
     case 'setSound':
       return state.sound === action.sound ? state : { ...state, sound: action.sound }
     case 'setTheme':

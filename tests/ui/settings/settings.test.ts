@@ -8,6 +8,7 @@ describe('settings reducer', () => {
   it('starts with every interval, Ascending, Synthesized and System', () => {
     expect(initialSettings.pool).toEqual(INTERVALS.map((i) => i.semitones))
     expect(initialSettings.direction).toBe('ascending')
+    expect(initialSettings.rootMode).toBe('random')
     expect(initialSettings.sound).toBe('synthesized')
     expect(initialSettings.theme).toBe('system')
   })
@@ -40,5 +41,11 @@ describe('settings reducer', () => {
     const next = settingsReducer(initialSettings, { type: 'setTheme', theme: 'light' })
     expect(initialSettings.theme).toBe('system')
     expect(JSON.parse(JSON.stringify(next))).toEqual(next)
+  })
+
+  it('sets the root mode and returns the same state when nothing changes', () => {
+    const fixed = settingsReducer(initialSettings, { type: 'setRootMode', rootMode: 'fixed' })
+    expect(fixed.rootMode).toBe('fixed')
+    expect(settingsReducer(fixed, { type: 'setRootMode', rootMode: 'fixed' })).toBe(fixed)
   })
 })

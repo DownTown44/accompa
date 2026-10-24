@@ -1,5 +1,5 @@
 import type { Question } from '../../core/model'
-import type { Interval } from '../../core/pitch'
+import type { Interval, Pitch } from '../../core/pitch'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
 import { useEngine } from '../engine/EngineContext'
@@ -14,8 +14,16 @@ export function useSessionActions() {
   const engine = useEngine()
 
   function startQuestion() {
-    const question = generateQuestion({ pool: settings.pool, range: COMMON_RANGE, random: Math.random, direction: settings.direction })
+    const fixed = settings.rootMode === 'fixed'
+    const question = generateQuestion({
+      pool: settings.pool,
+      range: COMMON_RANGE,
+      random: Math.random,
+      direction: settings.direction,
+      fixedRoot: fixed ? session.practice.fixedRoot : null,
+    })
     dispatch({ type: 'setQuestion', question })
+    if (fixed && session.practice.fixedRoot === null) dispatch({ type: 'setFixedRoot', pitch: question.root })
     return question
   }
 
@@ -56,6 +64,13 @@ export function useSessionActions() {
     }
   }
 
+  // Sets the root for later questions; the question in play is untouched.
+  function pressNote(pitch: Pitch) {
+    if (session.mode !== 'listen' || settings.rootMode !== 'fixed') return
+    engine.play([pitch], 'block')
+    dispatch({ type: 'setFixedRoot', pitch })
+  }
+
   function selectMode(mode: Mode) {
     if (mode === session.mode) return
     dispatch({ type: 'setMode', mode })
@@ -67,6 +82,7 @@ export function useSessionActions() {
     play,
     revealOrNext,
     guess,
+    pressNote,
     selectMode,
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),

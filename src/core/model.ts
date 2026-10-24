@@ -5,6 +5,8 @@ export type Instrument = 'piano' | 'guitar'
 
 export type Direction = 'ascending' | 'descending' | 'harmonic'
 
+export type RootMode = 'random' | 'fixed'
+
 export interface Question {
   readonly direction: Direction
   readonly root: Pitch
@@ -22,6 +24,8 @@ export interface Practice {
   readonly question: Question | null
   readonly revealed: boolean
   readonly wrongMarks: readonly Interval[]
+  // The pitch chosen as the root in Fixed mode; its pitch class roots every later question.
+  readonly fixedRoot: Pitch | null
 }
 
 export const initialWorkspace: Workspace = { pitches: [] }
@@ -30,6 +34,7 @@ export const initialPractice: Practice = {
   question: null,
   revealed: false,
   wrongMarks: [],
+  fixedRoot: null,
 }
 
 export type Sound = 'synthesized'
@@ -40,6 +45,7 @@ export type Theme = 'system' | 'light' | 'dark'
 export interface Settings {
   readonly pool: readonly Interval[]
   readonly direction: Direction
+  readonly rootMode: RootMode
   readonly sound: Sound
   readonly theme: Theme
 }
@@ -47,6 +53,7 @@ export interface Settings {
 export const initialSettings: Settings = {
   pool: INTERVALS.map((i) => i.semitones),
   direction: 'ascending',
+  rootMode: 'random',
   sound: 'synthesized',
   theme: 'system',
 }

@@ -6,7 +6,7 @@ import {
   type Question,
   type Workspace,
 } from '../../core/model'
-import type { Interval } from '../../core/pitch'
+import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
 export type { Instrument }
@@ -34,6 +34,7 @@ export type SessionAction =
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
   | { type: 'setQuestion'; question: Question }
+  | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
   | { type: 'guess'; interval: Interval }
   | { type: 'rightGuess'; interval: Interval }
@@ -78,6 +79,8 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
         feedback: null,
       }
+    case 'setFixedRoot':
+      return state.practice.fixedRoot === action.pitch ? state : { ...state, practice: { ...state.practice, fixedRoot: action.pitch } }
     case 'reveal': {
       if (!state.practice.question || state.practice.revealed) return state
       return fitRevealed({ ...state, practice: { ...state.practice, revealed: true }, feedback: null })
