@@ -8,8 +8,8 @@ Apor opens the app, hears an interval, replays it, optionally guesses, and revea
 
 ## Stories
 
-- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint
-- Open: Story 1.12 fix the root (the Root half split from 1.9) is the last story in the epic
+- Done: 1.1 scaffold and quality gates, 1.2 themed shell, 1.3 hear a random interval, 1.4 piano keyboard, 1.5 guitar fretboard and instrument swap, 1.6 reveal an interval, 1.7 guess an interval, 1.8 choose which intervals to practise, 1.9 set direction (Root half deferred), 1.10 choose sound and theme, 1.11 shortcuts and help hint, 1.12 fix the root
+- Open: Story 1.13 fixes from the Epic 1 review (reveal on a correct guess, no pointer focus border, immediate direction and root changes, upright help icon, backdrop closes Setup); the retro is in epic-1-retro-2026-10-24.md
 
 ## Requirements & Constraints
 

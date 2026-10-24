@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-24-2026 11:00
+last_updated: 10-24-2026 12:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -47,8 +47,9 @@ development_status:
   1-9-set-direction-and-root: done
   1-10-choose-sound-and-theme: done
   1-11-shortcuts-and-help-hint: done
-  1-12-fix-the-root: review
-  epic-1-retrospective: optional
+  1-12-fix-the-root: done
+  1-13-fixes-from-the-epic-1-review: backlog
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-name-an-interval-from-two-clicked-notes: backlog
@@ -78,3 +79,53 @@ development_status:
   5-2-guess-a-chord-quality: backlog
   5-3-reveal-the-chord-on-the-instrument: backlog
   epic-5-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-extract-one-guess-validity-rule-used-by"
+    epic: 1
+    action: "Extract one guess-validity rule used by the hook, the buttons and the
+      reducer"
+    owner: "dev (Amelia)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-2-add-shared-test-helpers-under-tests-ui-s"
+    epic: 1
+    action: "Add shared test helpers under tests/ui/support, point story agents at
+      them, and split SetupPanel.test.tsx by story concern"
+    owner: "dev (Amelia)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-3-remove-the-dead-closesetup-action-and-it"
+    epic: 1
+    action: "Remove the dead closeSetup action and its test, and add a favicon"
+    owner: "dev (Amelia)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-4-record-recurring-rejected-review-finding"
+    epic: 1
+    action: "Record recurring rejected review findings and the laptop-only constraint
+      in the project context"
+    owner: "Apor with bmad-project-context"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-5-add-pictured-use-matrix-rows-to-specs-ho"
+    epic: 1
+    action: "Add pictured-use matrix rows to specs (hover then click, change a setting
+      then use it) and name one owner when a rule moves between layers"
+    owner: "Apor (planning)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-6-keep-carrying-the-deferred-items-ci-work"
+    epic: 1
+    action: "Keep carrying the deferred items: CI workflow and guitar out-of-range
+      pitches"
+    owner: "Apor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
+  - id: "epic-1-retro-item-7-build-story-1-13-the-fixes-apor-asked-fo"
+    epic: 1
+    action: "Build Story 1.13, the fixes Apor asked for in the retro (reveal on correct
+      guess, no pointer focus border, immediate direction and root changes, upright
+      help icon, backdrop closes Setup)"
+    owner: "dev (Amelia), spec first"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
