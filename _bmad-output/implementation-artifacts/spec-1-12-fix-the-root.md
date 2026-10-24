@@ -2,7 +2,8 @@
 title: 'Story 1.12: Fix the root'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'done'
+baseline_commit: 'ecdb731e02f33d0ad785757c7dd34321dc2263e6'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -69,9 +70,25 @@ context:
 
 ## Implementation Notes
 
+- Root mode is `Settings.rootMode` (never saved); `Practice.fixedRoot` holds the clicked pitch. `generateQuestion` takes `fixedRoot` and keeps the root's pitch class in the nearest octave where the interval fits; `startQuestion` records a drawn root as the fixed root when none is chosen.
+- `pressNote` sounds the pitch in `block` mode and sets the root only in Listen and Fixed; both stages pass it as `onNotePress`.
+- `useLitNotes` lights `[fixedRoot]` with the root ring before reveal in Fixed; the guitar lights every position of it and rings the lowest fret.
+- The Status note ranks the root prompt below the wake message and above the offscreen note.
+
 ## Spec Change Log
 
 ## Review Triage Log
+
+| Finding | Verdict | Evidence / route |
+|---|---|---|
+| No candidate fits, so `root` stays -1 | false | `COMMON_RANGE` spans 47 semitones, so every pitch class fits for every interval of at most 12 |
+| Tie-break to the lower octave is unreachable | low | Matches the spec; harmless dead branch, and removing it is a refactor. Rejected |
+| Two dispatches in `startQuestion` read a stale root | low | Each key event re-renders first; same pattern accepted for pool and direction. Rejected |
+| Pressing a note while revealed changes the root with no new marker | low | Specified: the question in play and its lit notes are untouched. Rejected |
+| Root prompt hides the offscreen note | low | Only when a question is revealed offscreen while Fixed has no root. Rejected |
+| Guitar ring sits on the lowest fret, not the clicked cell | low | Specified in the spec. Rejected |
+| No keyboard path, no way to clear the root, no help text for Root, repeated predicate, `as never` casts, weak "not saved" test, dead-range tests | low | Out of the intent or refactors. Rejected |
+| Radio helpers changed to `hidden: true` | low | The panel is `hidden` when closed; the radios were verified clickable in a real browser. Rejected |
 
 ## Design Notes
 
