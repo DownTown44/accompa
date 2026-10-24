@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { COMMON_RANGE, INSTRUMENT_RANGES } from '../../src/core/instruments'
 import { interval, pitch, pitchClass } from '../../src/core/pitch'
-import { INTERVALS } from '../../src/core/theory'
+import { CHORD_QUALITIES, INTERVALS } from '../../src/core/theory'
 
 describe('INTERVALS', () => {
   it('holds m2 to P8 in semitone order', () => {
@@ -47,5 +47,15 @@ describe('INSTRUMENT_RANGES', () => {
 describe('COMMON_RANGE', () => {
   it('is the span both instruments can show', () => {
     expect(COMMON_RANGE).toEqual({ low: 40, high: 86 })
+  })
+})
+
+describe('CHORD_QUALITIES', () => {
+  it('holds the nine qualities once each with their symbols', () => {
+    expect(CHORD_QUALITIES.map((q) => q.name)).toEqual(['major', 'minor', 'diminished', 'augmented', 'maj7', 'dom7', 'min7', 'm7b5', 'dim7'])
+    expect(CHORD_QUALITIES.map((q) => q.symbol)).toEqual(['', 'm', 'dim', 'aug', 'maj7', '7', 'm7', 'm7♭5', 'dim7'])
+    expect(CHORD_QUALITIES.map((q) => q.intervals)).toEqual([
+      [0, 4, 7], [0, 3, 7], [0, 3, 6], [0, 4, 8], [0, 4, 7, 11], [0, 4, 7, 10], [0, 3, 7, 10], [0, 3, 6, 10], [0, 3, 6, 9],
+    ])
   })
 })
