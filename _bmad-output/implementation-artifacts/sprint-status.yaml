@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-25-2026 21:45
+last_updated: 10-25-2026 22:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -178,7 +178,7 @@ action_items:
       and root-to-reading helpers in core, split ExploreView.test.tsx by concern,
       formatter and line-ending config"
     owner: "dev (Amelia), spec first"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
   - id: "epic-3-retro-item-14-reconcile-experience-md-root-default-epi"
     epic: 3
@@ -192,7 +192,7 @@ action_items:
     action: "Decide the one-note-per-string rule for Explore on the guitar and where
       Epic 4 enforces it (4.1, 4.3 or 4.6)"
     owner: "Apor"
-    status: in-progress
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
   - id: "epic-3-retro-item-16-keep-matrix-rows-for-the-instrument-not"
     epic: 3
