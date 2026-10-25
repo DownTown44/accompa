@@ -8,10 +8,9 @@ import {
   type Workspace,
 } from '../../core/model'
 import { canGuess } from '../../core/guess'
-import { nameChord } from '../../core/chords'
-import { isReading, litPositions, orderedReadings, readingChoice, toggleLit } from '../../core/explore'
+import { isReading, litPositions, orderedReadings, readingChoice, readingRootedOn, sameChoice, toggleLit } from '../../core/explore'
 import type { FretPosition } from '../../core/instruments'
-import { pitchClass, type Interval, type Pitch } from '../../core/pitch'
+import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
 export type { Instrument }
@@ -123,16 +122,16 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       const { reading, root, ...rest } = state.workspace
       const { reading: choice } = action
       const named = orderedReadings(state.workspace.pitches).some((r) => isReading(r, choice))
-      if (!named || (root === undefined && reading && reading.root === choice.root && reading.quality === choice.quality)) return state
+      if (!named || (root === undefined && reading && sameChoice(reading, choice))) return state
       return { ...state, workspace: { ...rest, reading: choice } }
     }
     case 'chooseRoot': {
       const { pitch } = action
       const { pitches, reading, root, ...rest } = state.workspace
       if (state.mode !== 'explore' || !pitches.includes(pitch)) return state
-      const found = nameChord(pitches).find((r) => r.root === pitchClass(pitch))
+      const found = readingRootedOn(pitches, pitch)
       const choice = found ? readingChoice(found) : undefined
-      const same = root === pitch && (choice ? reading?.root === choice.root && reading.quality === choice.quality : reading === undefined)
+      const same = root === pitch && (choice ? reading !== undefined && sameChoice(reading, choice) : reading === undefined)
       if (same) return state.rootArmed ? { ...state, rootArmed: false } : state
       return { ...state, rootArmed: false, workspace: { pitches, ...rest, root: pitch, ...(choice ? { reading: choice } : {}) } }
     }
