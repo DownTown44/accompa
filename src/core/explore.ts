@@ -1,7 +1,7 @@
 import { nameChord, type ChordReading } from './chords'
 import type { ReadingChoice } from './model'
-import { closestPair, positionsForPitch, type FretPosition } from './instruments'
-import { pitch, pitchClass, type Pitch } from './pitch'
+import { positionsForPitch, STANDARD_GUITAR_TUNING, type FretPosition } from './instruments'
+import { pitchClass, type Pitch } from './pitch'
 import { chordSpoken, chordSymbol, noteName, spellChord, spellNotes } from './spelling'
 import { INTERVALS, type IntervalDefinition } from './theory'
 
@@ -148,22 +148,64 @@ export function exploreReading(lit: readonly Pitch[], chosen?: ReadingChoice, ro
 // Remembered fret positions by pitch; plain data.
 export type RememberedPositions = Readonly<Record<number, FretPosition>>
 
-const lowestFret = (p: Pitch): FretPosition | null =>
-  positionsForPitch(p).reduce<FretPosition | null>((best, pos) => (best === null || pos.fret < best.fret ? pos : best), null)
-
-// Where each lit pitch sits on the guitar, aligned with the pitches: the remembered position,
-// else the lowest fret, and the closest pair when two pitches have no remembered position.
-export function litPositions(lit: readonly Pitch[], remembered: RememberedPositions): (FretPosition | null)[] {
-  const unknown = lit.filter((p) => remembered[p] === undefined)
-  const lower = Math.min(...unknown)
-  const pair = unknown.length === 2 ? closestPair(pitch(lower), pitch(Math.max(...unknown))) : null
-  return lit.map((p) => {
-    const known = remembered[p]
-    if (known !== undefined) return known
-    if (pair) return p === lower ? pair.root : pair.upper
-    return lowestFret(p)
-  })
+export interface LitPlacement {
+  // Aligned with the lit pitches; null for a note beyond the fretboard or one left out.
+  readonly positions: (FretPosition | null)[]
+  // Lit pitches that found no free string, in lit order; with more notes than strings, the newest go first.
+  readonly leftOut: Pitch[]
 }
+
+const STRING_COUNT = STANDARD_GUITAR_TUNING.length
+
+// Places the lit pitches one per string. A note keeps its remembered position when that string is
+// free; the rest go lower pitch first, each to a free string at its lowest fret. A note with no
+// free string is left out, and when more are lit than strings the newest go first.
+export function placeLit(lit: readonly Pitch[], remembered: RememberedPositions): LitPlacement {
+  const playable = lit.filter((p) => positionsForPitch(p).length > 0)
+  const kept = new Set(playable.slice(0, STRING_COUNT))
+  const positions = new Map<Pitch, FretPosition>()
+  const taken = new Set<number>()
+  for (const p of kept) {
+    const known = remembered[p]
+    if (known === undefined || taken.has(known.string)) continue
+    positions.set(p, known)
+    taken.add(known.string)
+  }
+  const fixed = new Set(positions.keys())
+  const rest = [...kept].filter((p) => !positions.has(p)).sort((a, b) => a - b)
+  const owner = new Map<number, Pitch>()
+  for (const [p, pos] of positions) owner.set(pos.string, p)
+  const byFret = (p: Pitch) => [...positionsForPitch(p)].sort((a, b) => a.fret - b.fret)
+  // Invariant: a failed branch never mutates `positions` or `owner`; `seen` is a visited set that is
+  // never backtracked; remembered (fixed) notes are never moved.
+  // A note takes its lowest free fret; when every string is taken, a placed note that is not
+  // remembered moves to another string to make room.
+  const place = (p: Pitch, seen: Set<number>): boolean => {
+    const options = byFret(p)
+    const free = options.find((pos) => !owner.has(pos.string))
+    const target =
+      free ??
+      options.find((pos) => {
+        const other = owner.get(pos.string)!
+        if (seen.has(pos.string) || fixed.has(other)) return false
+        seen.add(pos.string)
+        return place(other, seen)
+      })
+    if (!target) return false
+    positions.set(p, target)
+    owner.set(target.string, p)
+    return true
+  }
+  for (const p of rest) place(p, new Set())
+  return {
+    positions: lit.map((p) => positions.get(p) ?? null),
+    leftOut: playable.filter((p) => !positions.has(p)),
+  }
+}
+
+// Where each lit pitch sits on the guitar, aligned with the pitches; null when beyond or left out.
+export const litPositions = (lit: readonly Pitch[], remembered: RememberedPositions): (FretPosition | null)[] =>
+  placeLit(lit, remembered).positions
 
 // The lit pitches whose shown position is on the string; notes beyond the fretboard have none.
 export function pitchesOnString(lit: readonly Pitch[], remembered: RememberedPositions, string: number): Pitch[] {
@@ -171,13 +213,18 @@ export function pitchesOnString(lit: readonly Pitch[], remembered: RememberedPos
   return lit.filter((_, i) => shown[i]?.string === string)
 }
 
-// How many lit pitches have no place on the guitar, beyond its lowest and highest note.
-export function beyondFretboard(lit: readonly Pitch[], remembered: RememberedPositions): number {
-  return litPositions(lit, remembered).filter((position) => position === null).length
-}
+// How many lit pitches are beyond the guitar's lowest and highest note.
+export const beyondFretboard = (lit: readonly Pitch[]): number => lit.filter((p) => positionsForPitch(p).length === 0).length
 
-// The Status note for lit notes beyond the guitar; undefined when there are none.
-export function beyondFretboardNote(count: number): string | undefined {
-  if (count <= 0) return undefined
-  return `${count} ${count === 1 ? 'note' : 'notes'} lit beyond the fretboard`
+// How many lit pitches found no free string.
+export const leftOutCount = (lit: readonly Pitch[], remembered: RememberedPositions): number => placeLit(lit, remembered).leftOut.length
+
+const plural = (count: number) => (count === 1 ? 'note' : 'notes')
+
+// The Status note for lit notes beyond the guitar or left out for want of a string; undefined when none.
+export function beyondFretboardNote(beyond: number, leftOut = 0): string | undefined {
+  if (beyond <= 0 && leftOut <= 0) return undefined
+  if (beyond <= 0) return `${leftOut} ${plural(leftOut)} left out: one note per string`
+  const lit = `${beyond} ${plural(beyond)} lit beyond the fretboard`
+  return leftOut > 0 ? `${lit}, ${leftOut} left out` : lit
 }

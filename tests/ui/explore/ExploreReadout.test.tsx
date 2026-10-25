@@ -81,10 +81,10 @@ describe('Explore live region', () => {
     press('i')
     expect([...document.querySelectorAll('.fretboard [data-lit]')]).toHaveLength(3)
     const at = (string: number, fret: number) => document.querySelector(`[data-lit="${string}:${fret}"]`)?.getAttribute('data-role')
-    // E4, G4 and C5 at their lowest frets on the high e string.
+    // E4 on the high e string, then G4 and C5 on the next free strings at their lowest frets.
     expect(at(5, 0)).toBe('third')
-    expect(at(5, 3)).toBe('fifth')
-    expect(at(5, 8)).toBe('root')
+    expect(at(4, 8)).toBe('fifth')
+    expect(at(3, 17)).toBe('root')
   })
 
   it('draws the same roles on the guitar', () => {

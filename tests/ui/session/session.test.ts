@@ -517,7 +517,7 @@ describe('chooseReading', () => {
   })
 
   it('keeps the reading when a guitar note only moves position', () => {
-    const moved = sessionReducer(chosen, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } })
+    const moved = sessionReducer(chosen, { type: 'toggleNote', pitch: pitch(60), position: { string: 0, fret: 20 } })
     expect(moved.workspace.reading).toEqual(adim7)
   })
 
