@@ -3,11 +3,12 @@ import {
   initialWorkspace,
   type Instrument,
   type Practice,
+  type ReadingChoice,
   type Question,
   type Workspace,
 } from '../../core/model'
 import { canGuess } from '../../core/guess'
-import { litPositions, toggleLit } from '../../core/explore'
+import { isReading, litPositions, orderedReadings, toggleLit } from '../../core/explore'
 import type { FretPosition } from '../../core/instruments'
 import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
@@ -39,6 +40,7 @@ export type SessionAction =
   | { type: 'setInstrument'; instrument: Instrument }
   | { type: 'toggleInstrument' }
   | { type: 'toggleNote'; pitch: Pitch; position?: FretPosition }
+  | { type: 'chooseReading'; reading: ReadingChoice }
   | { type: 'setQuestion'; question: Question }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
@@ -75,6 +77,13 @@ function fitRevealed(state: Session): Session {
   return pianoStart === state.pianoStart ? state : { ...state, pianoStart }
 }
 
+// The chosen reading stays only while the namer still names it for the notes.
+function pruneReading(workspace: Workspace): Workspace {
+  const { reading, ...rest } = workspace
+  if (!reading) return workspace
+  return orderedReadings(workspace.pitches).some((r) => isReading(r, reading)) ? workspace : rest
+}
+
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
     case 'setMode':
@@ -85,18 +94,25 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' })
     case 'toggleNote': {
       const { pitch, position } = action
-      const { pitches, positions } = state.workspace
+      const { pitches, positions, reading } = state.workspace
       const keep = (list: readonly Pitch[]) =>
         Object.fromEntries(Object.entries(positions).filter(([key]) => list.includes(Number(key) as Pitch)))
       if (pitches.includes(pitch) && position !== undefined) {
         const shown = litPositions(pitches, positions)[pitches.indexOf(pitch)]
         if (!shown || shown.string !== position.string || shown.fret !== position.fret) {
-          return { ...state, cleared: null, workspace: { pitches, positions: { ...positions, [pitch]: position } } }
+          return { ...state, cleared: null, workspace: { ...state.workspace, positions: { ...positions, [pitch]: position } } }
         }
       }
       const next = toggleLit(pitches, pitch)
       const remembered = position !== undefined && next.includes(pitch) ? { ...keep(next), [pitch]: position } : keep(next)
-      return { ...state, cleared: null, workspace: { pitches: next, positions: remembered } }
+      return { ...state, cleared: null, workspace: pruneReading({ pitches: next, positions: remembered, ...(reading ? { reading } : {}) }) }
+    }
+    case 'chooseReading': {
+      const { reading } = state.workspace
+      const { reading: choice } = action
+      const named = orderedReadings(state.workspace.pitches).some((r) => isReading(r, choice))
+      if (!named || (reading && reading.root === choice.root && reading.quality === choice.quality)) return state
+      return { ...state, workspace: { ...state.workspace, reading: choice } }
     }
     case 'setQuestion':
       return {

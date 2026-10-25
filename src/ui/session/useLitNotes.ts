@@ -23,8 +23,8 @@ export function useLitNotes(): LitNotes {
   if (session.mode === 'listen' && revealed && question) return { pitches: question.pitches, root: question.root }
   if (session.mode === 'listen' && settings.rootMode === 'fixed' && fixedRoot !== null) return { pitches: [fixedRoot], root: fixedRoot }
   if (session.mode === 'explore') {
-    const { pitches, positions } = session.workspace
-    const { root, roles } = exploreReading(pitches)
+    const { pitches, positions, reading } = session.workspace
+    const { root, roles } = exploreReading(pitches, reading)
     const placed = litPositions(pitches, positions)
     return {
       pitches,

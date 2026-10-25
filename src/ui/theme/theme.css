@@ -54,6 +54,7 @@
   --type-hint-weight: 400;
   --type-legend-size: 20px;
   --type-legend-weight: 400;
+  --type-alternative-size: 20px;
   --type-mode-size: 24px;
   --type-mode-weight: 400;
   --type-segment-size: 22px;
@@ -80,8 +81,10 @@
   --spacing-toggle-padding: 5px;
   --spacing-readout-gap: 14px;
   --spacing-legend-height: 34px;
+  --spacing-alternatives-height: 34px;
   --spacing-readout-block-height: calc(
-    var(--type-readout-size) * var(--type-readout-line-height) + var(--spacing-readout-gap) + var(--spacing-legend-height)
+    var(--type-readout-size) * var(--type-readout-line-height) + var(--spacing-readout-gap) + var(--spacing-alternatives-height) +
+      var(--spacing-readout-gap) + var(--spacing-legend-height)
   );
   --spacing-interval-gap: 10px;
   --spacing-control-gap: 18px;

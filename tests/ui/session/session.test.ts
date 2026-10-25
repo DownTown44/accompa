@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pitch, interval } from '../../../src/core/pitch'
+import { pitch, pitchClass, interval } from '../../../src/core/pitch'
 import { INTERVALS } from '../../../src/core/theory'
 import { initialSession, sessionReducer, type SessionAction } from '../../../src/ui/session/session'
 import { listenSession } from '../support/sessions'
@@ -420,5 +420,48 @@ describe('clear and undo', () => {
     const trip = sessionReducer(sessionReducer(cleared, { type: 'setMode', mode: 'listen' }), { type: 'setMode', mode: 'explore' })
     expect(trip.cleared).toEqual(lit.workspace)
     expect(sessionReducer(trip, { type: 'undoClear' }).workspace).toEqual(lit.workspace)
+  })
+})
+
+describe('chooseReading', () => {
+  const dim7 = [60, 63, 66, 69].reduce((s, n) => sessionReducer(s, { type: 'toggleNote', pitch: pitch(n) }), initialSession)
+  const adim7 = { root: pitchClass(pitch(9)), quality: 'dim7' } as const
+  const chosen = sessionReducer(dim7, { type: 'chooseReading', reading: adim7 })
+
+  it('stores the reading in the workspace only', () => {
+    expect(chosen.workspace.reading).toEqual(adim7)
+    expect(chosen.workspace.pitches).toBe(dim7.workspace.pitches)
+    expect(chosen.practice).toBe(dim7.practice)
+    expect(chosen.cleared).toBe(dim7.cleared)
+  })
+
+  it('ignores the same choice and a reading the notes do not have', () => {
+    expect(sessionReducer(chosen, { type: 'chooseReading', reading: adim7 })).toBe(chosen)
+    expect(sessionReducer(dim7, { type: 'chooseReading', reading: { root: pitchClass(pitch(0)), quality: 'major' } })).toBe(dim7)
+  })
+
+  it('keeps the reading while it exists and drops it when it stops existing', () => {
+    const more = sessionReducer(chosen, { type: 'toggleNote', pitch: pitch(72) })
+    expect(more.workspace.reading).toEqual(adim7)
+    const gone = sessionReducer(chosen, { type: 'toggleNote', pitch: pitch(63) })
+    expect('reading' in gone.workspace).toBe(false)
+  })
+
+  it('keeps the reading when a guitar note only moves position', () => {
+    const moved = sessionReducer(chosen, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } })
+    expect(moved.workspace.reading).toEqual(adim7)
+  })
+
+  it('Esc clears it with the notes and Undo restores both; mode switches keep it', () => {
+    const cleared = sessionReducer(chosen, { type: 'dismiss' })
+    expect(cleared.workspace.reading).toBeUndefined()
+    expect(sessionReducer(cleared, { type: 'undoClear' }).workspace.reading).toEqual(adim7)
+    for (const mode of ['listen', 'explore'] as const) {
+      expect(sessionReducer(chosen, { type: 'setMode', mode }).workspace).toBe(chosen.workspace)
+    }
+  })
+
+  it('leaves practice by reference', () => {
+    expect(sessionReducer(chosen, { type: 'chooseReading', reading: { root: pitchClass(pitch(3)), quality: 'dim7' } }).practice).toBe(chosen.practice)
   })
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
-import { pitch } from '../../src/core/pitch'
+import { pitch, pitchClass } from '../../src/core/pitch'
 
 const p = pitch
 
@@ -136,7 +136,7 @@ describe('exploreReading', () => {
   const legend = (...n: number[]) => read(...n).legend.map((e) => (e.degree ? `${e.label} ${e.note} (${e.degree})` : `${e.label} ${e.note}`))
 
   it('is empty for no notes', () => {
-    expect(read()).toEqual({ readout: null, roles: [], legend: [] })
+    expect(read()).toEqual({ readout: null, roles: [], legend: [], readings: [], alternatives: [] })
   })
 
   it('gives a triad and a seventh their roles and legend', () => {
@@ -175,5 +175,45 @@ describe('exploreReading', () => {
     expect(legend(60, 67)).toEqual(['root C'])
     expect(read(60, 72).roles).toEqual(['root', 'none'])
     expect(read(60).roles).toEqual(['root'])
+  })
+})
+
+describe('chosen reading', () => {
+  const dim7 = [60, 63, 66, 69].map(p)
+  const aug = [60, 64, 68].map(p)
+
+  it('lists the alternatives in namer order after the first reading', () => {
+    const { readings, alternatives, readout } = exploreReading(dim7)
+    expect(readings.map((r) => r.symbol)).toEqual(['Cdim7', 'E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(alternatives.map((r) => r.symbol)).toEqual(['E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(readout?.label).toBe('Cdim7')
+    expect(exploreReading(aug).alternatives).toHaveLength(2)
+  })
+
+  it('has no alternatives for one reading, a pair or an unknown set', () => {
+    expect(exploreReading([60, 64, 67].map(p)).alternatives).toEqual([])
+    expect(exploreReading([60, 67].map(p)).readings).toEqual([])
+    expect(exploreReading([60, 62, 66].map(p)).alternatives).toEqual([])
+  })
+
+  it('moves readout, root, roles, legend and spelling to the chosen reading', () => {
+    const chosen = exploreReading(dim7).alternatives[2]!.choice
+    const r = exploreReading(dim7, chosen)
+    expect(r.readout).toEqual({ label: 'Adim7/C', name: 'A dim7 over C' })
+    expect(r.root).toBe(69)
+    expect(r.roles).toEqual(['third', 'fifth', 'seventh', 'root'])
+    expect(r.legend.map((e) => `${e.label} ${e.note} ${e.degree ?? ''}`.trim())).toEqual(['root A', '3rd C m3', '5th E♭ d5', '7th G♭ d7'])
+    expect(r.readings.map((x) => x.symbol)).toEqual(['Adim7/C', 'Cdim7', 'E♭dim7/C', 'F♯dim7/C'])
+  })
+
+  it('falls back to the first reading when the chosen one is gone', () => {
+    const chosen = exploreReading(dim7).alternatives[0]!.choice
+    expect(exploreReading([60, 64, 67].map(p), chosen).readout?.label).toBe('C')
+    expect(exploreReading([60, 64, 68].map(p), { root: pitchClass(pitch(9)), quality: 'dim7' }).readout?.label).toBe('Caug')
+  })
+
+  it('treats choosing the first reading like any other', () => {
+    const first = exploreReading(dim7).readings[0]!.choice
+    expect(exploreReading(dim7, first)).toEqual(exploreReading(dim7))
   })
 })

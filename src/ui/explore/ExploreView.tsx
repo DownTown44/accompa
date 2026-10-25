@@ -4,6 +4,7 @@ import './explore.css'
 import { exploreReading } from '../../core/explore'
 import { RoleMarker } from '../shared/RoleMarker'
 import { useSession } from '../session/SessionContext'
+import { useSessionActions } from '../session/useSessionActions'
 
 const ANNOUNCE_DELAY_MS = 400
 
@@ -15,7 +16,8 @@ const sizeFor = (label: string): 'large' | 'medium' | 'small' =>
 
 export function ExploreView() {
   const { session } = useSession()
-  const { readout, legend } = exploreReading(session.workspace.pitches)
+  const { chooseReading } = useSessionActions()
+  const { readout, legend, alternatives } = exploreReading(session.workspace.pitches, session.workspace.reading)
   const spoken = readout ? (readout.name ?? readout.label) : ''
   const [announced, setAnnounced] = useState('')
   useEffect(() => {
@@ -33,6 +35,14 @@ export function ExploreView() {
       ) : (
         <p className="explore-prompt">{EXPLORE_PROMPT}</p>
       )}
+      <div className="reading-alternatives" role="group" aria-label="Other readings">
+        {alternatives.map((option, i) => (
+          <button key={i} type="button" className="reading-alt" onClick={() => chooseReading(option.choice)}>
+            <span aria-hidden="true">{option.symbol}</span>
+            <span className="visually-hidden">{option.spoken}</span>
+          </button>
+        ))}
+      </div>
       <ul className="role-legend" aria-label="Note roles">
         {legend.map((entry) => (
           <li key={entry.role} data-role={entry.role}>

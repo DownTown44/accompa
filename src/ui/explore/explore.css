@@ -66,3 +66,34 @@
   width: 34px;
   height: 34px;
 }
+
+/* One reserved row beneath the readout; empty with fewer than two readings. */
+.reading-alternatives {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  height: var(--spacing-alternatives-height);
+}
+
+.reading-alt {
+  padding: 2px 10px;
+  border: 0;
+  border-radius: var(--rounded-full);
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  font-size: var(--type-alternative-size);
+  font-style: italic;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.reading-alt:hover {
+  color: var(--color-ink);
+}
+
+.reading-alt:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}
