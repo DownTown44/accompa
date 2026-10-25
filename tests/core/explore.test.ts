@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, pitchesOnString, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
 import { pitch, pitchClass } from '../../src/core/pitch'
 
 const p = pitch
@@ -278,5 +278,18 @@ describe('readingRootedOn', () => {
     expect(readingRootedOn(lit, p(57))?.root).toBe(pitchClass(p(57)))
     expect(readingRootedOn(lit, p(57))?.quality.name).toBe('min7')
     expect(readingRootedOn(lit, p(62))).toBeUndefined()
+  })
+})
+
+describe('pitchesOnString', () => {
+  it('lists the lit pitches shown on the string, by remembered or default position', () => {
+    const remembered = { 60: { string: 3, fret: 5 } }
+    expect(pitchesOnString([pitch(60), pitch(64)], remembered, 3)).toEqual([60])
+    expect(pitchesOnString([pitch(60), pitch(64)], remembered, 5)).toEqual([64])
+    expect(pitchesOnString([pitch(60)], remembered, 0)).toEqual([])
+  })
+
+  it('gives no string to a note beyond the fretboard', () => {
+    for (let s = 0; s < 6; s++) expect(pitchesOnString([pitch(30)], {}, s)).toEqual([])
   })
 })

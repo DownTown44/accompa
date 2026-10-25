@@ -287,6 +287,75 @@ describe('toggleNote', () => {
     expect(moved.workspace.positions).toEqual({ 64: { string: 4, fret: 5 } })
   })
 
+  describe('one note per string', () => {
+    const at = (s: typeof initialSession, n: number, string: number, fret: number) => toggle(s, n, { string, fret })
+    const guitar: typeof initialSession = { ...initialSession, instrument: 'guitar' }
+
+    it('keeps both notes on different strings', () => {
+      expect(at(at(guitar, 60, 3, 5), 64, 5, 0).workspace.pitches).toEqual([60, 64])
+    })
+
+    it('replaces the note on the same string', () => {
+      const s = at(at(guitar, 60, 3, 5), 62, 3, 7)
+      expect(s.workspace.pitches).toEqual([62])
+      expect(s.workspace.positions).toEqual({ 62: { string: 3, fret: 7 } })
+    })
+
+    it('replaces the note on the string a lit note moves to', () => {
+      const s = at(at(at(guitar, 60, 3, 5), 59, 4, 0), 60, 4, 1)
+      expect(s.workspace.pitches).toEqual([60])
+      expect(s.workspace.positions).toEqual({ 60: { string: 4, fret: 1 } })
+    })
+
+    it('moves a note to a free string without replacing others', () => {
+      const s = at(at(at(guitar, 60, 3, 5), 64, 5, 0), 60, 4, 1)
+      expect(s.workspace.pitches).toEqual([60, 64])
+    })
+
+    it('unlights a note at its own position as before', () => {
+      expect(at(at(at(guitar, 60, 3, 5), 64, 5, 0), 60, 3, 5).workspace.pitches).toEqual([64])
+    })
+
+    it('keeps a note beyond the fretboard and takes no string', () => {
+      expect(at(toggle(guitar, 36), 60, 3, 5).workspace.pitches).toEqual([36, 60])
+    })
+
+    it('clears the root when its note is replaced', () => {
+      let s = guitar
+      for (const [n, st, f] of [[60, 5, 1], [64, 4, 5], [67, 3, 0], [71, 2, 4]] as const) s = at(s, n, st, f)
+      s = sessionReducer(s, { type: 'chooseRoot', pitch: pitch(64) })
+      expect(s.workspace.root).toBe(64)
+      const next = at(s, 66, 4, 7)
+      expect(next.workspace.pitches).toEqual([60, 67, 71, 66])
+      expect(next.workspace.root).toBeUndefined()
+    })
+
+    // Three notes beyond the fretboard (no string), then five notes on strings 0 to 4.
+    const full = () => {
+      let s = guitar
+      for (const n of [30, 31, 32]) s = toggle(s, n)
+      for (const [n, st, f] of [[40, 0, 0], [45, 1, 0], [50, 2, 0], [55, 3, 0], [59, 4, 0]] as const) s = at(s, n, st, f)
+      return s
+    }
+
+    it('unlights the oldest past the cap when a free string is clicked', () => {
+      const s = at(full(), 64, 5, 0)
+      expect(s.workspace.pitches).toEqual([31, 32, 40, 45, 50, 55, 59, 64])
+      expect(s.workspace.positions[64]).toEqual({ string: 5, fret: 0 })
+    })
+
+    it('replaces the note on the string first, so the cap trims nothing when it stays at 8', () => {
+      const s = at(full(), 60, 4, 1)
+      expect(s.workspace.pitches).toEqual([30, 31, 32, 40, 45, 50, 55, 60])
+    })
+
+    it('restores the whole workspace with Esc and Undo', () => {
+      const s = at(at(guitar, 60, 3, 5), 62, 3, 7)
+      const undone = sessionReducer(sessionReducer(s, { type: 'dismiss' }), { type: 'undoClear' })
+      expect(undone.workspace).toEqual(s.workspace)
+    })
+  })
+
   it('drops the position of the note that falls off', () => {
     let state = toggle(initialSession, 60, { string: 3, fret: 5 })
     for (let n = 61; n < 69; n++) state = toggle(state, n)
