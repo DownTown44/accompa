@@ -2,7 +2,8 @@
 title: 'Story 3.2: Root marker, role shapes and legend'
 type: 'feature'
 created: '2026-10-25'
-status: 'draft'
+status: 'done'
+baseline_commit: 'e9416766b82a0efe0fb86f67cedbffc2c4ea7d6d'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -58,11 +59,11 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/core/theory.ts`, `src/core/explore.ts` -- degree labels; role and legend function -- one source
-- [ ] `src/ui/shared/` marker, `PianoKeyboard.tsx`, `Fretboard.tsx`, stages, `useLitNotes.ts`, CSS -- shapes, tint, open ring, dark tokens
-- [ ] `src/ui/explore/ExploreView.tsx`, `explore.css`, `theme.css` -- legend row, block height
-- [ ] Tests per Code Map -- every matrix row, Listen regression
-- [ ] Headless Chrome 1280 x 800 -- picture the matrix shapes in light and dark on both instruments; compare instrument top edge across the stability states
+- [x] `src/core/theory.ts`, `src/core/explore.ts` -- degree labels; role and legend function -- one source
+- [x] `src/ui/shared/` marker, `PianoKeyboard.tsx`, `Fretboard.tsx`, stages, `useLitNotes.ts`, CSS -- shapes, tint, open ring, dark tokens
+- [x] `src/ui/explore/ExploreView.tsx`, `explore.css`, `theme.css` -- legend row, block height
+- [x] Tests per Code Map -- every matrix row, Listen regression
+- [x] Headless Chrome 1280 x 800 -- picture the matrix shapes in light and dark on both instruments; compare instrument top edge across the stability states
 
 **Acceptance Criteria:**
 - Given a recognised chord, when it renders, then each note shows its role shape and colour, piano keys carry the tint, and the legend lists the roles present with intervals.
@@ -79,3 +80,23 @@ context:
 
 **Manual checks (if no CLI):**
 - Headless Chrome at 1280 x 800, light and dark: C E G, C E G B, E G C, an unknown set; measure the instrument top.
+
+## Review Triage Log
+
+| # | Layer | Finding | Verdict | Route | Evidence |
+|---|-------|---------|---------|-------|----------|
+| 1 | edge, blind | Without `roles`, Listen's non-root dot shrinks to r5 and the piano root key gets the tint | medium | patch | Fixed: the default path draws the old r9 dot and no tint; a Listen test through `App` asserts it. |
+| 2 | gap | No guitar test with an off-board note; sorted multiset hides role-to-position mix-ups | medium | patch | Fixed: per-position roles for E4 E6 G4 C5 after a swap (E6 is unplaced, root last). |
+| 3 | edge, gap | No test for the Listen, black-key rows | medium | patch | Fixed: Listen test and a black-key `lit-dot-black` test added. |
+| 4 | blind, edge | Legend or readout overflows on narrow viewports; fixed 34px row with large text | low | rejected | Laptop-only; Chrome at 1280 x 800 shows the instrument top at 264.19 in every state. |
+| 5 | edge, blind | `Math.min` of an empty filter gives `Infinity` | false | rejected | A reading's root class always comes from a lit pitch, so the filter is never empty. |
+| 6 | edge | Block height switched to the readout size and is shared with Listen | false | rejected | Measured: instrument top is 264.19 in Listen and Explore, light and dark. |
+| 7 | edge | `justify-content: flex-start` may shift the prompt or a wrapped readout | false | rejected | The readout is `nowrap` and the prompt state measured at the same top. |
+| 8 | edge | Root beyond the fretboard gives no guitar ring | low | rejected | Same as before this story; the status note counts the unplaced note and the fix adds guards. |
+| 9 | blind | Guitar roles dropped when `exact` is false | false | rejected | `exact` is false only in Listen, which has no roles by design. |
+| 10 | edge | `stepOf` of -1 relies on `STEP_ROLES[-1]` being undefined | low | rejected | Falls to `none`; a deliberate fallback with no failing input shown. |
+| 11 | blind | Legend not in the live region; empty `<ul>` exposed | low | rejected | The spec puts the legend outside the live region; the readout and spoken name carry the chord. |
+| 12 | blind | Magic numbers in the triangle, repeated tint rules, unused `marker-none` CSS, 1px stroke on black no-role dot | low | rejected | Cosmetic; no named harm, and the fix is refactoring. |
+| 13 | blind | Colour-blind and contrast checks of role fills | low | rejected | Shape is the primary cue (spec: no role by colour alone); screenshots show legible shapes in light and dark. |
+| 14 | edge | `upper` and `pair` in `GuitarStage` still derive from `root` | low | rejected | Unused when `exact`; no failing case. |
+| 15 | blind | `as FretPosition & { role }` cast | low | rejected | Cosmetic. |
