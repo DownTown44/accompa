@@ -103,3 +103,18 @@ describe('root marker', () => {
     expect(c.querySelector('[data-root]')!.getAttribute('data-lit')).toBe('1:0')
   })
 })
+
+describe('role markers', () => {
+  it('draws the role shape inside the nut ring on an open string', () => {
+    const c = draw({ lit: [{ string: 0, fret: 0 }, { string: 2, fret: 2 }], roles: ['third', 'seventh'] })
+    expect(c.querySelector('[data-lit="0:0"] .fb-open-ring')).not.toBeNull()
+    expect(c.querySelector('[data-lit="0:0"] polygon.marker-third')).not.toBeNull()
+    expect(c.querySelector('[data-lit="2:2"] polygon.marker-seventh')).not.toBeNull()
+    expect(c.querySelector('[data-root]')).toBeNull()
+  })
+
+  it('rings every root role', () => {
+    const c = draw({ lit: [{ string: 0, fret: 0 }, { string: 2, fret: 2 }], roles: ['root', 'root'] })
+    expect(c.querySelectorAll('[data-root]')).toHaveLength(2)
+  })
+})

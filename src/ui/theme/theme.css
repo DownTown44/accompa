@@ -79,8 +79,9 @@
   --spacing-toggle-gap: 2px;
   --spacing-toggle-padding: 5px;
   --spacing-readout-gap: 14px;
+  --spacing-legend-height: 34px;
   --spacing-readout-block-height: calc(
-    var(--type-readout-question-size) * var(--type-readout-question-line-height) + var(--spacing-readout-gap) + var(--type-hint-size) * 1.4
+    var(--type-readout-size) * var(--type-readout-line-height) + var(--spacing-readout-gap) + var(--spacing-legend-height)
   );
   --spacing-interval-gap: 10px;
   --spacing-control-gap: 18px;

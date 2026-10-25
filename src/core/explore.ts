@@ -1,7 +1,7 @@
 import { nameChord } from './chords'
 import { closestPair, positionsForPitch, type FretPosition } from './instruments'
-import { pitch, type Pitch } from './pitch'
-import { chordSpoken, chordSymbol, noteName, spellNotes } from './spelling'
+import { pitch, pitchClass, type Pitch } from './pitch'
+import { chordSpoken, chordSymbol, noteName, spellChord, spellNotes } from './spelling'
 import { INTERVALS, type IntervalDefinition } from './theory'
 
 // The most notes Explore keeps lit; the oldest unlights when one more is added.
@@ -38,6 +38,56 @@ export function exploreReadout(lit: readonly Pitch[]): ExploreReadout | null {
   const reading = nameChord(lit)[0]
   if (reading) return { label: chordSymbol(reading), name: chordSpoken(reading) }
   return { label: spellNotes(lit).join(' ') }
+}
+
+export type Role = 'root' | 'third' | 'fifth' | 'seventh' | 'none'
+
+export interface LegendEntry {
+  readonly role: Exclude<Role, 'none'>
+  // `root`, `3rd`, `5th` or `7th`.
+  readonly label: string
+  readonly note: string
+  // The chord-degree label from the root (`M3`); absent for the root.
+  readonly degree?: string
+}
+
+export interface ExploreReading {
+  readonly readout: ExploreReadout | null
+  // The reading's root: the lowest lit note of its pitch class; the lowest lit note when nothing is named.
+  readonly root?: Pitch
+  // The role of each lit pitch, aligned with the input.
+  readonly roles: readonly Role[]
+  readonly legend: readonly LegendEntry[]
+}
+
+const STEP_ROLES = ['root', 'third', 'fifth', 'seventh'] as const
+const STEP_LABELS = ['root', '3rd', '5th', '7th']
+
+// The one reading of the lit notes: readout, root, each note's role and the legend entries.
+export function exploreReading(lit: readonly Pitch[]): ExploreReading {
+  const readout = exploreReadout(lit)
+  if (lit.length === 0) return { readout, roles: [], legend: [] }
+  const lowest = Math.min(...lit) as Pitch
+  const reading = lit.length >= 3 ? nameChord(lit)[0] : undefined
+  if (!reading) {
+    return {
+      readout,
+      root: lowest,
+      roles: lit.map((p) => (p === lowest ? 'root' : 'none')),
+      legend: [{ role: 'root', label: 'root', note: noteName(lowest) }],
+    }
+  }
+  const root = Math.min(...lit.filter((p) => pitchClass(p) === reading.root)) as Pitch
+  const stepOf = (p: Pitch) => reading.quality.intervals.findIndex((i) => i === (pitchClass(p) - reading.root + 12) % 12)
+  const roles = lit.map((p) => STEP_ROLES[stepOf(p)] ?? 'none')
+  const spelled = spellChord(reading)
+  const legend: LegendEntry[] = []
+  reading.quality.intervals.forEach((_, step) => {
+    const role = STEP_ROLES[step]!
+    if (!roles.includes(role)) return
+    legend.push(step === 0 ? { role, label: 'root', note: spelled[0]! } : { role, label: STEP_LABELS[step]!, note: spelled[step]!, degree: reading.quality.degrees[step - 1] })
+  })
+  return { readout, root, roles, legend }
 }
 
 // Remembered fret positions by pitch; plain data.

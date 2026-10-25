@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--spacing-readout-gap);
   box-sizing: content-box;
   height: var(--spacing-readout-block-height);
@@ -38,4 +38,31 @@
   color: var(--color-muted);
   font-size: var(--type-hint-size);
   font-weight: var(--type-hint-weight);
+}
+
+/* One reserved row; it stays empty when nothing is lit. */
+.role-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  height: var(--spacing-legend-height);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-legend-size);
+  font-weight: var(--type-legend-weight);
+  white-space: nowrap;
+}
+
+.role-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-legend svg {
+  display: block;
+  width: 34px;
+  height: 34px;
 }
