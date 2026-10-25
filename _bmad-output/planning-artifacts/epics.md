@@ -210,9 +210,28 @@ Decided by Apor after the Epic 3 retrospective: Explore stops two lit notes shar
 **When** I click another fret on that string
 **Then** the string holds only one lit note, and the readout, markers and legend follow the notes that remain.
 
-**Given** lit notes on the piano that map to the same guitar string
+The swap from the piano and the six-string limit are Story 3.9.
+
+### Story 3.9: Carry piano notes to the guitar one per string
+
+As Apor,
+I want the swap from the piano to place the lit notes one per string,
+So that the fretboard shows a shape a hand can play, and I am told what it left out.
+
+**Covers:** FR16 (the one-note-per-string rule); Epic 3 retrospective item
+
+Split from Story 3.8; built after it, reusing its placement function.
+
+**Acceptance Criteria:**
+
+**Given** lit piano notes that can only sit on the same guitar string
 **When** I swap to the guitar
-**Then** the swap shows one note per string and says what it left out.
+**Then** each note takes its remembered position or a free string, and a note with no free string is left out
+**And** the Status note says how many were left out, together with any notes beyond the fretboard.
+
+**Given** more than six notes are lit
+**When** I swap to the guitar and back
+**Then** the extra notes stay in the workspace and are lit again on the piano.
 
 ## Epic 4: Find the chord on guitar
 Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
