@@ -102,6 +102,27 @@ describe('synth engine', () => {
     expect(ctx.oscillators).toHaveLength(3)
   })
 
+  it('steps an eight-note arpeggio low to high at equal intervals', () => {
+    const ctx = new FakeContext('running')
+    const notes = [60, 62, 64, 65, 67, 69, 71, 72].map(pitch)
+    createSynthEngine(asContext(ctx)).play(notes, 'arpeggio')
+    const starts = ctx.oscillators.map((o) => o.startedAt!)
+    const freqs = ctx.oscillators.map((o) => o.frequency.value)
+    expect(ctx.oscillators).toHaveLength(8)
+    expect([...freqs].sort((a, b) => a - b)).toEqual(freqs)
+    const steps = starts.slice(1).map((t, i) => t - starts[i])
+    expect(steps.every((d) => d > 0)).toBe(true)
+    expect(steps[0]).toBeCloseTo(0.55, 10)
+    steps.forEach((d) => expect(d).toBeCloseTo(steps[0], 10))
+  })
+
+  it('starts all eight notes of a block together', () => {
+    const ctx = new FakeContext('running')
+    createSynthEngine(asContext(ctx)).play([60, 62, 64, 65, 67, 69, 71, 72].map(pitch), 'block')
+    expect(ctx.oscillators).toHaveLength(8)
+    expect(new Set(ctx.oscillators.map((o) => o.startedAt)).size).toBe(1)
+  })
+
   it('tunes A4 to 440 Hz', () => {
     const ctx = new FakeContext('running')
     createSynthEngine(asContext(ctx)).play([pitch(69)], 'block')
