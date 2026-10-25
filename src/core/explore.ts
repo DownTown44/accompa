@@ -25,8 +25,14 @@ export function pairInterval(a: Pitch, b: Pitch): IntervalDefinition | null {
 // The identity of a reading: root pitch class and quality name.
 export const readingChoice = (reading: ChordReading): ReadingChoice => ({ root: reading.root, quality: reading.quality.name })
 
-export const isReading = (reading: ChordReading, choice: ReadingChoice): boolean =>
-  reading.root === choice.root && reading.quality.name === choice.quality
+// Two choices are the same when root and quality are equal.
+export const sameChoice = (a: ReadingChoice, b: ReadingChoice): boolean => a.root === b.root && a.quality === b.quality
+
+export const isReading = (reading: ChordReading, choice: ReadingChoice): boolean => sameChoice(readingChoice(reading), choice)
+
+// The namer reading whose root is the pitch's class, if any.
+export const readingRootedOn = (lit: readonly Pitch[], p: Pitch): ChordReading | undefined =>
+  nameChord(lit).find((r) => r.root === pitchClass(p))
 
 // The readings of the lit notes with the chosen one first, the others in namer order;
 // the first reading leads when nothing is chosen or the chosen one is no longer named.
@@ -41,7 +47,7 @@ const litRoot = (lit: readonly Pitch[], root?: Pitch): Pitch | undefined => (roo
 
 // With a root, the one reading rooted on its pitch class leads; none means the set reads as unknown.
 function rootedReadings(lit: readonly Pitch[], root: Pitch): ChordReading[] {
-  const found = nameChord(lit).find((r) => r.root === pitchClass(root))
+  const found = readingRootedOn(lit, root)
   return found ? orderedReadings(lit, readingChoice(found)) : []
 }
 

@@ -120,7 +120,7 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 
 Click-to-sound: every note click sounds immediately (on press); the note toggles lit. Click a lit note to unlight it. No hover-only actions.
 
-Root: the lowest note is the root by default. `R` then click a lit note sets the root; clicking an alternative reading in the Readout also sets it. [ASSUMPTION] exact `R` gesture (the wireframe also says "right-click or key R").
+Root: the root is the chord's root, the lowest lit note of that pitch class (so the inversion C/E marks C, not E); when no chord is named it is the lowest lit note. `R` then click a lit note sets the root (built as `R` then click; no right-click); a note that roots no chord makes the set read as unknown; clicking an alternative reading in the Readout also sets the root and clears a chosen one.
 
 Voicing browsing: `Left` / `Right` or the arrows step; a fret click moves a note (hand-edit, FR-19) and the name keeps updating.
 

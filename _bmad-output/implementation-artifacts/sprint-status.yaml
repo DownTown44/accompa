@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-26-2026 10:30
+last_updated: 10-25-2026 18:30
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -63,10 +63,13 @@ development_status:
   3-1-name-chords-in-core: done
   3-2-root-marker-role-shapes-and-legend: done
   3-3-choose-between-alternative-chord-readings: done
-  3-4-play-the-chord-as-a-block-or-an-arpeggio: review
+  3-4-play-the-chord-as-a-block-or-an-arpeggio: done
   3-5-see-the-chord-named-as-i-click-notes: done
   3-6-choose-the-root-by-clicking-a-note: done
-  epic-3-retrospective: optional
+  3-7-tidy-up-before-the-fretboard: review
+  3-8-one-note-per-string-on-the-guitar: backlog
+  3-9-carry-piano-notes-to-the-guitar-one-per-string: backlog
+  epic-3-retrospective: done
 
   epic-4: backlog
   4-1-carry-the-chord-to-the-fretboard: backlog
@@ -89,20 +92,20 @@ action_items:
     action: "Extract one guess-validity rule used by the hook, the buttons and the
       reducer"
     owner: "dev (Amelia)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-1-retro-item-2-add-shared-test-helpers-under-tests-ui-s"
     epic: 1
     action: "Add shared test helpers under tests/ui/support, point story agents at
       them, and split SetupPanel.test.tsx by story concern"
     owner: "dev (Amelia)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-1-retro-item-3-remove-the-dead-closesetup-action-and-it"
     epic: 1
     action: "Remove the dead closeSetup action and its test, and add a favicon"
     owner: "dev (Amelia)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-1-retro-item-4-record-recurring-rejected-review-finding"
     epic: 1
@@ -139,14 +142,14 @@ action_items:
       styles and focus helper, one guess-validity rule, shared test helpers and split
       SetupPanel.test.tsx, favicon"
     owner: "dev (Amelia), spec first"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
   - id: "epic-2-retro-item-9-decide-what-the-user-sees-for-lit-notes"
     epic: 2
     action: "Decide what the user sees for lit notes beyond the guitar range or wider
       than one piano window, before Epic 4"
     owner: "Apor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
   - id: "epic-2-retro-item-10-push-main-or-branch-the-docs-after-house"
     epic: 2
@@ -167,5 +170,34 @@ action_items:
     action: "Keep the matrix row for the instrument not moving in every spec that
       touches the readout or controls"
     owner: "Apor (planning)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
+  - id: "epic-3-retro-item-13-build-story-3-7-tidy-up-before-the-fretb"
+    epic: 3
+    action: "Build Story 3.7, Tidy up before the fretboard: shared reading-identity
+      and root-to-reading helpers in core, split ExploreView.test.tsx by concern,
+      formatter and line-ending config"
+    owner: "dev (Amelia), spec first"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
+  - id: "epic-3-retro-item-14-reconcile-experience-md-root-default-epi"
+    epic: 3
+    action: "Reconcile EXPERIENCE.md root default, epics.md Story 3.3 text and epic-3-context.md
+      C6 examples to the as-built behaviour"
+    owner: "Apor approves, dev applies"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
+  - id: "epic-3-retro-item-15-decide-the-one-note-per-string-rule-for"
+    epic: 3
+    action: "Decide the one-note-per-string rule for Explore on the guitar and where
+      Epic 4 enforces it (4.1, 4.3 or 4.6)"
+    owner: "Apor"
+    status: in-progress
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
+  - id: "epic-3-retro-item-16-keep-matrix-rows-for-the-instrument-not"
+    epic: 3
+    action: "Keep matrix rows for the instrument not moving and a Listen regression
+      in every spec that touches a shared component"
+    owner: "Apor (planning)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"

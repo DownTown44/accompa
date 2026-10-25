@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
 import { pitch, pitchClass } from '../../src/core/pitch'
 
 const p = pitch
@@ -261,5 +261,22 @@ describe('exploreReading with a chosen root', () => {
     expect(two.roles).toEqual(['none', 'root'])
     expect(two.legend).toEqual([{ role: 'root', label: 'root', note: 'G' }])
     expect(two.alternatives).toEqual([])
+  })
+})
+
+describe('sameChoice', () => {
+  it('is true for equal root and quality, false when either differs', () => {
+    expect(sameChoice({ root: pitchClass(p(57)), quality: 'min7' }, { root: pitchClass(p(57)), quality: 'min7' })).toBe(true)
+    expect(sameChoice({ root: pitchClass(p(57)), quality: 'min7' }, { root: pitchClass(p(60)), quality: 'min7' })).toBe(false)
+    expect(sameChoice({ root: pitchClass(p(57)), quality: 'min7' }, { root: pitchClass(p(57)), quality: 'dom7' })).toBe(false)
+  })
+})
+
+describe('readingRootedOn', () => {
+  it('returns the reading rooted on the pitch class, or undefined', () => {
+    const lit = [57, 60, 64, 67].map(p)
+    expect(readingRootedOn(lit, p(57))?.root).toBe(pitchClass(p(57)))
+    expect(readingRootedOn(lit, p(57))?.quality.name).toBe('min7')
+    expect(readingRootedOn(lit, p(62))).toBeUndefined()
   })
 })
