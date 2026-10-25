@@ -17,7 +17,7 @@ const sizeFor = (label: string): 'large' | 'medium' | 'small' =>
 export function ExploreView() {
   const { session } = useSession()
   const { chooseReading } = useSessionActions()
-  const { readout, legend, alternatives } = exploreReading(session.workspace.pitches, session.workspace.reading)
+  const { readout, legend, alternatives } = exploreReading(session.workspace.pitches, session.workspace.reading, session.workspace.root)
   const spoken = readout ? (readout.name ?? readout.label) : ''
   const [announced, setAnnounced] = useState('')
   useEffect(() => {

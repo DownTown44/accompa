@@ -40,7 +40,15 @@ export function Shell() {
         : undefined
   const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
   const message =
-    audio === 'blocked' ? 'Press any key to wake the sound.' : chooseRoot ? 'Click a note to set the root.' : undo ? 'Notes cleared.' : offscreen
+    audio === 'blocked'
+      ? 'Press any key to wake the sound.'
+      : session.rootArmed
+        ? 'Click a lit note to set the root.'
+        : chooseRoot
+          ? 'Click a note to set the root.'
+          : undo
+            ? 'Notes cleared.'
+            : offscreen
   return (
     <div className="page">
       <ModeStrip />

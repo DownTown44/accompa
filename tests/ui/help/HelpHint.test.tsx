@@ -87,6 +87,7 @@ describe('help hint', () => {
       [['1–9', '0', '-', '='], 'Pick m2 to P8'],
       [['M'], 'Listen or Explore'],
       [['I'], 'Piano or Guitar'],
+      [['R'], 'Set root'],
       [['P'], 'Setup'],
       [['[', ']'], 'Piano octave down, up'],
       [['Esc'], 'Close panel or list; clear notes in Explore'],
