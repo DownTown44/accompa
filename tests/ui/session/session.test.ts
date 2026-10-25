@@ -465,3 +465,89 @@ describe('chooseReading', () => {
     expect(sessionReducer(chosen, { type: 'chooseReading', reading: { root: pitchClass(pitch(3)), quality: 'dim7' } }).practice).toBe(chosen.practice)
   })
 })
+
+describe('chooseRoot and armRoot', () => {
+  const lit = (ns: number[]) => ns.reduce((s, n) => sessionReducer(s, { type: 'toggleNote', pitch: pitch(n) }), initialSession)
+  const dim7 = lit([60, 63, 66, 69])
+  const aug = lit([60, 64, 68])
+  const armed = sessionReducer(dim7, { type: 'armRoot' })
+
+  it('arms only in Explore with a lit note, and toggles', () => {
+    expect(sessionReducer(initialSession, { type: 'armRoot' })).toBe(initialSession)
+    expect(sessionReducer({ ...dim7, mode: 'listen' }, { type: 'armRoot' }).rootArmed).toBe(false)
+    expect(armed.rootArmed).toBe(true)
+    expect(sessionReducer(armed, { type: 'armRoot' }).rootArmed).toBe(false)
+  })
+
+  it('stores the root and its reading, disarms, and leaves the rest by reference', () => {
+    const next = sessionReducer(armed, { type: 'chooseRoot', pitch: pitch(66) })
+    expect(next.workspace.root).toBe(66)
+    expect(next.workspace.reading).toEqual({ root: pitchClass(pitch(66)), quality: 'dim7' })
+    expect(next.rootArmed).toBe(false)
+    expect(next.workspace.pitches).toBe(armed.workspace.pitches)
+    expect(next.practice).toBe(armed.practice)
+    expect(next.cleared).toBe(armed.cleared)
+  })
+
+  it('removes the reading when the root roots none, and ignores unlit pitches', () => {
+    const maj7 = lit([60, 64, 67, 71])
+    const choice = sessionReducer(maj7, { type: 'chooseReading', reading: { root: pitchClass(pitch(0)), quality: 'maj7' } })
+    const next = sessionReducer(choice, { type: 'chooseRoot', pitch: pitch(67) })
+    expect(next.workspace.root).toBe(67)
+    expect('reading' in next.workspace).toBe(false)
+    expect(sessionReducer(maj7, { type: 'chooseRoot', pitch: pitch(61) })).toBe(maj7)
+  })
+
+  it('returns the same state for the same root', () => {
+    const once = sessionReducer(aug, { type: 'chooseRoot', pitch: pitch(64) })
+    expect(sessionReducer(once, { type: 'chooseRoot', pitch: pitch(64) })).toBe(once)
+  })
+
+  const rooted = sessionReducer(dim7, { type: 'chooseRoot', pitch: pitch(66) })
+
+  it('persists through added notes and a guitar move, and clears when unlit', () => {
+    expect(sessionReducer(rooted, { type: 'toggleNote', pitch: pitch(72) }).workspace.root).toBe(66)
+    expect(sessionReducer(rooted, { type: 'toggleNote', pitch: pitch(60), position: { string: 2, fret: 1 } }).workspace.root).toBe(66)
+    const unlit = sessionReducer(rooted, { type: 'toggleNote', pitch: pitch(66) })
+    expect('root' in unlit.workspace).toBe(false)
+  })
+
+  it('keeps the root when its class stops rooting a reading', () => {
+    const gone = sessionReducer(rooted, { type: 'toggleNote', pitch: pitch(63) })
+    expect(gone.workspace.root).toBe(66)
+    expect('reading' in gone.workspace).toBe(false)
+  })
+
+  it('choosing an alternative reading clears the root', () => {
+    const next = sessionReducer(rooted, { type: 'chooseReading', reading: { root: pitchClass(pitch(0)), quality: 'dim7' } })
+    expect('root' in next.workspace).toBe(false)
+    expect(next.workspace.reading?.root).toBe(0)
+  })
+
+  it('Esc disarms first, Undo restores the root but not the armed state, a mode switch disarms', () => {
+    const a = sessionReducer(rooted, { type: 'armRoot' })
+    const esc1 = sessionReducer(a, { type: 'dismiss' })
+    expect(esc1.rootArmed).toBe(false)
+    expect(esc1.workspace).toBe(a.workspace)
+    const cleared = sessionReducer(esc1, { type: 'dismiss' })
+    const undone = sessionReducer(cleared, { type: 'undoClear' })
+    expect(undone.workspace.root).toBe(66)
+    expect(undone.rootArmed).toBe(false)
+    const listen = sessionReducer(a, { type: 'setMode', mode: 'listen' })
+    expect(listen.rootArmed).toBe(false)
+    expect(listen.workspace).toBe(a.workspace)
+  })
+
+  it('lighting no notes disarms', () => {
+    const a = sessionReducer(lit([60]), { type: 'armRoot' })
+    expect(sessionReducer(a, { type: 'toggleNote', pitch: pitch(60) }).rootArmed).toBe(false)
+  })
+
+  it('re-clicking the current root while armed only disarms', () => {
+    const again = sessionReducer(rooted, { type: 'armRoot' })
+    expect(again.workspace.root).toBe(66)
+    const next = sessionReducer(again, { type: 'chooseRoot', pitch: pitch(66) })
+    expect(next.rootArmed).toBe(false)
+    expect(next.workspace).toBe(again.workspace)
+  })
+})

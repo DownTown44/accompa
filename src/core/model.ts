@@ -29,6 +29,8 @@ export interface Workspace {
   readonly positions: Readonly<Record<number, FretPosition>>
   // The chord reading chosen among the namer's readings; absent means the first. Not persisted.
   readonly reading?: ReadingChoice
+  // The lit pitch the user made the root; wins over the reading's root. Not persisted.
+  readonly root?: Pitch
 }
 
 // Written only by practice rounds; never touches the workspace.

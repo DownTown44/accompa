@@ -217,3 +217,49 @@ describe('chosen reading', () => {
     expect(exploreReading(dim7, first)).toEqual(exploreReading(dim7))
   })
 })
+
+describe('exploreReading with a chosen root', () => {
+  const notes = (...n: number[]) => n.map(p)
+
+  it('roots a reading on the chosen pitch and marks it', () => {
+    const r = exploreReading(notes(60, 63, 66, 69), undefined, p(66))
+    expect(r.readout?.label).toBe('F♯dim7/C')
+    expect(r.root).toBe(66)
+    expect(r.roles).toEqual(['fifth', 'seventh', 'root', 'third'])
+    expect(r.legend[0]).toEqual({ role: 'root', label: 'root', note: 'F♯' })
+  })
+
+  it('reads as unknown when the root roots no reading, listing every reading', () => {
+    const r = exploreReading(notes(60, 64, 67, 71), undefined, p(64))
+    expect(r.readout?.label).toBe('C E G B')
+    expect(r.root).toBe(64)
+    expect(r.roles).toEqual(['none', 'root', 'none', 'none'])
+    expect(r.legend).toEqual([{ role: 'root', label: 'root', note: 'E' }])
+    expect(r.alternatives.map((o) => o.symbol)).toEqual(['Cmaj7'])
+    expect(r.readings).toEqual(r.alternatives)
+  })
+
+  it('wins over the reading choice and ignores a root that is not lit', () => {
+    const choice = { root: pitchClass(p(69)), quality: 'dim7' }
+    expect(exploreReading(notes(60, 63, 66, 69), choice, p(63)).readout?.label).toBe('E♭dim7/C')
+    expect(exploreReading(notes(60, 63, 66, 69), choice, p(72))).toEqual(exploreReading(notes(60, 63, 66, 69), choice))
+  })
+
+  it('keeps the root through added notes and lists the other aug readings', () => {
+    expect(exploreReading(notes(64, 67, 71, 74), undefined, p(64)).readout?.label).toBe('Em7')
+    const aug = exploreReading(notes(60, 64, 68), undefined, p(64))
+    expect(aug.root).toBe(64)
+    expect(aug.alternatives).toHaveLength(2)
+  })
+
+  it('with one or two lit notes keeps the readout and moves the root marker and legend', () => {
+    const one = exploreReading(notes(60), undefined, p(60))
+    expect(one.readout?.label).toBe('C')
+    const two = exploreReading(notes(60, 67), undefined, p(67))
+    expect(two.readout?.label).toBe('P5')
+    expect(two.root).toBe(67)
+    expect(two.roles).toEqual(['none', 'root'])
+    expect(two.legend).toEqual([{ role: 'root', label: 'root', note: 'G' }])
+    expect(two.alternatives).toEqual([])
+  })
+})

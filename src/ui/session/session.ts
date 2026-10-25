@@ -8,9 +8,10 @@ import {
   type Workspace,
 } from '../../core/model'
 import { canGuess } from '../../core/guess'
-import { isReading, litPositions, orderedReadings, toggleLit } from '../../core/explore'
+import { nameChord } from '../../core/chords'
+import { isReading, litPositions, orderedReadings, readingChoice, toggleLit } from '../../core/explore'
 import type { FretPosition } from '../../core/instruments'
-import type { Interval, Pitch } from '../../core/pitch'
+import { pitchClass, type Interval, type Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
 export type { Instrument }
@@ -33,6 +34,8 @@ export interface Session {
   readonly feedback: Feedback | null
   readonly setupOpen: boolean
   readonly helpOpen: boolean
+  // The next click on a lit note makes it the root; never undone.
+  readonly rootArmed: boolean
 }
 
 export type SessionAction =
@@ -41,6 +44,8 @@ export type SessionAction =
   | { type: 'toggleInstrument' }
   | { type: 'toggleNote'; pitch: Pitch; position?: FretPosition }
   | { type: 'chooseReading'; reading: ReadingChoice }
+  | { type: 'chooseRoot'; pitch: Pitch }
+  | { type: 'armRoot' }
   | { type: 'setQuestion'; question: Question }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
@@ -65,6 +70,7 @@ export const initialSession: Session = {
   feedback: null,
   setupOpen: false,
   helpOpen: false,
+  rootArmed: false,
 }
 
 // A revealed question, or the lit Explore notes, must be visible when the piano is showing.
@@ -87,14 +93,14 @@ function pruneReading(workspace: Workspace): Workspace {
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
     case 'setMode':
-      return fitRevealed({ ...state, mode: action.mode })
+      return fitRevealed({ ...state, mode: action.mode, rootArmed: false })
     case 'setInstrument':
       return fitRevealed({ ...state, instrument: action.instrument })
     case 'toggleInstrument':
       return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' })
     case 'toggleNote': {
       const { pitch, position } = action
-      const { pitches, positions, reading } = state.workspace
+      const { pitches, positions, reading, root } = state.workspace
       const keep = (list: readonly Pitch[]) =>
         Object.fromEntries(Object.entries(positions).filter(([key]) => list.includes(Number(key) as Pitch)))
       if (pitches.includes(pitch) && position !== undefined) {
@@ -105,15 +111,34 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       }
       const next = toggleLit(pitches, pitch)
       const remembered = position !== undefined && next.includes(pitch) ? { ...keep(next), [pitch]: position } : keep(next)
-      return { ...state, cleared: null, workspace: pruneReading({ pitches: next, positions: remembered, ...(reading ? { reading } : {}) }) }
+      const workspace = pruneReading({
+        pitches: next,
+        positions: remembered,
+        ...(reading ? { reading } : {}),
+        ...(root !== undefined && next.includes(root) ? { root } : {}),
+      })
+      return { ...state, cleared: null, rootArmed: next.length > 0 && state.rootArmed, workspace }
     }
     case 'chooseReading': {
-      const { reading } = state.workspace
+      const { reading, root, ...rest } = state.workspace
       const { reading: choice } = action
       const named = orderedReadings(state.workspace.pitches).some((r) => isReading(r, choice))
-      if (!named || (reading && reading.root === choice.root && reading.quality === choice.quality)) return state
-      return { ...state, workspace: { ...state.workspace, reading: choice } }
+      if (!named || (root === undefined && reading && reading.root === choice.root && reading.quality === choice.quality)) return state
+      return { ...state, workspace: { ...rest, reading: choice } }
     }
+    case 'chooseRoot': {
+      const { pitch } = action
+      const { pitches, reading, root, ...rest } = state.workspace
+      if (state.mode !== 'explore' || !pitches.includes(pitch)) return state
+      const found = nameChord(pitches).find((r) => r.root === pitchClass(pitch))
+      const choice = found ? readingChoice(found) : undefined
+      const same = root === pitch && (choice ? reading?.root === choice.root && reading.quality === choice.quality : reading === undefined)
+      if (same) return state.rootArmed ? { ...state, rootArmed: false } : state
+      return { ...state, rootArmed: false, workspace: { pitches, ...rest, root: pitch, ...(choice ? { reading: choice } : {}) } }
+    }
+    case 'armRoot':
+      if (state.rootArmed) return { ...state, rootArmed: false }
+      return state.mode === 'explore' && state.workspace.pitches.length > 0 ? { ...state, rootArmed: true } : state
     case 'setQuestion':
       return {
         ...state,
@@ -157,8 +182,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     case 'dismiss':
       if (state.helpOpen) return { ...state, helpOpen: false }
       if (state.setupOpen) return { ...state, setupOpen: false }
+      if (state.rootArmed) return { ...state, rootArmed: false }
       if (state.mode === 'explore' && state.workspace.pitches.length > 0) {
-        return { ...state, cleared: state.workspace, workspace: initialWorkspace }
+        return { ...state, cleared: state.workspace, workspace: initialWorkspace, rootArmed: false }
       }
       return state
     case 'undoClear':

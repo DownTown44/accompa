@@ -105,7 +105,9 @@ export function useSessionActions() {
 
   // Releasing a pressed note lights it, or unlights it when it is already lit.
   function releaseNote(pitch: Pitch, position?: FretPosition) {
-    if (session.mode === 'explore') dispatch({ type: 'toggleNote', pitch, position })
+    if (session.mode !== 'explore') return
+    if (session.rootArmed && session.workspace.pitches.includes(pitch)) dispatch({ type: 'chooseRoot', pitch })
+    else dispatch({ type: 'toggleNote', pitch, position })
   }
 
   function selectMode(mode: Mode) {
@@ -124,6 +126,7 @@ export function useSessionActions() {
     pressNote,
     releaseNote,
     selectMode,
+    armRoot: () => dispatch({ type: 'armRoot' }),
     chooseReading: (reading: ReadingChoice) => dispatch({ type: 'chooseReading', reading }),
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
