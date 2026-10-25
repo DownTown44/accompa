@@ -2,7 +2,8 @@
 title: 'Story 3.5: See the chord named as I click notes'
 type: 'feature'
 created: '2026-10-24'
-status: 'draft'
+status: 'done'
+baseline_commit: '685d3ee9ae452881cc0868431b501eb3b5532518'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -57,12 +58,12 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `src/core/explore.ts` -- raise `MAX_LIT`; `exploreReadout` returns the chord symbol with spoken name, else `spellNotes` for three or more -- one readout path
-- [ ] `src/core/spelling.ts` -- add `chordSpoken` -- natural screen reader text
-- [ ] `src/ui/explore/ExploreView.tsx`, `explore.css` -- length-stepped size, `nowrap`, spoken text in the hidden span and live region -- fixed height
-- [ ] `tests/core/explore.test.ts`, `tests/core/spelling.test.ts` -- replace the cap test; readout rows (chord, inversion, unknown, two classes, nine qualities through `chordSymbol`), `chordSpoken`
-- [ ] `tests/ui/session/session.test.ts`, `tests/ui/explore/ExploreView.test.tsx`, `tests/ui/app/BeyondFretboard.test.tsx` -- replace the third-note tests; matrix rows including swap, clear and Undo, Play and Block with three notes, beyond-range count, live region text after 400 ms
-- [ ] Headless Chrome at 1280 x 800 -- measure the instrument top with 0, 1, 2, 3 and `MAX_LIT` notes on both instruments, and the long names
+- [x] `src/core/explore.ts` -- raise `MAX_LIT`; `exploreReadout` returns the chord symbol with spoken name, else `spellNotes` for three or more -- one readout path
+- [x] `src/core/spelling.ts` -- add `chordSpoken` -- natural screen reader text
+- [x] `src/ui/explore/ExploreView.tsx`, `explore.css` -- length-stepped size, `nowrap`, spoken text in the hidden span and live region -- fixed height
+- [x] `tests/core/explore.test.ts`, `tests/core/spelling.test.ts` -- replace the cap test; readout rows (chord, inversion, unknown, two classes, nine qualities through `chordSymbol`), `chordSpoken`
+- [x] `tests/ui/session/session.test.ts`, `tests/ui/explore/ExploreView.test.tsx`, `tests/ui/app/BeyondFretboard.test.tsx` -- replace the third-note tests; matrix rows including swap, clear and Undo, Play and Block with three notes, beyond-range count, live region text after 400 ms
+- [x] Headless Chrome at 1280 x 800 -- measure the instrument top with 0, 1, 2, 3 and `MAX_LIT` notes on both instruments, and the long names
 
 **Acceptance Criteria:**
 - Given C, E and G are lit in any order, when the third lights, then the readout shows `C` and no cap drops a note.
@@ -80,3 +81,20 @@ context:
 
 **Manual checks (if no CLI):**
 - Headless Chrome at 1280 x 800: Explore, piano and guitar; light C E G, then `Cm7♭5/E♭` and the longest unknown set; compare the instrument top to the empty state.
+
+## Review Triage Log
+
+| # | Layer | Finding | Verdict | Route | Evidence |
+|---|-------|---------|---------|-------|----------|
+| 1 | blind | First reading wins with no tie-break | false | rejected | The frozen block says "the first reading"; ranking is Story 3.1's and alternatives are Story 3.3. |
+| 2 | blind | `C E` for two pitch classes hides the interval | false | rejected | The frozen block and matrix row ("not an interval") require it. |
+| 3 | blind, edge | Font tiers: hard-coded 36px, `question-size` reuse, overflow on narrow screens | low | rejected | Tiers and 36px are in the frozen block; laptop-only; headless Chrome at 1280 x 800 shows no overflow for 8 notes (`scrollWidth <= clientWidth`). |
+| 4 | blind | Spoken form of the note list and `min7` wording | false | rejected | Spec fixes `A min7 over C` and the note names as the spoken text. |
+| 5 | blind | Cap of 8 under-tested; no hint on the silent drop | low | rejected | Cap, swap, Play and Block rows each have a test; the silent drop is today's behaviour. |
+| 6 | blind | Test edits weaken old assertions | low | rejected | The extra `click(key(64))` keeps the old test's two-note setup; the position test sets one position, so `{}` is the whole expectation. |
+| 7 | blind | Fallback spelling untested for enharmonics | low | rejected | `spellNotes` is Story 3.1's, tested there; the new rows cover `C D F♯` and `C E`. |
+| 8 | verification-gap | Beyond-fretboard test asserts `toContain('E')`, which a note list also satisfies | medium | patch | Fixed: exact label `E` and spoken `E major`. |
+| 9 | edge | C4 C5 C6 reads `C`, like one note | low | rejected | Follows the frozen rule (only sets with a reading or two pitch classes are special); the fix adds a branch. |
+| 10 | edge | `label.length` counts UTF-16 units | false | rejected | `♭` and `♯` are one unit; only the rare double glyphs count two, which steps down early and safely. |
+| 11 | edge, gap | No automated check of CSS size steps or boundaries 6/7 and 10/11 | low | rejected | CSS cannot run in happy-dom; the Chrome check covers it. |
+| 12 | edge | Matrix long-name spelling differs (`E♭`, `B♭`) | false | rejected | The matrix names the lit keys; `spellNotes` uses the default root table by decision. Chrome shows `C♯ E♭ F♯ A♭ B♭ B C D`. |
