@@ -172,6 +172,28 @@ Split from Story 3.2; built after Story 3.3, so it must settle how a chosen root
 **When** later notes are added
 **Then** the chosen root stays until it is unlit or the user changes it again.
 
+### Story 3.7: Tidy up before the fretboard
+
+As Apor,
+I want the chord code and tests tidied before guitar voicings build on them,
+So that Epic 4 starts from one rule per idea and a steady toolchain.
+
+**Covers:** Epic 3 retrospective items
+
+**Acceptance Criteria:**
+
+**Given** a chosen reading is compared with a namer reading, and a root is looked up among the readings
+**When** the reducer, the readout and the legend need either
+**Then** one helper each in `core/explore.ts` serves all of them, and `ui/session` no longer calls `nameChord`.
+
+**Given** `tests/ui/explore/ExploreView.test.tsx`
+**When** it is read
+**Then** it is split by concern (readout, readings, root, guitar) with no file near 600 lines, and no test is lost.
+
+**Given** an agent edits source or test files
+**When** it formats them
+**Then** a formatter config, `.editorconfig` and `.gitattributes` matching the existing style (no semicolons, single quotes, width 140, one line ending) mean it does not reflow untouched lines or change line endings.
+
 ## Epic 4: Find the chord on guitar
 Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
 **FRs covered:** FR15, FR16, FR17, FR18, FR19, FR20
@@ -915,7 +937,7 @@ The `R` then click gesture was split out of this story into Story 3.6.
 
 As Apor,
 I want to pick another name for the same notes,
-So that I can see Am7/C and C6 as two views of one set of notes.
+So that I can see a diminished seventh or an augmented triad named from each of its notes.
 
 **Covers:** FR14; AD-10; UX-DR7
 

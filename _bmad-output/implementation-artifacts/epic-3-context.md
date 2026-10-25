@@ -4,7 +4,7 @@
 
 ## Goal
 
-In Explore, Apor clicks any notes on the piano keyboard and the app marks the root, names the chord live, shows each note's role and its interval from the root, and plays the chord as a block or an arpeggio. When the same notes have several names (C6 and Am7/C), he can pick another reading. This lifts the two-note cap from Epic 2 and replaces the interval readout with chord naming. Guitar voicings (Epic 4) and chord ear practice (Epic 5) build on the chord quality table and namer created here.
+In Explore, Apor clicks any notes on the piano keyboard and the app marks the root, names the chord live, shows each note's role and its interval from the root, and plays the chord as a block or an arpeggio. When the same notes have several names (a diminished seventh or an augmented triad), he can pick another reading. This lifts the two-note cap from Epic 2 and replaces the interval readout with chord naming. Guitar voicings (Epic 4) and chord ear practice (Epic 5) build on the chord quality table and namer created here.
 
 ## Stories
 
@@ -19,7 +19,7 @@ In Explore, Apor clicks any notes on the piano keyboard and the app marks the ro
 - Scope is triads (major, minor, diminished, augmented) and sevenths (maj7, dom7, min7, m7b5, dim7), root position as the first reading; inversions appear as slash chords.
 - The user builds a chord by clicking individual keys; each click sounds on pointer-down and toggles lit on release. No keyboard note building.
 - Naming is live: the readout updates on every note change and is announced politely, debounced 300 to 500 ms.
-- Root defaults to the lowest lit note. `R` then a click on a lit note sets it; clicking an alternative reading sets it too. A user-chosen root stays until that note is unlit or the user changes it again.
+- Root is the reading's root (the lowest lit note of that pitch class; the lowest lit note when nothing is named). `R` then a click on a lit note sets it; clicking an alternative reading sets it too. A user-chosen root stays until that note is unlit or the user changes it again.
 - Unknown note sets show the note names with no chord name; the lowest note keeps the root marker, others get the no-role dot, and the legend lists only the root.
 - Readout also shows the intervals from the root for each note. The legend lists only roles present with note names (`root C`, `3rd E`, `5th G`, `7th B`) and is absent for an empty chord.
 - Roles are never conveyed by color alone: root is a ringed filled circle, 3rd a diamond, 5th a square (green), 7th a triangle, no-role a small ink dot; 1.8px ink outline, at least 18px; piano keys add an 80% role tint. Dark theme uses the dark role tokens.
@@ -33,7 +33,7 @@ In Explore, Apor clicks any notes on the piano keyboard and the app marks the ro
 - `core/` stays pure: no browser APIs, no imports from `ui/` or `audio/`, and no `Math.random` (randomness is injected, tests are seeded). Functions are total and return empty results, not exceptions.
 - Pitch is an integer (branded `Pitch`, `PitchClass`, `Interval`); no note-name strings in `core/`. A spelled note is a struct of integers.
 - Spelling lives in `core/spelling`: chord tones are spelled by letter stepping from the spelled root (3rd +2 letters, 5th +4, 7th +6), with the default root table (Db, Eb, Gb, Ab, Bb flat; C#, F# sharp) where no reading fixes the root. dim7 must spell correctly. Six semitones is always A4.
-- Tests to cover: every supported quality in root position, inversions, C6 vs Am7/C, unknown sets, dim7 spelling, and the first-reading fallback when a chosen reading disappears.
+- Tests to cover: every supported quality in root position, inversions, diminished-seventh and augmented alternatives, unknown sets, dim7 spelling, and the first-reading fallback when a chosen reading disappears.
 - The workspace holds lit notes and the chosen reading or root; practice never writes it. Lit notes and the chosen reading are not persisted.
 - Playing is a command to the audio engine with an ordered pitch list (block or arpeggio in list order); the engine owns timing and callers pass no timestamps.
 
@@ -57,7 +57,7 @@ In Explore, Apor clicks any notes on the piano keyboard and the app marks the ro
 - Workspace and cleared state: `Workspace` holds `pitches` (oldest first) and `positions` (guitar position remembered per pitch); `Session.cleared` holds the notes restored by Undo. They are written only by `toggleNote`, `dismiss` and `undoClear`; practice is written only by its own actions, and a reducer test checks every action by reference. Mode switches write neither.
 - Two-note cap: `MAX_LIT` in `src/core/explore.ts` is the one place the cap lives, used by `toggleLit`. Epic 3 lifts it there; `pairInterval`, `exploreReadout` and `litPositions` in the same file are the interval-era readout logic Epic 3 replaces or extends.
 - Explore readout: `ui/explore/ExploreView` shows the prompt or the 84px name, with the full name visually hidden and a polite live region debounced 400 ms. The prompt and readout share one height (`--spacing-readout-block-height`), so the instrument top stays put; keep that when adding alternatives and the legend.
-- Lit notes: `useLitNotes` returns the workspace with exact guitar positions and the root (lowest pitch) in Explore, and only a revealed question or the Fixed root in Listen. Root today is always the lowest pitch; Epic 3 makes it user-selectable.
+- Lit notes: `useLitNotes` returns the workspace with exact guitar positions and the root (lowest pitch) in Explore, and only a revealed question or the Fixed root in Listen. Epic 3 made the root the reading's root and user-selectable (`exploreReading`, `Workspace.root`).
 - Play and Block: `ui/explore/ExploreControls` reuses the `action-button` look; `play` and `revealOrNext` in `useSessionActions` are mode-aware and sound the lit pitches low to high (arpeggio or block). These already handle any count of pitches. `dismiss` (`Esc`) closes the shortcuts list, then Setup, then clears the notes with Undo.
 - Status note priority: `StatusNote` takes an optional `action` button; `App` picks the message in the order audio blocked, Fixed-root prompt, clear note with Undo, offscreen (piano offscreen-lit and guitar `beyondFretboard`).
 - Shared UI in `src/ui/shared/`: `.controls`, `.action-button`, `.visually-hidden` styles and `focusInstrument`. `scripts/check-boundaries.mjs` stops `ui/listen`, `ui/explore`, `ui/shell` and `ui/shared` importing one another's feature code, so new chord UI goes in `ui/explore` or `ui/shared`, not borrowed from Listen.
