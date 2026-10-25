@@ -69,6 +69,71 @@ describe('Explore controls', () => {
     expect(engine.plays).toEqual([{ pitches: [60, 67], mode: 'block' }])
   })
 
+  it('sounds a chord sorted low to high whatever the click order', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    ;[64, 67, 60].forEach((n) => click(key(n)))
+    engine.plays.length = 0
+    press('Enter')
+    press(' ')
+    fireEvent.click(blockBtn(), { detail: 1 })
+    fireEvent.click(playBtn(), { detail: 1 })
+    expect(engine.plays).toEqual([
+      { pitches: [60, 64, 67], mode: 'block' },
+      { pitches: [60, 64, 67], mode: 'arpeggio' },
+      { pitches: [60, 64, 67], mode: 'block' },
+      { pitches: [60, 64, 67], mode: 'arpeggio' },
+    ])
+  })
+
+  it('sounds all eight notes of the longest chord', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    const notes = [72, 60, 71, 62, 69, 64, 67, 65]
+    notes.forEach((n) => click(key(n)))
+    engine.plays.length = 0
+    press(' ')
+    expect(engine.plays).toEqual([{ pitches: [60, 62, 64, 65, 67, 69, 71, 72], mode: 'arpeggio' }])
+  })
+
+  it('keeps the key hints and shortcuts on both buttons', () => {
+    render(<App engine={createFakeEngine()} />)
+    expect(playBtn().getAttribute('aria-keyshortcuts')).toBe('Space')
+    expect(blockBtn().getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect(playBtn().querySelector('.key-hint')!.textContent).toBe('Space')
+    expect(blockBtn().querySelector('.key-hint')!.textContent).toBe('Enter')
+  })
+
+  it('sounds the same sorted pitches after another reading is chosen', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    ;[69, 60, 66, 63].forEach((n) => click(key(n)))
+    const readoutText = () => document.querySelector('.readout-interval span')!.textContent
+    const before = readoutText()
+    const alternatives = document.querySelectorAll('.reading-alt')
+    expect(alternatives.length).toBeGreaterThan(0)
+    fireEvent.click(alternatives[0])
+    expect(readoutText()).not.toBe(before)
+    engine.plays.length = 0
+    press('Enter')
+    press(' ')
+    expect(engine.plays).toEqual([
+      { pitches: [60, 63, 66, 69], mode: 'block' },
+      { pitches: [60, 63, 66, 69], mode: 'arpeggio' },
+    ])
+  })
+
+  it('shows the wake note when a chord is played with audio blocked', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    ;[60, 64, 67].forEach((n) => click(key(n)))
+    expect(note().textContent).not.toContain('wake the sound')
+    press(' ')
+    expect(engine.plays.at(-1)!.mode).toBe('arpeggio')
+    act(() => engine.setStatus('blocked'))
+    expect(note().textContent).toBe('Press any key to wake the sound.')
+  })
+
   it('is absent in Listen', () => {
     render(<App session={listenSession} engine={createFakeEngine()} />)
     expect(screen.queryByRole('button', { name: /^Block/ })).toBeNull()
