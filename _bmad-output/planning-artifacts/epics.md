@@ -194,6 +194,26 @@ So that Epic 4 starts from one rule per idea and a steady toolchain.
 **When** it formats them
 **Then** a formatter config, `.editorconfig` and `.gitattributes` matching the existing style (no semicolons, single quotes, width 140, one line ending) mean it does not reflow untouched lines or change line endings.
 
+### Story 3.8: One note per string on the guitar
+
+As Apor,
+I want Explore on the guitar to hold at most one lit note per string,
+So that what I build on the fretboard is a shape a hand can play, before voicings in Epic 4.
+
+**Covers:** FR16 (the one-note-per-string rule); Epic 3 retrospective item
+
+Decided by Apor after the Epic 3 retrospective: Explore stops two lit notes sharing a string. What a second click on a string does is settled in the story's spec.
+
+**Acceptance Criteria:**
+
+**Given** Explore on the guitar with a note lit on a string
+**When** I click another fret on that string
+**Then** the string holds only one lit note, and the readout, markers and legend follow the notes that remain.
+
+**Given** lit notes on the piano that map to the same guitar string
+**When** I swap to the guitar
+**Then** the swap shows one note per string and says what it left out.
+
 ## Epic 4: Find the chord on guitar
 Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
 **FRs covered:** FR15, FR16, FR17, FR18, FR19, FR20

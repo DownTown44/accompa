@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-25-2026 16:30
+last_updated: 10-25-2026 17:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -67,6 +67,7 @@ development_status:
   3-5-see-the-chord-named-as-i-click-notes: done
   3-6-choose-the-root-by-clicking-a-note: done
   3-7-tidy-up-before-the-fretboard: backlog
+  3-8-one-note-per-string-on-the-guitar: backlog
   epic-3-retrospective: done
 
   epic-4: backlog
@@ -183,14 +184,14 @@ action_items:
     action: "Reconcile EXPERIENCE.md root default, epics.md Story 3.3 text and epic-3-context.md
       C6 examples to the as-built behaviour"
     owner: "Apor approves, dev applies"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
   - id: "epic-3-retro-item-15-decide-the-one-note-per-string-rule-for"
     epic: 3
     action: "Decide the one-note-per-string rule for Explore on the guitar and where
       Epic 4 enforces it (4.1, 4.3 or 4.6)"
     owner: "Apor"
-    status: open
+    status: in-progress
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
   - id: "epic-3-retro-item-16-keep-matrix-rows-for-the-instrument-not"
     epic: 3
