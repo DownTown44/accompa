@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beyondFretboard, beyondFretboardNote, exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, toggleLit } from '../../src/core/explore'
 import { pitch } from '../../src/core/pitch'
 
 const p = pitch
@@ -128,5 +128,52 @@ describe('beyondFretboardNote', () => {
     expect(beyondFretboardNote(0)).toBeUndefined()
     expect(beyondFretboardNote(1)).toBe('1 note lit beyond the fretboard')
     expect(beyondFretboardNote(2)).toBe('2 notes lit beyond the fretboard')
+  })
+})
+
+describe('exploreReading', () => {
+  const read = (...n: number[]) => exploreReading(n.map(p))
+  const legend = (...n: number[]) => read(...n).legend.map((e) => (e.degree ? `${e.label} ${e.note} (${e.degree})` : `${e.label} ${e.note}`))
+
+  it('is empty for no notes', () => {
+    expect(read()).toEqual({ readout: null, roles: [], legend: [] })
+  })
+
+  it('gives a triad and a seventh their roles and legend', () => {
+    expect(read(60, 64, 67).roles).toEqual(['root', 'third', 'fifth'])
+    expect(legend(60, 64, 67)).toEqual(['root C', '3rd E (M3)', '5th G (P5)'])
+    expect(read(60, 64, 67, 71).roles).toEqual(['root', 'third', 'fifth', 'seventh'])
+    expect(legend(60, 64, 67, 71)).toEqual(['root C', '3rd E (M3)', '5th G (P5)', '7th B (M7)'])
+  })
+
+  it('spells a flat third and a diminished fifth', () => {
+    expect(legend(60, 63, 66)).toEqual(['root C', '3rd E♭ (m3)', '5th G♭ (d5)'])
+    expect(legend(60, 63, 66, 69)[3]).toBe('7th B𝄫 (d7)')
+    expect(legend(60, 64, 68)[2]).toBe('5th G♯ (A5)')
+    expect(legend(60, 64, 67, 70)[3]).toBe('7th B♭ (m7)')
+  })
+
+  it('roots an inversion on the reading root and a doubled root twice', () => {
+    const inv = read(64, 67, 72)
+    expect(inv.root).toBe(72)
+    expect(inv.roles).toEqual(['third', 'fifth', 'root'])
+    expect(legend(64, 67, 72)).toEqual(['root C', '3rd E (M3)', '5th G (P5)'])
+    expect(read(60, 64, 67, 72).roles).toEqual(['root', 'third', 'fifth', 'root'])
+    expect(read(55, 60, 64, 67, 76).root).toBe(60)
+  })
+
+  it('roots Am7/C on A', () => {
+    const r = read(60, 64, 67, 69)
+    expect(r.root).toBe(69)
+    expect(r.roles).toEqual(['third', 'fifth', 'seventh', 'root'])
+  })
+
+  it('marks only the lowest for an unknown set, a pair and one note', () => {
+    expect(read(62, 60, 66)).toMatchObject({ root: 60, roles: ['none', 'root', 'none'] })
+    expect(legend(62, 60, 66)).toEqual(['root C'])
+    expect(read(60, 67).roles).toEqual(['root', 'none'])
+    expect(legend(60, 67)).toEqual(['root C'])
+    expect(read(60, 72).roles).toEqual(['root', 'none'])
+    expect(read(60).roles).toEqual(['root'])
   })
 })

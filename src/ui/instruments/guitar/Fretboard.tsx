@@ -1,7 +1,9 @@
 import { useRef, type PointerEvent } from 'react'
 import { GUITAR_FRETS, pitchAt, type FretPosition } from '../../../core/instruments'
 import type { Pitch } from '../../../core/pitch'
+import type { Role } from '../../../core/explore'
 import { stringNames } from '../../../core/spelling'
+import { RoleMarker } from '../../shared/RoleMarker'
 
 const WIDTH = 1200
 const HEIGHT = 372
@@ -13,9 +15,7 @@ const STRING_GAP = 46
 const LOW_STRING_Y = 300
 const NUMBER_Y = 344
 const NAME_X = 58
-const DOT_RADIUS = 9
 const OPEN_RING_RADIUS = 19
-const ROOT_RING_RADIUS = 16
 const OPEN_X = 108
 const THICKEST_STRING = 3.25
 const THINNEST_STRING = 1.0
@@ -33,12 +33,14 @@ interface FretboardProps {
   frets?: number
   lit: readonly FretPosition[]
   root?: FretPosition
+  // The role of each lit position, aligned with `lit`; the default is the root marker and a dot.
+  roles?: readonly Role[]
   onNotePress?: (note: FretNote) => void
   onNoteRelease?: (note: FretNote) => void
 }
 
 // Presentational: draws the board and reports presses; it owns no musical state or sound.
-export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, onNotePress, onNoteRelease }: FretboardProps) {
+export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, roles, onNotePress, onNoteRelease }: FretboardProps) {
   const held = useRef<string | null>(null)
   const fretWidth = (BOARD_RIGHT - NUT_X) / frets
   const wireX = (fret: number) => NUT_X + fret * fretWidth
@@ -64,7 +66,10 @@ export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, onNotePress
   const strings = tuning.map((_, string) => string)
   const wires = Array.from({ length: frets }, (_, i) => i + 1)
   const cells = Array.from({ length: frets + 1 }, (_, i) => i)
-  const visible = lit.filter((p) => p.string >= 0 && p.string < tuning.length && p.fret >= 0 && p.fret <= frets)
+  const isRoot = (p: FretPosition) => root?.string === p.string && root.fret === p.fret
+  const visible = lit
+    .map((p, i) => ({ ...p, role: roles?.[i] ?? (isRoot(p) ? 'root' : 'none') }) as FretPosition & { role: Role })
+    .filter((p) => p.string >= 0 && p.string < tuning.length && p.fret >= 0 && p.fret <= frets)
 
   return (
     <svg
@@ -122,13 +127,10 @@ export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, onNotePress
           )
         }),
       )}
-      {visible.map(({ string, fret }) => (
-        <g key={keyOf(string, fret)} data-lit={keyOf(string, fret)} data-root={root?.string === string && root.fret === fret ? '' : undefined} className="fb-lit">
+      {visible.map(({ string, fret, role }) => (
+        <g key={keyOf(string, fret)} data-lit={keyOf(string, fret)} data-role={role} data-root={role === 'root' ? '' : undefined} className="fb-lit">
           {fret === 0 && <circle className="fb-open-ring" cx={OPEN_X} cy={stringY(string)} r={OPEN_RING_RADIUS} />}
-          {root?.string === string && root.fret === fret && (
-            <circle className="root-ring" cx={cellX(fret)} cy={stringY(string)} r={ROOT_RING_RADIUS} />
-          )}
-          <circle className="lit-dot" cx={cellX(fret)} cy={stringY(string)} r={DOT_RADIUS} />
+          <RoleMarker role={role} cx={cellX(fret)} cy={stringY(string)} plain={!roles} />
         </g>
       ))}
     </svg>

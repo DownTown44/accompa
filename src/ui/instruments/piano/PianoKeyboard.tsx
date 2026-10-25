@@ -1,20 +1,22 @@
 import { useRef, type PointerEvent } from 'react'
 import { isBlackKey, windowPitches } from '../../../core/piano'
 import { pitchClass, type Pitch } from '../../../core/pitch'
+import type { Role } from '../../../core/explore'
 import { octaveLabel } from '../../../core/spelling'
+import { RoleMarker } from '../../shared/RoleMarker'
 
 const WHITE_WIDTH = 57
 const WHITE_HEIGHT = 300
 const BLACK_WIDTH = 36
 const BLACK_HEIGHT = 185
 const TOP = 4
-const DOT_RADIUS = 9
-const ROOT_RING_RADIUS = 16
 
 interface PianoKeyboardProps {
   start: number
   lit: readonly Pitch[]
   root?: Pitch
+  // The role of each lit pitch, aligned with `lit`; the default is the root marker and a dot.
+  roles?: readonly Role[]
   onNotePress?: (pitch: Pitch) => void
   onNoteRelease?: (pitch: Pitch) => void
 }
@@ -34,10 +36,10 @@ function layout(start: number): KeyShape[] {
 }
 
 // Presentational: draws the window and reports presses; it owns no musical state or sound.
-export function PianoKeyboard({ start, lit, root, onNotePress, onNoteRelease }: PianoKeyboardProps) {
+export function PianoKeyboard({ start, lit, root, roles, onNotePress, onNoteRelease }: PianoKeyboardProps) {
   const held = useRef<Pitch | null>(null)
   const keys = layout(start)
-  const litSet = new Set(lit)
+  const roleOf = new Map<Pitch, Role>(lit.map((p, i) => [p, roles?.[i] ?? (p === root ? 'root' : 'none')]))
   const width = 1 + WHITE_WIDTH * keys.filter((k) => !k.black).length + 1
 
   function press(event: PointerEvent, p: Pitch) {
@@ -61,6 +63,10 @@ export function PianoKeyboard({ start, lit, root, onNotePress, onNoteRelease }: 
 
   const white = keys.filter((k) => !k.black)
   const black = keys.filter((k) => k.black)
+  const tint = (p: Pitch) => {
+    const role = roles ? roleOf.get(p) : undefined
+    return role === undefined || role === 'none' ? undefined : role
+  }
 
   return (
     <svg
@@ -73,20 +79,20 @@ export function PianoKeyboard({ start, lit, root, onNotePress, onNoteRelease }: 
       aria-label="Piano keyboard"
     >
       {white.map((k) => (
-        <rect key={k.pitch} className="key-white" data-pitch={k.pitch} x={k.x} y={TOP} width={WHITE_WIDTH} height={WHITE_HEIGHT} {...handlers(k.pitch)} />
+        <rect key={k.pitch} className="key-white" data-pitch={k.pitch} data-tint={tint(k.pitch)} x={k.x} y={TOP} width={WHITE_WIDTH} height={WHITE_HEIGHT} {...handlers(k.pitch)} />
       ))}
       {black.map((k) => (
-        <rect key={k.pitch} className="key-black" data-pitch={k.pitch} x={k.x} y={TOP} width={BLACK_WIDTH} height={BLACK_HEIGHT} {...handlers(k.pitch)} />
+        <rect key={k.pitch} className="key-black" data-pitch={k.pitch} data-tint={tint(k.pitch)} x={k.x} y={TOP} width={BLACK_WIDTH} height={BLACK_HEIGHT} {...handlers(k.pitch)} />
       ))}
       {keys
-        .filter((k) => litSet.has(k.pitch))
+        .filter((k) => roleOf.has(k.pitch))
         .map((k) => {
           const cx = k.x + (k.black ? BLACK_WIDTH : WHITE_WIDTH) / 2
           const cy = k.black ? 160 : 255
+          const role = roleOf.get(k.pitch)!
           return (
-            <g key={k.pitch} data-lit={k.pitch} data-root={k.pitch === root ? '' : undefined}>
-              {k.pitch === root && <circle className="root-ring" cx={cx} cy={cy} r={ROOT_RING_RADIUS} />}
-              <circle className={k.black ? 'lit-dot lit-dot-black' : 'lit-dot'} cx={cx} cy={cy} r={DOT_RADIUS} />
+            <g key={k.pitch} data-lit={k.pitch} data-role={role} data-root={role === 'root' ? '' : undefined}>
+              <RoleMarker role={role} cx={cx} cy={cy} tone={k.black ? 'lit-dot-black' : undefined} plain={!roles} />
             </g>
           )
         })}

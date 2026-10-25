@@ -44,3 +44,13 @@
   pointer-events: none;
   user-select: none;
 }
+
+/* A lit key carries an 80% tint of its role fill. */
+.key-white[data-tint='root'] { fill: color-mix(in srgb, var(--color-role-root) 80%, var(--color-surface)); }
+.key-white[data-tint='third'] { fill: color-mix(in srgb, var(--color-role-third) 80%, var(--color-surface)); }
+.key-white[data-tint='fifth'] { fill: color-mix(in srgb, var(--color-role-fifth) 80%, var(--color-surface)); }
+.key-white[data-tint='seventh'] { fill: color-mix(in srgb, var(--color-role-seventh) 80%, var(--color-surface)); }
+.key-black[data-tint='root'] { fill: color-mix(in srgb, var(--color-role-root) 80%, var(--color-key-black)); }
+.key-black[data-tint='third'] { fill: color-mix(in srgb, var(--color-role-third) 80%, var(--color-key-black)); }
+.key-black[data-tint='fifth'] { fill: color-mix(in srgb, var(--color-role-fifth) 80%, var(--color-key-black)); }
+.key-black[data-tint='seventh'] { fill: color-mix(in srgb, var(--color-role-seventh) 80%, var(--color-key-black)); }

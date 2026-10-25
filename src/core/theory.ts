@@ -32,12 +32,22 @@ export interface ChordQuality {
   readonly symbol: string
   // Semitones above the root: the root (0), then the 3rd, 5th and 7th where the quality has them.
   readonly intervals: readonly Interval[]
+  // The chord-degree label of each interval above the root (the root has none): m3, M3, d5, P5, A5, d7, m7, M7.
+  readonly degrees: readonly string[]
 }
+
+// Chord-degree labels by step (3rd, 5th, 7th) and semitones above the root.
+const DEGREE_LABELS: readonly Readonly<Record<number, string>>[] = [
+  { 3: 'm3', 4: 'M3' },
+  { 6: 'd5', 7: 'P5', 8: 'A5' },
+  { 9: 'd7', 10: 'm7', 11: 'M7' },
+]
 
 const quality = (name: string, symbol: string, stack: readonly number[]): ChordQuality => ({
   name,
   symbol,
   intervals: stack.map(interval),
+  degrees: stack.slice(1).map((semitones, i) => DEGREE_LABELS[i]![semitones] ?? ''),
 })
 
 export const CHORD_QUALITIES: readonly ChordQuality[] = [

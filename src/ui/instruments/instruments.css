@@ -1,8 +1,12 @@
 .root-ring {
-  fill: var(--color-role-root);
+  fill: none;
   stroke: var(--color-ink);
-  stroke-width: 2px;
+  stroke-width: 1.8px;
   pointer-events: none;
+}
+
+.root-ring.lit-dot-black {
+  stroke: var(--color-surface);
 }
 
 .stage {
@@ -19,9 +23,31 @@
   pointer-events: none;
 }
 
+.marker-shape {
+  stroke: var(--color-ink);
+  stroke-width: 1.8px;
+  stroke-linejoin: round;
+}
+
+.marker-root {
+  fill: var(--color-role-root);
+}
+
+.marker-third {
+  fill: var(--color-role-third);
+}
+
+.marker-fifth {
+  fill: var(--color-role-fifth);
+}
+
+.marker-seventh {
+  fill: var(--color-role-seventh);
+}
+
+/* On a dark key the outline turns light so the shape stays legible. */
 .lit-dot-black {
   stroke: var(--color-surface);
-  stroke-width: 3px;
 }
 
 .stage-fade {

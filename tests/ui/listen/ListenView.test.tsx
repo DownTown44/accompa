@@ -177,6 +177,18 @@ describe('Reveal and Next', () => {
   const reveal = () => screen.getByRole('button', { name: /Reveal|Next/ })
   const lit = () => [...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-lit'))
 
+  it('reveals a ringed root and a plain dot, with no legend and no key tint', () => {
+    press({ key: ' ' })
+    fireEvent.click(reveal())
+    expect(document.querySelectorAll('[data-root]')).toHaveLength(1)
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(2)
+    expect(document.querySelectorAll('.root-ring')).toHaveLength(1)
+    const dot = document.querySelector('[data-lit]:not([data-root]) .lit-dot')!
+    expect(dot.getAttribute('r')).toBe('9')
+    expect(document.querySelectorAll('.role-legend li')).toHaveLength(0)
+    expect(document.querySelector('[data-tint]')).toBeNull()
+  })
+
   it('is disabled with no question and Enter does nothing', () => {
     expect(reveal().getAttribute('aria-disabled')).toBe('true')
     fireEvent.click(reveal())

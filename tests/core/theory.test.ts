@@ -59,3 +59,19 @@ describe('CHORD_QUALITIES', () => {
     ])
   })
 })
+
+describe('chord degree labels', () => {
+  it('labels every quality tone beside the table', () => {
+    expect(CHORD_QUALITIES.map((q) => q.degrees)).toEqual([
+      ['M3', 'P5'],
+      ['m3', 'P5'],
+      ['m3', 'd5'],
+      ['M3', 'A5'],
+      ['M3', 'P5', 'M7'],
+      ['M3', 'P5', 'm7'],
+      ['m3', 'P5', 'm7'],
+      ['m3', 'd5', 'm7'],
+      ['m3', 'd5', 'd7'],
+    ])
+  })
+})

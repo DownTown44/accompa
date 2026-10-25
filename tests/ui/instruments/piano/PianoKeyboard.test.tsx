@@ -89,3 +89,25 @@ describe('root marker', () => {
     expect(container.querySelector('[data-root]')!.getAttribute('data-lit')).toBe('60')
   })
 })
+
+describe('role markers', () => {
+  it('tones a role shape on a black key', () => {
+    const { container } = render(<PianoKeyboard start={48} lit={[pitch(63)]} roles={['third']} />)
+    expect(container.querySelector('[data-lit="63"] polygon.marker-third')!.classList.contains('lit-dot-black')).toBe(true)
+  })
+
+  it('draws each role shape and tints the key, with the default a root and a dot', () => {
+    const lit = [60, 64, 67, 71, 63].map(pitch)
+    const { container } = render(<PianoKeyboard start={48} lit={lit} roles={['root', 'third', 'fifth', 'seventh', 'none']} />)
+    expect(container.querySelector('[data-lit="60"] .root-ring')).not.toBeNull()
+    expect(container.querySelector('[data-lit="60"] circle.marker-root')).not.toBeNull()
+    expect(container.querySelector('[data-lit="64"] polygon.marker-third')).not.toBeNull()
+    expect(container.querySelector('[data-lit="67"] rect.marker-fifth')).not.toBeNull()
+    expect(container.querySelector('[data-lit="71"] polygon.marker-seventh')).not.toBeNull()
+    expect(container.querySelector('[data-lit="63"] .marker-none')).not.toBeNull()
+    expect(container.querySelector('[data-pitch="64"]')!.getAttribute('data-tint')).toBe('third')
+    expect(container.querySelector('[data-pitch="63"]')!.getAttribute('data-tint')).toBeNull()
+    const plain = render(<PianoKeyboard start={48} lit={[pitch(60), pitch(67)]} root={pitch(60)} />).container
+    expect(plain.querySelectorAll('[data-role="none"]')).toHaveLength(1)
+  })
+})
