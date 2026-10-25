@@ -1,5 +1,5 @@
 import type { FretPosition } from './instruments'
-import type { Interval, Pitch } from './pitch'
+import type { Interval, Pitch, PitchClass } from './pitch'
 import { INTERVALS } from './theory'
 
 export type Instrument = 'piano' | 'guitar'
@@ -15,12 +15,20 @@ export interface Question {
   readonly pitches: readonly Pitch[]
 }
 
+// A chord reading picked by the user: its root pitch class and quality name. The bass follows from the notes.
+export interface ReadingChoice {
+  readonly root: PitchClass
+  readonly quality: string
+}
+
 // Written only by Explore actions (builder, free play, voicing editing).
 export interface Workspace {
   // Lit notes, oldest first.
   readonly pitches: readonly Pitch[]
   // The guitar position each pitch was lit at, where it was lit on the guitar.
   readonly positions: Readonly<Record<number, FretPosition>>
+  // The chord reading chosen among the namer's readings; absent means the first. Not persisted.
+  readonly reading?: ReadingChoice
 }
 
 // Written only by practice rounds; never touches the workspace.

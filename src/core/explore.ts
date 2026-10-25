@@ -1,4 +1,5 @@
-import { nameChord } from './chords'
+import { nameChord, type ChordReading } from './chords'
+import type { ReadingChoice } from './model'
 import { closestPair, positionsForPitch, type FretPosition } from './instruments'
 import { pitch, pitchClass, type Pitch } from './pitch'
 import { chordSpoken, chordSymbol, noteName, spellChord, spellNotes } from './spelling'
@@ -21,6 +22,32 @@ export function pairInterval(a: Pitch, b: Pitch): IntervalDefinition | null {
   return INTERVALS.find((i) => i.semitones === simple) ?? null
 }
 
+// The identity of a reading: root pitch class and quality name.
+export const readingChoice = (reading: ChordReading): ReadingChoice => ({ root: reading.root, quality: reading.quality.name })
+
+export const isReading = (reading: ChordReading, choice: ReadingChoice): boolean =>
+  reading.root === choice.root && reading.quality.name === choice.quality
+
+// The readings of the lit notes with the chosen one first, the others in namer order;
+// the first reading leads when nothing is chosen or the chosen one is no longer named.
+export function orderedReadings(lit: readonly Pitch[], chosen?: ReadingChoice): ChordReading[] {
+  const readings = nameChord(lit)
+  const at = chosen ? readings.findIndex((r) => isReading(r, chosen)) : -1
+  return at <= 0 ? readings : [readings[at]!, ...readings.filter((_, i) => i !== at)]
+}
+
+export interface ReadingOption {
+  readonly choice: ReadingChoice
+  readonly symbol: string
+  readonly spoken: string
+}
+
+const toOption = (reading: ChordReading): ReadingOption => ({
+  choice: readingChoice(reading),
+  symbol: chordSymbol(reading),
+  spoken: chordSpoken(reading),
+})
+
 export interface ExploreReadout {
   readonly label: string
   readonly name?: string
@@ -28,14 +55,14 @@ export interface ExploreReadout {
 
 // The note's name for one lit note, the interval for two, the chord symbol for three or more
 // that form a chord, else their note names; null when nothing is lit.
-export function exploreReadout(lit: readonly Pitch[]): ExploreReadout | null {
+export function exploreReadout(lit: readonly Pitch[], chosen?: ReadingChoice): ExploreReadout | null {
   if (lit.length === 0) return null
   if (lit.length === 1) return { label: noteName(lit[0]!) }
   if (lit.length === 2) {
     const found = pairInterval(lit[0]!, lit[1]!)
     return found ? { label: found.abbreviation, name: found.name } : null
   }
-  const reading = nameChord(lit)[0]
+  const reading = orderedReadings(lit, chosen)[0]
   if (reading) return { label: chordSymbol(reading), name: chordSpoken(reading) }
   return { label: spellNotes(lit).join(' ') }
 }
@@ -58,23 +85,30 @@ export interface ExploreReading {
   // The role of each lit pitch, aligned with the input.
   readonly roles: readonly Role[]
   readonly legend: readonly LegendEntry[]
+  // Every reading, the one shown large first; empty under three pitch classes or when nothing is named.
+  readonly readings: readonly ReadingOption[]
+  // The readings other than the large one, in namer order.
+  readonly alternatives: readonly ReadingOption[]
 }
 
 const STEP_ROLES = ['root', 'third', 'fifth', 'seventh'] as const
 const STEP_LABELS = ['root', '3rd', '5th', '7th']
 
 // The one reading of the lit notes: readout, root, each note's role and the legend entries.
-export function exploreReading(lit: readonly Pitch[]): ExploreReading {
-  const readout = exploreReadout(lit)
-  if (lit.length === 0) return { readout, roles: [], legend: [] }
+export function exploreReading(lit: readonly Pitch[], chosen?: ReadingChoice): ExploreReading {
+  const readout = exploreReadout(lit, chosen)
+  if (lit.length === 0) return { readout, roles: [], legend: [], readings: [], alternatives: [] }
   const lowest = Math.min(...lit) as Pitch
-  const reading = lit.length >= 3 ? nameChord(lit)[0] : undefined
+  const ordered = lit.length >= 3 ? orderedReadings(lit, chosen) : []
+  const reading = ordered[0]
   if (!reading) {
     return {
       readout,
       root: lowest,
       roles: lit.map((p) => (p === lowest ? 'root' : 'none')),
       legend: [{ role: 'root', label: 'root', note: noteName(lowest) }],
+      readings: [],
+      alternatives: [],
     }
   }
   const root = Math.min(...lit.filter((p) => pitchClass(p) === reading.root)) as Pitch
@@ -87,7 +121,8 @@ export function exploreReading(lit: readonly Pitch[]): ExploreReading {
     if (!roles.includes(role)) return
     legend.push(step === 0 ? { role, label: 'root', note: spelled[0]! } : { role, label: STEP_LABELS[step]!, note: spelled[step]!, degree: reading.quality.degrees[step - 1] })
   })
-  return { readout, root, roles, legend }
+  const readings = ordered.map(toOption)
+  return { readout, root, roles, legend, readings, alternatives: readings.slice(1) }
 }
 
 // Remembered fret positions by pitch; plain data.

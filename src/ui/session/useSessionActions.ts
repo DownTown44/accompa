@@ -1,4 +1,4 @@
-import type { Direction, Question, RootMode } from '../../core/model'
+import type { Direction, Question, ReadingChoice, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
 import type { FretPosition } from '../../core/instruments'
 import type { PlayMode } from '../../audio/engine'
@@ -124,6 +124,7 @@ export function useSessionActions() {
     pressNote,
     releaseNote,
     selectMode,
+    chooseReading: (reading: ReadingChoice) => dispatch({ type: 'chooseReading', reading }),
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
     toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
