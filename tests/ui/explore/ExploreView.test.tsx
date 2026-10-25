@@ -51,17 +51,106 @@ describe('Explore', () => {
     expect(readout()).toContain('P8')
   })
 
-  it('unlights the oldest on a third note and unlights a clicked lit note, sounding both', () => {
+  it('names a triad in any click order with the marker on the lowest', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(64))
+    click(key(60))
+    click(key(67))
+    expect(lit()).toEqual(['60', '64', '67'])
+    expect(readout()).toContain('C major')
+    expect(rooted()).toEqual(['60'])
+  })
+
+  it('grows and shrinks the name', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(60))
+    click(key(67))
+    expect(readout()).toContain('P5')
+    click(key(64))
+    expect(readout()).toContain('C major')
+    click(key(64))
+    expect(readout()).toContain('P5')
+    click(key(64))
+    click(key(64))
+    click(key(67))
+    click(key(60))
+    expect(document.querySelector('.explore-prompt')).not.toBeNull()
+  })
+
+  it('reads an inversion with the marker on its bass', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(64))
+    click(key(67))
+    click(key(72))
+    expect(document.querySelector('.readout-interval span')!.textContent).toBe('C/E')
+    expect(readout()).toContain('C major over E')
+    expect(rooted()).toEqual(['64'])
+  })
+
+  it('lists notes for an unknown set and for two classes', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(60))
+    click(key(62))
+    click(key(66))
+    expect(document.querySelector('.readout-interval span')!.textContent).toBe('C D F♯')
+    expect(rooted()).toEqual(['60'])
+    click(key(62))
+    click(key(66))
+    click(key(64))
+    click(key(72))
+    expect(document.querySelector('.readout-interval span')!.textContent).toBe('C E')
+  })
+
+  it('steps the font by label length', () => {
+    render(<App engine={createFakeEngine()} />)
+    const size = () => document.querySelector('.readout-interval')!.getAttribute('data-size')
+    click(key(60))
+    expect(size()).toBe('large')
+    click(key(60))
+    ;[63, 66, 70, 72].forEach((n) => click(key(n)))
+    expect(size()).toBe('medium')
+    ;[61, 62, 64, 65].forEach((n) => click(key(n)))
+    expect(size()).toBe('small')
+  })
+
+  it('caps at eight lit notes and unlights a clicked lit note, sounding both', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    for (let n = 60; n < 69; n++) click(key(n))
+    expect(lit()).toHaveLength(8)
+    expect(lit()).not.toContain('60')
+    click(key(61))
+    expect(lit()).toHaveLength(7)
+    expect(engine.plays).toHaveLength(10)
+  })
+
+  it('plays and blocks three notes, sorted', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    click(key(67))
+    click(key(60))
+    click(key(64))
+    engine.plays.length = 0
+    press(' ')
+    press('Enter')
+    expect(engine.plays).toEqual([
+      { pitches: [60, 64, 67], mode: 'arpeggio' },
+      { pitches: [60, 64, 67], mode: 'block' },
+    ])
+  })
+
+  it('returns to the chord after clear and Undo, silently', () => {
     const engine = createFakeEngine()
     render(<App engine={engine} />)
     click(key(60))
+    click(key(64))
     click(key(67))
-    click(key(64))
-    expect(lit()).toEqual(['64', '67'])
-    expect(readout()).toContain('m3')
-    click(key(64))
-    expect(lit()).toEqual(['67'])
-    expect(engine.plays).toHaveLength(4)
+    const sounded = engine.plays.length
+    press('Escape')
+    expect(document.querySelector('.explore-prompt')).not.toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }))
+    expect(readout()).toContain('C major')
+    expect(engine.plays).toHaveLength(sounded)
   })
 
   it('sounds only the pressed key after hovering', () => {
@@ -95,7 +184,8 @@ describe('Explore', () => {
     expect(lit()).toEqual(['1:5', '3:0'])
     expect(rooted()).toEqual(['1:5'])
     click(cell(4, 5))
-    expect(rooted()).toEqual(['3:0'])
+    expect(lit()).toHaveLength(3)
+    expect(rooted()).toEqual(['1:5'])
   })
 
   it('allows two lit positions on one string', () => {
@@ -115,6 +205,16 @@ describe('Explore', () => {
     expect(readout()).toContain('P5')
     press('i')
     expect(lit()).toEqual(['60', '67'])
+  })
+
+  it('keeps a chord name across a swap', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(60))
+    click(key(64))
+    click(key(67))
+    press('i')
+    expect(lit()).toHaveLength(3)
+    expect(readout()).toContain('C major')
   })
 
   it('remembers a clicked guitar position through a swap', () => {
@@ -163,5 +263,16 @@ describe('Explore live region', () => {
     })
     expect(region().textContent).toBe('perfect fifth')
     expect(region().getAttribute('aria-live')).toBe('polite')
+  })
+
+  it('announces the spoken chord after a debounce', () => {
+    render(<App engine={createFakeEngine()} />)
+    click(key(60))
+    click(key(64))
+    click(key(67))
+    act(() => {
+      vi.advanceTimersByTime(400)
+    })
+    expect(screen.getByTestId('explore-announce').textContent).toBe('C major')
   })
 })

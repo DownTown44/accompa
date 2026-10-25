@@ -38,6 +38,7 @@ describe('Explore controls', () => {
     engine.plays.length = 0
     press(' ')
     expect(engine.plays).toEqual([{ pitches: [64], mode: 'arpeggio' }])
+    click(key(64))
     click(key(60))
     click(key(67))
     engine.plays.length = 0

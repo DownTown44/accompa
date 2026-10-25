@@ -3,7 +3,7 @@ import { STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import type { ChordReading } from '../../src/core/chords'
 import { CHORD_QUALITIES, INTERVALS } from '../../src/core/theory'
 import { interval, pitch, pitchClass } from '../../src/core/pitch'
-import { chordSymbol, octaveLabel, spellChord, spellInterval, stringNames } from '../../src/core/spelling'
+import { chordSpoken, chordSymbol, octaveLabel, spellChord, spellInterval, stringNames } from '../../src/core/spelling'
 
 describe('octaveLabel', () => {
   it('labels C keys', () => {
@@ -113,5 +113,13 @@ describe('spellChord and chordSymbol', () => {
     expect(chordSymbol(reading(60, 'major', 64))).toBe('C/E')
     expect(chordSymbol(reading(69, 'min7', 60))).toBe('Am7/C')
     expect(chordSymbol(reading(64, 'augmented', 60))).toBe('Eaug/C')
+  })
+})
+
+describe('chordSpoken', () => {
+  const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
+  it('says root and quality, and the bass of an inversion', () => {
+    expect(chordSpoken({ root: pitchClass(pitch(60)), quality: quality('major') })).toBe('C major')
+    expect(chordSpoken({ root: pitchClass(pitch(69)), quality: quality('min7'), bass: pitchClass(pitch(60)) })).toBe('A min7 over C')
   })
 })
