@@ -37,6 +37,14 @@ describe('notes lit beyond the fretboard', () => {
     expect(readout()).toContain('P5')
   })
 
+  it('counts a chord note beyond the fretboard and keeps the name', () => {
+    render(<App engine={createFakeEngine()} session={withNotes(40, 44, 47, 88)} />)
+    press('i')
+    expect(note()).toBe('1 note lit beyond the fretboard')
+    expect(document.querySelector('.readout-interval span')!.textContent).toBe('E')
+    expect(readout()).toContain('E major')
+  })
+
   it('counts one note when the other is in range, and lights that one', () => {
     render(<App engine={createFakeEngine()} session={withNotes(60, 90)} />)
     press('i')

@@ -1,10 +1,11 @@
+import { nameChord } from './chords'
 import { closestPair, positionsForPitch, type FretPosition } from './instruments'
 import { pitch, type Pitch } from './pitch'
-import { noteName } from './spelling'
+import { chordSpoken, chordSymbol, noteName, spellNotes } from './spelling'
 import { INTERVALS, type IntervalDefinition } from './theory'
 
 // The most notes Explore keeps lit; the oldest unlights when one more is added.
-export const MAX_LIT = 2
+export const MAX_LIT = 8
 
 // Lights the pitch, or unlights it when it is already lit. The list is ordered oldest first.
 export function toggleLit(lit: readonly Pitch[], p: Pitch): Pitch[] {
@@ -25,12 +26,18 @@ export interface ExploreReadout {
   readonly name?: string
 }
 
-// The note's name for one lit note, the interval for two; null when nothing is lit.
+// The note's name for one lit note, the interval for two, the chord symbol for three or more
+// that form a chord, else their note names; null when nothing is lit.
 export function exploreReadout(lit: readonly Pitch[]): ExploreReadout | null {
   if (lit.length === 0) return null
   if (lit.length === 1) return { label: noteName(lit[0]!) }
-  const found = pairInterval(lit[0]!, lit[1]!)
-  return found ? { label: found.abbreviation, name: found.name } : null
+  if (lit.length === 2) {
+    const found = pairInterval(lit[0]!, lit[1]!)
+    return found ? { label: found.abbreviation, name: found.name } : null
+  }
+  const reading = nameChord(lit)[0]
+  if (reading) return { label: chordSymbol(reading), name: chordSpoken(reading) }
+  return { label: spellNotes(lit).join(' ') }
 }
 
 // Remembered fret positions by pitch; plain data.

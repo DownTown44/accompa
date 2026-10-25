@@ -8,6 +8,10 @@ const ANNOUNCE_DELAY_MS = 400
 
 export const EXPLORE_PROMPT = 'Select notes to build a chord'
 
+// The font steps down with the label length so the one-line readout never wraps.
+const sizeFor = (label: string): 'large' | 'medium' | 'small' =>
+  label.length <= 6 ? 'large' : label.length <= 10 ? 'medium' : 'small'
+
 export function ExploreView() {
   const { session } = useSession()
   const readout = exploreReadout(session.workspace.pitches)
@@ -21,7 +25,7 @@ export function ExploreView() {
   return (
     <section className="explore" aria-label="Explore">
       {readout ? (
-        <p className="readout-interval">
+        <p className="readout-interval" data-size={sizeFor(readout.label)}>
           <span aria-hidden="true">{readout.label}</span>
           <span className="visually-hidden">{readout.name ?? readout.label}</span>
         </p>

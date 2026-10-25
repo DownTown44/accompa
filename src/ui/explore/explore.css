@@ -23,6 +23,15 @@
   font-size: var(--type-readout-size);
   font-weight: var(--type-readout-weight);
   line-height: var(--type-readout-line-height);
+  white-space: nowrap;
+}
+
+.readout-interval[data-size='medium'] {
+  font-size: var(--type-readout-question-size);
+}
+
+.readout-interval[data-size='small'] {
+  font-size: 36px;
 }
 
 .explore-prompt {

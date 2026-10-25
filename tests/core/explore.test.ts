@@ -10,9 +10,11 @@ describe('toggleLit', () => {
     expect(toggleLit([p(60), p(67)], p(60))).toEqual([67])
   })
 
-  it('drops the oldest when a third is added', () => {
-    expect(MAX_LIT).toBe(2)
-    expect(toggleLit([p(60), p(67)], p(64))).toEqual([67, 64])
+  it('keeps a third note and drops the oldest only past the cap', () => {
+    expect(MAX_LIT).toBe(8)
+    expect(toggleLit([p(60), p(67)], p(64))).toEqual([60, 67, 64])
+    const full = [60, 61, 62, 63, 64, 65, 66, 67].map(p)
+    expect(toggleLit(full, p(68))).toEqual([61, 62, 63, 64, 65, 66, 67, 68])
   })
 })
 
@@ -41,6 +43,36 @@ describe('exploreReadout', () => {
   it('is empty with nothing lit', () => expect(exploreReadout([])).toBeNull())
   it('names one note without an octave', () => expect(exploreReadout([p(63)])).toEqual({ label: 'E♭' }))
   it('names the pair', () => expect(exploreReadout([p(67), p(60)])).toEqual({ label: 'P5', name: 'perfect fifth' }))
+})
+
+describe('exploreReadout for three or more', () => {
+  const label = (...n: number[]) => exploreReadout(n.map(p))
+  it('names a triad in any order', () => {
+    expect(label(64, 60, 67)).toEqual({ label: 'C', name: 'C major' })
+  })
+  it('names an inversion with the bass', () => {
+    expect(label(64, 67, 72)).toEqual({ label: 'C/E', name: 'C major over E' })
+  })
+  it('names a seventh', () => expect(label(60, 64, 67, 71)).toEqual({ label: 'Cmaj7', name: 'C maj7' }))
+  it('lists notes low to high when no chord fits', () => {
+    expect(label(66, 60, 62)).toEqual({ label: 'C D F♯' })
+  })
+  it('lists two pitch classes instead of an interval', () => {
+    expect(label(60, 64, 72)).toEqual({ label: 'C E' })
+  })
+  it.each([
+    [[60, 64, 67], 'C'],
+    [[60, 63, 67], 'Cm'],
+    [[60, 63, 66], 'Cdim'],
+    [[60, 64, 68], 'Caug'],
+    [[60, 64, 67, 71], 'Cmaj7'],
+    [[60, 64, 67, 70], 'C7'],
+    [[60, 63, 67, 70], 'Cm7'],
+    [[60, 63, 66, 70], 'Cm7♭5'],
+    [[60, 63, 66, 69], 'Cdim7'],
+  ])('reads %j as %s', (notes, symbol) => {
+    expect(label(...notes)?.label).toBe(symbol)
+  })
 })
 
 describe('litPositions', () => {

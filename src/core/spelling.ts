@@ -69,6 +69,12 @@ export function chordSymbol(reading: ChordReading): string {
   return `${ROOT_NAMES[reading.root]!}${reading.quality.symbol}${bass}`
 }
 
+// The reading as screen reader text: `C major`, `A min7 over C`.
+export function chordSpoken(reading: ChordReading): string {
+  const bass = reading.bass === undefined ? '' : ` over ${ROOT_NAMES[reading.bass]!}`
+  return `${ROOT_NAMES[reading.root]!} ${reading.quality.name}${bass}`
+}
+
 // Distinct note names, low to high, for a set no chord name fits.
 export function spellNotes(pitches: readonly Pitch[]): string[] {
   const names: string[] = []

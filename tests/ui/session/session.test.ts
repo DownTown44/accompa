@@ -258,9 +258,12 @@ describe('toggleNote', () => {
     expect(toggle(lit, 60).workspace.pitches).toEqual([])
   })
 
-  it('unlights the oldest on a third note', () => {
-    const state = toggle(toggle(toggle(initialSession, 60), 67), 64)
-    expect(state.workspace.pitches).toEqual([67, 64])
+  it('keeps a third note and unlights the oldest past the cap', () => {
+    const three = toggle(toggle(toggle(initialSession, 60), 67), 64)
+    expect(three.workspace.pitches).toEqual([60, 67, 64])
+    let full = initialSession
+    for (let n = 60; n < 68; n++) full = toggle(full, n)
+    expect(toggle(full, 70).workspace.pitches).toEqual([61, 62, 63, 64, 65, 66, 67, 70])
   })
 
   it('unlights a note lit without a position when its shown position is clicked, and moves it from another', () => {
@@ -286,8 +289,7 @@ describe('toggleNote', () => {
 
   it('drops the position of the note that falls off', () => {
     let state = toggle(initialSession, 60, { string: 3, fret: 5 })
-    state = toggle(state, 67)
-    state = toggle(state, 64)
+    for (let n = 61; n < 69; n++) state = toggle(state, n)
     expect(state.workspace.positions).toEqual({})
   })
 
