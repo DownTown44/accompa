@@ -147,7 +147,32 @@ In Explore, Apor clicks any two notes on either instrument and the app names the
 Apor clicks notes on the keyboard and the app marks the root, names the chord live and plays it as a block or an arpeggio. He can switch between alternative readings.
 **FRs covered:** FR12, FR13, FR14
 
-### Epic 4: Find the chord on guitar
+#### Story 3.6: Choose the root by clicking a note
+
+As Apor,
+I want to pick which lit note is the root,
+So that I can hear and see the same notes built from a different root.
+
+**Covers:** FR12; UX-DR22
+
+Split from Story 3.2; built after Story 3.3, so it must settle how a chosen root combines with the chosen reading.
+
+**Acceptance Criteria:**
+
+**Given** the root defaults to the reading's root
+**When** I press `R` then click a lit note
+**Then** that note becomes the root, the readout and legend update, and the notes themselves stay lit
+**And** a Status note `Click a lit note to set the root.` shows while the gesture is armed, and `R` is in the shortcut list.
+
+**Given** the clicked note is not the root of any reading
+**When** it is chosen
+**Then** it takes the root marker and the set reads as unknown (note names, no-role dots, legend with the root only).
+
+**Given** the root is changed by the user
+**When** later notes are added
+**Then** the chosen root stays until it is unlit or the user changes it again.
+
+## Epic 4: Find the chord on guitar
 Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
 **FRs covered:** FR15, FR16, FR17, FR18, FR19, FR20
 
@@ -876,13 +901,11 @@ So that I can see the structure of the chord at a glance.
 **When** the readout renders
 **Then** it also shows the intervals from the root for each note.
 
-**Given** the root defaults to the lowest note
-**When** I press `R` then click a lit note
-**Then** that note becomes the root, the readout and legend update, and the notes themselves stay lit.
+**Given** the root is the reading's root (the lowest lit note when no chord is named)
+**When** a named inversion renders
+**Then** the root marker sits on the reading's root, not the bass.
 
-**Given** the root is changed by the user
-**When** later notes are added
-**Then** the chosen root stays until it is unlit or the user changes it again.
+The `R` then click gesture was split out of this story into Story 3.6.
 
 **Given** dark theme
 **When** the markers render
