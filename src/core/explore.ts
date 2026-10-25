@@ -165,6 +165,12 @@ export function litPositions(lit: readonly Pitch[], remembered: RememberedPositi
   })
 }
 
+// The lit pitches whose shown position is on the string; notes beyond the fretboard have none.
+export function pitchesOnString(lit: readonly Pitch[], remembered: RememberedPositions, string: number): Pitch[] {
+  const shown = litPositions(lit, remembered)
+  return lit.filter((_, i) => shown[i]?.string === string)
+}
+
 // How many lit pitches have no place on the guitar, beyond its lowest and highest note.
 export function beyondFretboard(lit: readonly Pitch[], remembered: RememberedPositions): number {
   return litPositions(lit, remembered).filter((position) => position === null).length

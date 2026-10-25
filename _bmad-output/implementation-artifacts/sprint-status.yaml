@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-25-2026 18:30
+last_updated: 10-25-2026 20:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -66,8 +66,8 @@ development_status:
   3-4-play-the-chord-as-a-block-or-an-arpeggio: done
   3-5-see-the-chord-named-as-i-click-notes: done
   3-6-choose-the-root-by-clicking-a-note: done
-  3-7-tidy-up-before-the-fretboard: review
-  3-8-one-note-per-string-on-the-guitar: backlog
+  3-7-tidy-up-before-the-fretboard: done
+  3-8-one-note-per-string-on-the-guitar: review
   3-9-carry-piano-notes-to-the-guitar-one-per-string: backlog
   epic-3-retrospective: done
 

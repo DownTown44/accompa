@@ -8,7 +8,7 @@ import {
   type Workspace,
 } from '../../core/model'
 import { canGuess } from '../../core/guess'
-import { isReading, litPositions, orderedReadings, readingChoice, readingRootedOn, sameChoice, toggleLit } from '../../core/explore'
+import { isReading, litPositions, orderedReadings, pitchesOnString, readingChoice, readingRootedOn, sameChoice, toggleLit } from '../../core/explore'
 import type { FretPosition } from '../../core/instruments'
 import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
@@ -102,13 +102,26 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       const { pitches, positions, reading, root } = state.workspace
       const keep = (list: readonly Pitch[]) =>
         Object.fromEntries(Object.entries(positions).filter(([key]) => list.includes(Number(key) as Pitch)))
+      // One lit note per string: the others on the clicked string are replaced.
+      const without = (list: readonly Pitch[]) => {
+        if (position === undefined) return list
+        const taken = pitchesOnString(list, positions, position.string)
+        return list.filter((p) => p === pitch || !taken.includes(p))
+      }
       if (pitches.includes(pitch) && position !== undefined) {
         const shown = litPositions(pitches, positions)[pitches.indexOf(pitch)]
         if (!shown || shown.string !== position.string || shown.fret !== position.fret) {
-          return { ...state, cleared: null, workspace: { ...state.workspace, positions: { ...positions, [pitch]: position } } }
+          const next = without(pitches)
+          const workspace = pruneReading({
+            pitches: next,
+            positions: { ...keep(next), [pitch]: position },
+            ...(reading ? { reading } : {}),
+            ...(root !== undefined && next.includes(root) ? { root } : {}),
+          })
+          return { ...state, cleared: null, workspace }
         }
       }
-      const next = toggleLit(pitches, pitch)
+      const next = toggleLit(pitches.includes(pitch) ? pitches : without(pitches), pitch)
       const remembered = position !== undefined && next.includes(pitch) ? { ...keep(next), [pitch]: position } : keep(next)
       const workspace = pruneReading({
         pitches: next,
