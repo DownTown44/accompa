@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { beyondFretboard, beyondFretboardNote } from '../../core/explore'
+import { beyondFretboard, beyondFretboardNote, leftOutCount } from '../../core/explore'
 import { offscreenLit, offscreenNote } from '../../core/piano'
 import { ENGINES } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
@@ -36,7 +36,7 @@ export function Shell() {
     session.instrument === 'piano'
       ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart))
       : session.mode === 'explore'
-        ? beyondFretboardNote(beyondFretboard(lit.pitches, session.workspace.positions))
+        ? beyondFretboardNote(beyondFretboard(lit.pitches), leftOutCount(lit.pitches, session.workspace.positions))
         : undefined
   const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
   const message =

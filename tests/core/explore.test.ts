@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, litPositions, MAX_LIT, pairInterval, pitchesOnString, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, leftOutCount, litPositions, MAX_LIT, pairInterval, pitchesOnString, placeLit, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
+import { STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass } from '../../src/core/pitch'
 
 const p = pitch
@@ -84,9 +85,9 @@ describe('litPositions', () => {
     expect(litPositions([p(64)], {})).toEqual([{ string: 5, fret: 0 }])
   })
 
-  it('falls back to the closest pair for two', () => {
-    const [a, b] = litPositions([p(67), p(60)], {})
-    expect(Math.abs(a!.string - b!.string) + Math.abs(a!.fret - b!.fret)).toBeLessThanOrEqual(4)
+  it('puts two notes with no remembered position on different strings', () => {
+    const [a, b] = litPositions([p(59), p(60)], {})
+    expect(a!.string).not.toBe(b!.string)
   })
 
   it('keeps a remembered position and puts the other pitch at its lowest fret', () => {
@@ -103,23 +104,18 @@ describe('litPositions', () => {
 
 describe('beyondFretboard', () => {
   it('counts none when every note has a place', () => {
-    expect(beyondFretboard([], {})).toBe(0)
-    expect(beyondFretboard([p(60), p(67)], {})).toBe(0)
+    expect(beyondFretboard([])).toBe(0)
+    expect(beyondFretboard([p(60), p(67)])).toBe(0)
   })
 
   it('counts one or two notes beyond the fretboard', () => {
-    expect(beyondFretboard([p(90)], {})).toBe(1)
-    expect(beyondFretboard([p(90), p(93)], {})).toBe(2)
+    expect(beyondFretboard([p(90)])).toBe(1)
+    expect(beyondFretboard([p(90), p(93)])).toBe(2)
   })
 
   it('counts only the notes beyond when the other is in range', () => {
-    expect(beyondFretboard([p(60), p(90)], {})).toBe(1)
-    expect(beyondFretboard([p(30), p(60)], {})).toBe(1)
-  })
-
-  it('does not count a note with a remembered position', () => {
-    expect(beyondFretboard([p(60), p(90)], { 60: { string: 2, fret: 1 } })).toBe(1)
-    expect(beyondFretboard([p(60)], { 60: { string: 2, fret: 1 } })).toBe(0)
+    expect(beyondFretboard([p(60), p(90)])).toBe(1)
+    expect(beyondFretboard([p(30), p(60)])).toBe(1)
   })
 })
 
@@ -128,6 +124,13 @@ describe('beyondFretboardNote', () => {
     expect(beyondFretboardNote(0)).toBeUndefined()
     expect(beyondFretboardNote(1)).toBe('1 note lit beyond the fretboard')
     expect(beyondFretboardNote(2)).toBe('2 notes lit beyond the fretboard')
+  })
+
+  it('words left-out notes alone and with beyond notes', () => {
+    expect(beyondFretboardNote(0, 1)).toBe('1 note left out: one note per string')
+    expect(beyondFretboardNote(0, 2)).toBe('2 notes left out: one note per string')
+    expect(beyondFretboardNote(1, 1)).toBe('1 note lit beyond the fretboard, 1 left out')
+    expect(beyondFretboardNote(2, 1)).toBe('2 notes lit beyond the fretboard, 1 left out')
   })
 })
 
@@ -291,5 +294,72 @@ describe('pitchesOnString', () => {
 
   it('gives no string to a note beyond the fretboard', () => {
     for (let s = 0; s < 6; s++) expect(pitchesOnString([pitch(30)], {}, s)).toEqual([])
+  })
+})
+
+describe('placeLit', () => {
+  const strings = (lit: number[], remembered = {}) => placeLit(lit.map(p), remembered).positions.map((x) => x?.string)
+
+  it('gives B3 and C4 their own strings', () => {
+    const { positions, leftOut } = placeLit([p(59), p(60)], {})
+    expect(positions[0]!.string).not.toBe(positions[1]!.string)
+    expect(leftOut).toEqual([])
+  })
+
+  it('leaves out the higher of two notes that only sound on string 0', () => {
+    const { positions, leftOut } = placeLit([p(40), p(41)], {})
+    expect(positions).toEqual([{ string: 0, fret: 0 }, null])
+    expect(leftOut).toEqual([41])
+    expect(leftOutCount([p(40), p(41)], {})).toBe(1)
+  })
+
+  it('keeps remembered positions when free', () => {
+    const remembered = { 60: { string: 3, fret: 5 }, 64: { string: 5, fret: 0 } }
+    expect(placeLit([p(60), p(64)], remembered).positions).toEqual([{ string: 3, fret: 5 }, { string: 5, fret: 0 }])
+  })
+
+  it('leaves out the newest when more are lit than strings', () => {
+    const lit = [40, 45, 50, 55, 59, 64, 65].map(p)
+    const { positions, leftOut } = placeLit(lit, {})
+    expect(leftOut).toEqual([65])
+    expect(positions.slice(0, 6).every((x) => x !== null)).toBe(true)
+    expect(positions[6]).toBeNull()
+  })
+
+  it('counts a note beyond the fretboard separately', () => {
+    const { positions, leftOut } = placeLit([p(30), p(40), p(41)], {})
+    expect(positions[0]).toBeNull()
+    expect(leftOut).toEqual([41])
+    expect(beyondFretboard([p(30), p(40), p(41)])).toBe(1)
+  })
+
+  it('uses a free string rather than a clash', () => {
+    expect(new Set(strings([59, 60, 64])).size).toBe(3)
+  })
+
+  // A note is left out only when no one-per-string layout exists: a note that finds every
+  // string taken asks an earlier, unremembered note to move to another free string first.
+  it('rearranges so all six notes of C4 to A4 are shown', () => {
+    const lit = [60, 62, 64, 65, 67, 69].map(p)
+    const { positions, leftOut } = placeLit(lit, {})
+    expect(leftOut).toEqual([])
+    expect(positions.every((x) => x !== null)).toBe(true)
+    expect(new Set(positions.map((x) => x!.string)).size).toBe(6)
+    positions.forEach((x, i) => expect(STANDARD_GUITAR_TUNING[x!.string]! + x!.fret).toBe(lit[i]))
+  })
+
+  it('never moves a remembered position when rearranging', () => {
+    const remembered = { 62: { string: 3, fret: 7 }, 64: { string: 4, fret: 5 } }
+    const lit = [60, 62, 64, 65, 67, 69].map(p)
+    const { positions } = placeLit(lit, remembered)
+    expect(positions[1]).toEqual({ string: 3, fret: 7 })
+    expect(positions[2]).toEqual({ string: 4, fret: 5 })
+    expect(new Set(positions.filter((x) => x).map((x) => x!.string)).size).toBe(positions.filter((x) => x).length)
+  })
+
+  it('leaves a note out when no rearrangement gives it a string', () => {
+    const { positions, leftOut } = placeLit([p(40), p(41), p(42)], {})
+    expect(leftOut).toEqual([41, 42])
+    expect(positions).toEqual([{ string: 0, fret: 0 }, null, null])
   })
 })
