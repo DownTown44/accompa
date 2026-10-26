@@ -71,14 +71,14 @@ development_status:
   3-9-carry-piano-notes-to-the-guitar-one-per-string: done
   epic-3-retrospective: done
 
-  epic-4: backlog
+  epic-4: in-progress
   4-1-carry-the-chord-to-the-fretboard: done # retired: delivered by 3-8 and 3-9, voicing shown by 4-3
-  4-2-limit-the-fretboard-to-a-fret-region: backlog # deferred by Apor until after 4-4; may be dropped
+  4-2-limit-the-fretboard-to-a-fret-region: done # dropped, see sprint-change-proposal-2026-10-26
   4-3-generate-every-playable-guitar-voicing: review
   4-4-step-through-voicings-nearest-register-first: review
   4-5-common-shapes-rank-first: review
   4-6-hand-edit-a-voicing: review
-  4-7-hear-the-voicing-strummed-or-arpeggiated: backlog
+  4-7-hear-the-voicing-strummed-or-arpeggiated: review
   epic-4-retrospective: optional
 
   epic-5: backlog
