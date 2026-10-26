@@ -174,6 +174,6 @@ graph LR
 - **Visual design, layout and voicing browsing UX:** decided in the UX spines (DESIGN.md, EXPERIENCE.md).
 - **Alternate tunings, other string counts:** a tuning parameter exists (see conventions); no UI yet.
 - **Hosting and deployment:** local only. A static host works without change when wanted.
-- **Piano keyboard range and fret-region UI:** decided in the UX spines. The piano shows 3 octaves (engine range stays MIDI 36 to 96); the fret region is set by dragging, with the whole neck by default.
+- **Piano keyboard range:** decided in the UX spines. The piano shows 3 octaves (engine range stays MIDI 36 to 96).
 - **Later capability areas in the PRD (scales and modes, circle of fifths, progression analysis):** not in Phase 1.
-- **Accessibility and keyboard navigation:** decided in the UX spines. Keyboard-first for Listen, mode and instrument switching, transport and voicing stepping; instrument note-toggling and fret-region drag are pointer-only in v1 (see EXPERIENCE.md Accessibility Floor).
+- **Accessibility and keyboard navigation:** decided in the UX spines. Keyboard-first for Listen, mode and instrument switching, transport and voicing stepping; instrument note-toggling is pointer-only in v1 (see EXPERIENCE.md Accessibility Floor).

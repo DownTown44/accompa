@@ -23,7 +23,7 @@ Laptop browser (see Responsive & Platform for viewport scope), client-only stati
 **Precedence (stated once).** EXPERIENCE.md and DESIGN.md win over every mock and wireframe on every point, including color and type. The mocks' visual render is unchecked: the designer never viewed them in a browser.
 
 References:
-- [`wireframes/flow-build-chord-2026-10-23.excalidraw`](wireframes/flow-build-chord-2026-10-23.excalidraw): 4-frame Explore flow, piano to guitar. Illustrates IA, voicing stepper, fret region, role markers.
+- [`wireframes/flow-build-chord-2026-10-23.excalidraw`](wireframes/flow-build-chord-2026-10-23.excalidraw): 4-frame Explore flow, piano to guitar. Illustrates IA, voicing stepper, role markers.
 - [`mockups/key-explore-piano.html`](mockups/key-explore-piano.html), [`mockups/key-explore-guitar.html`](mockups/key-explore-guitar.html), [`mockups/key-listen-setup.html`](mockups/key-listen-setup.html): key screens (inline links at each section below).
 - Mocks are illustrative, not production markup: they are span-built controls with inset box-shadow rings that forced-colors modes would strip. Build real buttons, groups and outlines.
 - Exploration record, not normative: [`.working/directions-1.html`](.working/directions-1.html), [`.working/color-themes-1.html`](.working/color-themes-1.html) (also linked from DESIGN.md).
@@ -56,7 +56,7 @@ Quiet, short, sentence case, italic in the UI. No exclamation marks, no scores, 
 
 | Do | Don't |
 |---|---|
-| `No voicing fits here. Try widening the region.` | `Error: no voicing found` |
+| `No voicing fits these notes.` | `Error: no voicing found` |
 | `Press any key to wake the sound.` | `Audio is blocked! Click to enable.` |
 | `Voicing 1 of N` | `Shape: Open C` (no shape labels) |
 | `m3 is not it — try another.` | `Wrong!` |
@@ -83,12 +83,11 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 | Readout | Explore: live chord name. Listen: `Which interval?`, then the interval name after Reveal. | Updates live on every note change. Multiple readings: the first is large, the others are small clickable italic alternatives. **Clicking an alternative changes both the name and the root**: the notes stay the same, the root marker moves to that reading's root, the Readout and Role legend update (for example `C6` vs `Am7/C`). Empty chord: prompt line (see States). |
 | Role legend | Under Readout | Shows roles present with their note names (`root C`, `3rd E`, `5th G`). Updates with the chord. |
 | Piano keyboard | Instrument | Three octaves. Click key: sounds on press, toggles lit on release. Root marked differently. `[` and `]` shift one octave. |
-| Fretboard | Instrument | Click a fret position: sounds and toggles that note (one per string in a voicing). Shows open and muted markers; an open string is its role shape inside a ring at the nut. A chord shows as one voicing, filtered by fret region. |
+| Fretboard | Instrument | Click a fret position: sounds and toggles that note (one per string in a voicing). Shows open and muted markers; an open string is its role shape inside a ring at the nut. A chord shows as one voicing. |
 | Role marker | On piano keys and frets | Root is ringed and filled; 3rd, 5th, 7th are distinct shapes, always shape plus color. A lit note with no role gets the no-role dot. |
 | Action button | Play and reveal controls | Click or its key-hint key. One primary per row. Explore: Play (`Space`, an arpeggio low to high), Block (`Enter`, primary). Listen: Play again (`Space`), Reveal (`Enter`). After Reveal, a Next button takes the primary slot; `Enter` again = Next. |
 | Interval button | Listen, 12 of them (m2 to P8) | Click or keys `1`-`9`, `0`, `-`, `=`. Correct: advances to the next question and auto-plays it. Wrong: the button is marked and disabled until the next question; the question stays. Disabled while revealed. Only intervals in the pool are enabled; [ASSUMPTION] pool-excluded buttons are shown disabled, not hidden. A wrong button keeps focusability for assistive tech (`aria-disabled`), and its accessible name carries the state (for example `m3, tried`). |
 | Voicing stepper | Guitar view | `◀ Voicing 1 of N ▶`; `Left` / `Right` or the arrows step. [ASSUMPTION] No wrap: the arrow at either end is inert (`aria-disabled`, replaced visually by `·`). If a focused arrow goes inert, focus moves to the remaining stepper arrow; if the stepper hides, to the instrument if no stepper control is left. Best playable shape ranks first. Guitar only; piano voicings and inversions are Phase 2 (FR-21 withdrawn). |
-| Fret-region bar | Guitar view | Defaults to the whole neck. Set by dragging over the fret numbers; the quiet clear control restores the whole neck. It sits outside the track, to the right of the bar, on the page background. It is a real button, accessible name `Clear fret region`, keyboard-focusable with the standard focus ring, and operable by keyboard even though the region is set by drag. It is disabled (visually unchanged) when the region is already the whole neck; its hit area stays at least 28px. Stepper recomputes for the region. |
 | Setup panel | On demand | Non-modal. `P` toggles, `Esc` closes. Focus enters on open and returns to the opener on close. Holds the inner controls below. The opener is the gear icon (Setup opener). Width (560px) and floating overlap of the instrument are accepted by the user. |
 | Pool chip | Setup panel | Checkbox chip per interval; on = selected treatment (accent fill, weight 600), no check glyph. [ASSUMPTION] At least one interval stays selected; the last ticked chip cannot be unticked: it gets `aria-disabled` (stays focusable), a non-colour cue, and a live-region hint `Keep at least one interval.` [ASSUMPTION]. On/off cue is fill, text color and weight, with no check glyph (user decision); dark unselected label contrast on the panel is 4.00 (muted on chip over surface; light 5.02), an accepted limit (see Accessibility Floor). |
 | Setup segmented control | Setup panel | Direction (Ascending, Descending, Harmonic), Root (Random, Fixed), Sound (Synthesized; samples later), Theme (System, Light, Dark). One selected, same treatment as the Instrument toggle. Each has a Setup label. |
@@ -105,7 +104,7 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 | Single note lit | Explore | Readout shows the note name; the note carries the root marker. Guitar view: that note where it is placed, no stepper (a voicing needs two or more notes). |
 | Chord name unresolved (notes form no known chord) | Explore Readout | No name for unknown note sets ([ASSUMPTION]); Readout shows the note names. The lowest note keeps the root marker; every other lit note gets the no-role dot, so nothing relies on color alone. Role legend lists only the root. |
 | Multiple chord readings | Explore Readout | First reading large; others small clickable italic alternatives; clicking one changes name and root (see Readout). |
-| No voicing fits | Guitar | Fretboard empty with only the Status note under it: `No voicing fits here. Try widening the region.` Stepper hidden. Notes stay lit on piano. |
+| No voicing fits | Guitar | Fretboard empty with only the Status note under it: `No voicing fits these notes.` Stepper hidden. Notes stay lit on piano. |
 | Voicing after piano build | Guitar | Chord carries over, stepper opens on best shape; climax of Flow 1. |
 | Lit notes offscreen | Piano | After `[` / `]` shifts the three-octave window, lit notes outside it are shown by a Status note at the matching edge (`◀ 2 notes lit` / `3 notes lit ▶`). [ASSUMPTION] |
 | Audio blocked | Instrument | No enable-sound screen. First click or key wakes audio. If still blocked: Status note `Press any key to wake the sound.`; it disappears when audio starts. |
@@ -113,7 +112,7 @@ Visual specs live in `DESIGN.md` Components. Names are identical. Mock per compo
 | Listen: waiting for guess | Listen | Readout `Which interval?`; Interval buttons enabled. |
 | Listen: wrong guess | Listen | That Interval button marked (`interval-button-wrong`) and disabled until the next question; Readout hint `m3 is not it — try another.`; question stays. |
 | Listen: right guess | Listen | Quiet hint line `P5. Next interval is playing.` (interval name, no praise) and the next interval auto-plays. [ASSUMPTION] exact wording. |
-| Listen: revealed | Listen | Notes light on the active instrument, name in Readout, Next button appears; no penalty. Root note carries the root marker, the other the no-role dot. On guitar [ASSUMPTION]: one position per note, the closest pair near the lowest frets inside the region. |
+| Listen: revealed | Listen | Notes light on the active instrument, name in Readout, Next button appears; no penalty. Root note carries the root marker, the other the no-role dot. On guitar [ASSUMPTION]: one position per note, the closest pair near the lowest frets. |
 | Listen: mid-question changes | Listen, Setup panel | [ASSUMPTION] Switching to Explore and back keeps the same question and wrong marks (it does not replay). Changing pool, direction or root applies from the next question; the current one stays answerable. |
 
 ## Interaction Primitives
@@ -148,7 +147,7 @@ Shortcut rules:
 - **Repeat:** `Space` and `Enter` ignore auto-repeat (`event.repeat`); holding the key does one action.
 - **Yield:** digit keys, `Left` / `Right` / `Up` / `Down` and `Space` / `Enter` all yield when focus is on a tab, radio segment, pool chip or text field (native behavior: arrows move selection, `Space` / `Enter` activate); `Space` and `Enter` also yield to any focused button. So in Listen a focused button gets `Space` / `Enter` as activation, not Play again or Reveal (the shortcuts list says so). Other shortcuts yield only to text fields (none in v1). After a **pointer** click on a control outside the Setup panel, focus returns to the instrument so shortcuts keep working; after a pointer click on a control inside the non-modal Setup panel, focus stays inside the panel (it returns to the opener only on close). **Keyboard** activation keeps focus where it is.
 - **Focus after state changes:** Reveal and Next are one button whose label changes, so focus stays on it from Reveal to Next. When the Voicing stepper hides or an arrow goes inert, focus moves to the remaining stepper control, or to the instrument if none is left.
-- **Focus order:** Mode strip (Mode tabs, then Instrument toggle) → Instrument (one stop) → Readout alternatives and Voicing stepper → `Clear fret region` button → Action buttons (and the Interval row in Listen) → Status note `Undo` button (when shown) → Setup opener and, when open, the panel → Help hint last (both sit in the strip; the opener is the slot just before the Help hint, and the Help hint is the final stop). The wordmark is not a stop.
+- **Focus order:** Mode strip (Mode tabs, then Instrument toggle) → Instrument (one stop) → Readout alternatives and Voicing stepper → Action buttons (and the Interval row in Listen) → Status note `Undo` button (when shown) → Setup opener and, when open, the panel → Help hint last (both sit in the strip; the opener is the slot just before the Help hint, and the Help hint is the final stop). The wordmark is not a stop.
 
 Deferred: MIDI input is later; on-screen instruments only for now. Leave a seam so a note-on from MIDI can drive the same click-to-sound path.
 
@@ -176,7 +175,6 @@ Behavioral. Visual contrast lives in `DESIGN.md` (Colors, Contrast).
 ### Accepted limits (user decisions, v1)
 
 - Note toggling on the piano and fretboard is **pointer-only**; there is no keyboard chord-building.
-- The fret region is **drag-only**; no keyboard or click-click alternative. The `Clear fret region` button stays keyboard-operable.
 - **No small-screen or reflow support** (see Responsive & Platform).
 - **Listen requires hearing**; it has no visual substitute by design. Explore, instruments, chord names and voicings work silently.
 - **Screen-reader support is best-effort** (names and live regions above), and full parity for a spatial instrument is out of scope.
@@ -195,9 +193,8 @@ Behavioral. Visual contrast lives in `DESIGN.md` (Colors, Contrast).
 4. He presses `I` (or clicks Guitar). The instrument crossfades to the fretboard; the chord carries over.
 5. **Climax:** the fretboard shows a shape he can play right now, with the best voicing first (`Voicing 1 of N`), root marked, open and muted strings shown.
 6. He plays it on his own guitar, then steps `Right` through other voicings, or clicks a fret to move a note; the name keeps updating.
-7. He drags across the fret numbers to limit the region, and clears it when done.
 
-Failure: no voicing fits the region, so the fretboard is empty and the Status note says `No voicing fits here. Try widening the region.`; notes stay lit on piano. Failure: audio blocked, so `Press any key to wake the sound.` appears near the instrument.
+Failure: no voicing fits these notes, so the fretboard is empty and the Status note says `No voicing fits these notes.`; notes stay lit on piano. Failure: audio blocked, so `Press any key to wake the sound.` appears near the instrument.
 
 ### Flow 2: On-demand ear practice (PRD core loop; Apor, ten minutes before practice)
 

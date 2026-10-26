@@ -202,10 +202,6 @@ components:
   voicing-stepper:
     textColor: '{colors.ink}'
     typography: '{typography.hint}'
-  fret-region-bar:
-    backgroundColor: '{colors.chip}'
-    textColor: '{colors.muted}'
-    rounded: '{rounded.full}'
   setup-panel:
     backgroundColor: '{colors.surface}'
     textColor: '{colors.ink}'
@@ -256,7 +252,7 @@ Every color has a light token and a `-dark` twin of the same name; dark mode swa
 - **bg** and **surface**: the page canvas and the "white" piano keys, fretboard slab and setup panel.
 - **ink** and **muted**: primary text (and role outlines and rings), and secondary text (octave and string labels, unselected tabs, muted-string cross, wrong-guess ring).
 - **keyline**: fret wires and white-key edges. Decorative only.
-- **accent** (blush): the single selected-state fill, used identically on the selected mode tab, the selected Piano|Guitar segment, selected pool chips and every other segmented control. Nothing else uses it (plus the proposed fret-region fill, [ASSUMPTION]).
+- **accent** (blush): the single selected-state fill, used identically on the selected mode tab, the selected Piano|Guitar segment, selected pool chips and every other segmented control. Nothing else uses it.
 - **action** (apricot): the one emphasized action button in a row (Block in Explore, Reveal in Listen).
 - **interval-tint** and **wrong**: resting fill of an interval answer button, and fill of a wrongly guessed one.
 - **role-root, role-third, role-fifth, role-seventh**: chord-role fills on piano keys and fretboard markers. The 5th is green, which replaced the original blue 5th at the user's request; the exact green is Sally's pick under delegation.
@@ -324,7 +320,7 @@ Pixel values are from a **1280 x 800 design canvas** (the mocks render it 1:1). 
 
 Top to bottom: a slim **mode strip** ({spacing.strip-height}, side padding {spacing.strip-padding-x}) holding the wordmark, the Listen / Explore modes (gap {spacing.mode-gap}), the Piano|Guitar toggle pushed right, then the Setup opener and the help hint at the far right (opener just left of the hint). Below, the body (padding {spacing.body-padding}): readout centered ({typography.readout}) with the role legend under it (gap {spacing.readout-gap}), the instrument filling the remaining height and horizontally centered, then a centered control row (gap {spacing.control-gap}, top {spacing.control-top}). In Listen, a row of 12 interval buttons sits at the bottom (gap {spacing.interval-gap}).
 
-The guitar view adds a voicing stepper and a fret-region bar around the fretboard ([wireframe frame 3](wireframes/flow-build-chord-2026-10-23.excalidraw); [guitar mock](mockups/key-explore-guitar.html)); exact placement beyond what the wireframe shows is not specified. **Setup panel placement is accepted by the user:** the [Listen and setup mock](mockups/key-listen-setup.html) shows it anchored under the strip at the right, a 560px floating overlay on the instrument's right edge; it may cover part of the readout and Reveal while open (accepted limit). The Listen arrangement around it is accepted by the user. The panel uses existing tokens only (surface, {rounded.interval}).
+The guitar view adds a voicing stepper around the fretboard ([wireframe frame 3](wireframes/flow-build-chord-2026-10-23.excalidraw); [guitar mock](mockups/key-explore-guitar.html)); exact placement beyond what the wireframe shows is not specified. **Setup panel placement is accepted by the user:** the [Listen and setup mock](mockups/key-listen-setup.html) shows it anchored under the strip at the right, a 560px floating overlay on the instrument's right edge; it may cover part of the readout and Reveal while open (accepted limit). The Listen arrangement around it is accepted by the user. The panel uses existing tokens only (surface, {rounded.interval}).
 
 The piano shows three octaves; `[` and `]` move by octave (EXPERIENCE.md).
 
@@ -334,7 +330,7 @@ Flat. No shadows, no gradients, no hard borders. Depth is tonal: surface on bg, 
 
 ## Shapes
 
-Pill ({rounded.full}) for modes, toggle segments, action buttons, pool chips, the help hint and Setup opener (circles) and the fret-region bar. {rounded.interval} for interval buttons. {rounded.key} for piano keys and the fretboard slab, {rounded.key-black} for black keys. Large radii everywhere; nothing sharp.
+Pill ({rounded.full}) for modes, toggle segments, action buttons, pool chips, the help hint and Setup opener (circles). {rounded.interval} for interval buttons. {rounded.key} for piano keys and the fretboard slab, {rounded.key-black} for black keys. Large radii everywhere; nothing sharp.
 
 **Role markers** (the second channel, mandatory with the fill):
 
@@ -367,12 +363,11 @@ Names are identical in EXPERIENCE.md Component Patterns. Illustrations: [Explore
 - **Action button** — pill {typography.button} on {colors.chip} with a key-hint cap beside the label. The one primary action per row uses {colors.action} fill and weight 600 (`action-button-primary`). The Next button (after Reveal) is an Action button in the primary slot.
 - **Interval button** — {rounded.interval}, {colors.interval-tint}, interval label {typography.interval-label} over a key-hint cap (`1` to `=`, {typography.key-hint-small}). Wrong state (`interval-button-wrong`): {colors.wrong} fill, inset 2px {colors.muted} ring, label struck through (no corner cross, by decision); it is disabled. Pool-excluded: shown disabled, dimmed to no less than 55% opacity [ASSUMPTION; the mock uses 40%, which reads too faint].
 - **Voicing stepper** — `◀ Voicing 1 of N ▶`, {typography.hint}; arrows step. Arrow targets are at least 40 x 40px (pill chip style like the help hint). At the ends the arrow is replaced by `·` and is inert (no wrap). No shape label (user decision).
-- **Fret-region bar** — a bar over the fret numbers; drag across frets to set the region; a small clear control restores the whole neck. It sits **outside the track, to the right of the bar, on the page background** (muted cross on bg is 5.23 light / 5.90 dark; it never sits over the region fill, where muted on accent fails). It is a quiet {colors.muted} cross, about 10px, with no fill and no label, so it does not compete with the bar (it was a loud 38px chip in the stepper row before). It is a real button (accessible name `Clear fret region`) with the standard focus ring drawn around its hit area, not the 10px glyph; the hit area stays at least 28px. When the region is already the whole neck it is disabled and looks the same. The region defaults to the whole neck. [ASSUMPTION] Visual treatment (pill track {colors.chip}, region fill {colors.accent}) is inferred; the wireframe shows it as an outline only. Text on the fret-region fill is {colors.on-fill}, not ink.
 - **Setup panel** — on-demand panel, {colors.surface}, non-modal, 560px wide floating overlay at the right under the strip (placement accepted by the user). Opened and closed by the Setup opener (the gear icon) or `P`. Inner controls are components:
   - **Pool chip** — one per interval (m2 to P8); `pool-chip` at rest, `pool-chip-selected` when in the pool (accent fill, ink text and weight 600; no check glyph, by decision). On/off is carried by fill, text color and weight, not fill alone. The last ticked chip cannot be unticked [ASSUMPTION]; it carries `aria-disabled`, stays focusable, and shows a non-colour cue (see EXPERIENCE.md Pool chip). Accepted limit (user): dark unselected chip label, muted on chip over the panel surface, is 4.00 (light 5.02), under 4.5 for 22px text; on/off still relies on fill, text color step and weight.
   - **Setup segmented control** — `setup-segmented`, reuses the selected treatment of `instrument-toggle-selected`. Used for Direction (Ascending, Descending, Harmonic), Root (Random, Fixed), Sound (Synthesized, v1 only) and Theme (System, Light, Dark).
   - **Setup label** — {typography.legend} in {colors.muted} above each group, associated to its control.
-- **Status note** — quiet italic line in {colors.muted}, {typography.hint}, for `No voicing fits here. Try widening the region.`, `Press any key to wake the sound.`, the offscreen-lit-notes indicator and the clear-undo line. Contains an inline button (`Undo`) in the last case.
+- **Status note** — quiet italic line in {colors.muted}, {typography.hint}, for `No voicing fits these notes.`, `Press any key to wake the sound.`, the offscreen-lit-notes indicator and the clear-undo line. Contains an inline button (`Undo`) in the last case.
 - **Key hint** — {typography.key-hint} cap shown inside buttons and in the shortcuts list; solid colors per Typography.
 - **Focus ring** — `focus-ring`: {spacing.focus-ring-width} {colors.focus} outline with a {spacing.focus-ring-offset} gap, drawn **outside** the control on `:focus-visible`. It sits outside because inside it fails on accent and action in dark (see Contrast). For SVG keys and frets draw it as an element, not a box-shadow. Selected state is a separate, additional cue.
 
