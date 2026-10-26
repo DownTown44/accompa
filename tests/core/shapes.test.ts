@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { GUITAR_FRETS, pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
+import { pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitchClass, type PitchClass } from '../../src/core/pitch'
 import { SHAPE_TEMPLATES, shapeFrets } from '../../src/core/shapes'
 import { CHORD_QUALITIES } from '../../src/core/theory'
-import { generateVoicings } from '../../src/core/voicings'
+import { generateVoicings, VOICING_RULES } from '../../src/core/voicings'
 
 const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
 const roots = Array.from({ length: 12 }, (_, i) => i as PitchClass)
@@ -25,26 +25,26 @@ describe('shapeFrets', () => {
     expect(shapeFrets({ root: 9 as PitchClass, quality: quality('minor') }).map(text)).toContain('x 0 2 2 1 0')
   })
 
-  it('anchors movable shapes on fret 1 to 12 or an octave up, and drops instances off the neck', () => {
+  it('anchors movable shapes on fret 1 to 12 and drops instances above the voicing fret limit', () => {
     const triad = (root: number) => shapeFrets({ root: root as PitchClass, quality: quality('major') }).filter((f) => f[0] === null && f[1] === null && f[2] === null)
     for (const root of roots) {
       for (const name of CHORD_QUALITIES.map((q) => q.name)) {
         for (const frets of shapeFrets({ root, quality: quality(name) })) {
           const sounding = frets.filter((f): f is number => f !== null)
-          for (const f of sounding) expect(f >= 0 && f <= GUITAR_FRETS).toBe(true)
+          for (const f of sounding) expect(f >= 0 && f <= VOICING_RULES.maxFret).toBe(true)
           if (!sounding.includes(0)) {
             const anchor = frets.find((f) => f !== null)!
-            expect((anchor >= 1 && anchor <= 12) || (anchor >= 13 && anchor - 12 <= 12 && anchor <= GUITAR_FRETS)).toBe(true)
+            expect(anchor >= 1 && anchor <= VOICING_RULES.maxFret).toBe(true)
           }
         }
       }
     }
     // The G, B and high E triad: for G the anchor is fret 12 (`x x x 12 12 10`); its octave copy would pass the neck and is dropped.
     expect(triad(7).map(text)).toEqual(['x x x 12 12 10'])
-    // For C the anchor is fret 5 and its octave copy 17 fits.
-    expect(triad(0).map(text)).toEqual(['x x x 5 5 3', 'x x x 17 17 15'])
-    // For D#/E-flat the anchor is fret 8 and the copy at 20 would put the high E at 18, still on the neck.
-    expect(triad(3).map(text)).toEqual(['x x x 8 8 6', 'x x x 20 20 18'])
+    // For C the anchor is fret 5; its octave copy 17 is above the voicing fret limit and is dropped.
+    expect(triad(0).map(text)).toEqual(['x x x 5 5 3'])
+    // For D#/E-flat the anchor is fret 8; the copy at 20 is dropped too.
+    expect(triad(3).map(text)).toEqual(['x x x 8 8 6'])
   })
 
   it('applies an open shape only to its root', () => {

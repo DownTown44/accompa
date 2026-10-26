@@ -1,6 +1,7 @@
-import { GUITAR_FRETS, STANDARD_GUITAR_TUNING } from './instruments'
+import { STANDARD_GUITAR_TUNING } from './instruments'
 import { pitchClass, type PitchClass } from './pitch'
 import type { ChordQuality } from './theory'
+import { VOICING_RULES } from './voicings'
 
 // A common guitar shape as data. `frets` has one entry per string, lowest first: a fret or null (muted).
 // A movable shape holds frets relative to its anchor, the lowest sounding string, whose note is the root.
@@ -62,10 +63,10 @@ export function shapeFrets(chord: { readonly root: PitchClass; readonly quality:
     }
     const anchor = template.frets.findIndex((f) => f !== null)
     const first = (chord.root - pitchClass(STANDARD_GUITAR_TUNING[anchor]!) + 12) % 12 || 12
-    // The anchor fret is 1 to 12, and its octave copy 12 frets up while it fits the neck.
+    // The anchor fret is 1 to 12, and its octave copy 12 frets up while it stays at or below the voicing fret limit.
     for (const base of [first, first + 12]) {
       const frets = template.frets.map((f) => (f === null ? null : base + f))
-      if (frets.every((f) => f === null || (f >= 1 && f <= GUITAR_FRETS))) found.push(frets)
+      if (frets.every((f) => f === null || (f >= 1 && f <= VOICING_RULES.maxFret))) found.push(frets)
     }
   }
   return found

@@ -4,6 +4,8 @@ import type { ChordQuality } from './theory'
 
 // The tunable rules of a playable voicing, kept in one place.
 export interface VoicingRules {
+  // The highest fret a voicing may use; the neck repeats after the 12th fret.
+  readonly maxFret: number
   // The widest spread of fretted notes, in frets; open strings are not counted.
   readonly maxSpan: number
   // An open string is allowed only when every fretted note is at or below this fret.
@@ -17,6 +19,7 @@ export interface VoicingRules {
 }
 
 export const VOICING_RULES: VoicingRules = {
+  maxFret: 12,
   maxSpan: 4,
   openPositionMaxFret: 5,
   maxFingers: 4,
@@ -66,7 +69,7 @@ export function generateVoicings(
   const steps = chord.quality.intervals
   const stepOf = (p: Pitch): number => steps.findIndex((i) => i === (pitchClass(p) - chord.root + 12) % 12)
   const required = steps.reduce((mask, _, step) => (steps.length > 3 && rules.droppableSteps.includes(step) ? mask : mask | (1 << step)), 0)
-  const high = Math.min(range.high, GUITAR_FRETS)
+  const high = Math.min(range.high, GUITAR_FRETS, rules.maxFret)
   const options = tuning.map((_, string) => {
     const found: { fret: number; step: number }[] = []
     for (let fret = fret0(range); fret <= high; fret++) {

@@ -82,7 +82,7 @@ describe('Explore live region', () => {
     const roles = [...document.querySelectorAll('.fretboard [data-lit]')].map((n) => `${n.getAttribute('data-lit')}=${n.getAttribute('data-role')}`)
     // The voicing's pitch classes ignore the octave, but its register follows the mean of all lit
     // notes, including the one beyond the fretboard.
-    expect(roles).toEqual(['1:19=third', '2:17=fifth', '3:17=root', '4:17=third', '5:20=root'])
+    expect(roles).toEqual(['3:9=third', '4:8=fifth', '5:8=root'])
   })
 
   it('draws the same roles on the guitar', () => {
