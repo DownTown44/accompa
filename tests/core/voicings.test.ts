@@ -3,7 +3,7 @@ import { pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass, type PitchClass } from '../../src/core/pitch'
 import { CHORD_QUALITIES } from '../../src/core/theory'
 import { shapeFrets } from '../../src/core/shapes'
-import { generateVoicings, mean, moveFret, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../src/core/voicings'
+import { generateVoicings, mean, moveFret, rankVoicings, VOICING_RULES, voicingPitches, type GuitarVoicing } from '../../src/core/voicings'
 
 const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
 const C = pitchClass(pitch(60))
@@ -256,5 +256,22 @@ describe('moveFret', () => {
     expect(moveFret(frets, 1, null)).toEqual([null, null, 2, 0, 1, 0])
     expect(moveFret(frets, 0, 0)).toEqual([0, 3, 2, 0, 1, 0])
     expect(frets).toEqual([null, 3, 2, 0, 1, 0])
+  })
+})
+
+describe('voicingPitches', () => {
+  it('lists the sounding pitches bass to treble, muted strings silent', () => {
+    expect(voicingPitches([null, 3, 2, 0, 1, 0])).toEqual([48, 52, 55, 60, 64])
+  })
+
+  it('keeps a doubled pitch and sorts by pitch', () => {
+    expect(voicingPitches([0, 7, null, null, null, 0])).toEqual([40, 52, 64])
+    expect(voicingPitches([null, 7, null, null, null, 3])).toEqual([52, 67])
+    expect(voicingPitches([null, null, 5, null, 5, null])).toEqual([55, 64])
+    expect(voicingPitches([null, null, null, null, null, null])).toEqual([])
+  })
+
+  it('takes the tuning as a parameter', () => {
+    expect(voicingPitches([0, null, null, null, null, 0], [38, 45, 50, 55, 59, 64].map(pitch))).toEqual([38, 64])
   })
 })

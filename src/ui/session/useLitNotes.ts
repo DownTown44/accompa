@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import { exploreReading, litPositions, orderedReadings, readingChoice, readingRootedOn, type Role } from '../../core/explore'
 import { pitchClass, type PitchClass } from '../../core/pitch'
-import { pitchAt, STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
+import { STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
 import type { Pitch } from '../../core/pitch'
 import { CHORD_QUALITIES } from '../../core/theory'
 import { shapeFrets } from '../../core/shapes'
-import { generateVoicings, mean, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../core/voicings'
+import { generateVoicings, mean, rankVoicings, VOICING_RULES, voicingPitches, type GuitarVoicing } from '../../core/voicings'
 import type { Workspace } from '../../core/model'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from './SessionContext'
@@ -85,7 +85,7 @@ function shownOf({ list, frets, lead, intervals }: Ranked, selected: Workspace['
 
 // The hand-edited frets as the shown voicing: roles from the namer's reading of the edited pitches, the list the generated voicings of those pitches.
 function editedOf(ranked: Ranked | undefined, frets: readonly (number | null)[], workspace: Pick<Workspace, 'pitches' | 'reading' | 'root'>): Shown {
-  const sounding = frets.flatMap((fret, string) => (fret === null ? [] : [pitchAt(STANDARD_GUITAR_TUNING, string, fret)])).sort((a, b) => a - b)
+  const sounding = voicingPitches(frets)
   const { roles } = exploreReading(workspace.pitches, workspace.reading, workspace.root)
   return {
     voicing: { pitches: sounding, frets },

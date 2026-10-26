@@ -3,6 +3,7 @@ import type { AudioEngine, AudioStatus, PlayMode } from './engine'
 
 const LEAD_IN = 0.03
 const ARPEGGIO_STEP = 0.55
+const STRUM_SPREAD = 0.04
 const NOTE_LENGTH = 1.2
 const ATTACK = 0.015
 const PEAK_GAIN = 0.3
@@ -73,7 +74,8 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
     const start = ctx.currentTime + LEAD_IN
     const peak = PEAK_GAIN / Math.sqrt(pitches.length)
     pitches.forEach((p, index) => {
-      const at = start + (mode === 'arpeggio' ? index * ARPEGGIO_STEP : 0)
+      const step = mode === 'arpeggio' ? ARPEGGIO_STEP : mode === 'strum' ? STRUM_SPREAD : 0
+      const at = start + index * step
       const oscillator = ctx.createOscillator()
       const gain = ctx.createGain()
       oscillator.type = 'triangle'

@@ -192,3 +192,43 @@ describe('Hand-edit a voicing', () => {
     expect(mutedStrings()).toEqual([0, 4])
   })
 })
+
+describe('Hear the voicing', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  it('strums the shown voicing on Enter and plays it one at a time on Space', () => {
+    const engine = open()
+    engine.plays.length = 0
+    press('Enter')
+    press(' ')
+    expect(engine.plays).toEqual([
+      { pitches: [48, 52, 55, 60, 64], mode: 'strum' },
+      { pitches: [48, 52, 55, 60, 64], mode: 'arpeggio' },
+    ])
+  })
+
+  it('plays the voicing, not the lit pitches, and keeps a doubled pitch class', () => {
+    const engine = open()
+    click(cell(0, 0))
+    engine.plays.length = 0
+    press('Enter')
+    expect(engine.plays).toEqual([{ pitches: [40, 48, 52, 55, 60, 64], mode: 'strum' }])
+  })
+
+  it('plays the edited pitches once edited', () => {
+    const engine = open()
+    click(cell(4, 3))
+    engine.plays.length = 0
+    press('Enter')
+    expect(engine.plays).toEqual([{ pitches: [48, 52, 55, 62, 64], mode: 'strum' }])
+  })
+
+  it('leaves muted strings silent', () => {
+    const engine = open()
+    click(cell(1, 3))
+    engine.plays.length = 0
+    press('Enter')
+    expect(engine.plays[0]!.pitches).toEqual([52, 55, 60, 64])
+  })
+})

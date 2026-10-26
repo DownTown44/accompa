@@ -4,9 +4,9 @@ import type { FretPosition } from '../../core/instruments'
 import type { PlayMode } from '../../audio/engine'
 import { canGuess } from '../../core/guess'
 import { COMMON_RANGE } from '../../core/instruments'
-import { moveFret } from '../../core/voicings'
+import { moveFret, voicingPitches } from '../../core/voicings'
 import { generateQuestion } from '../../core/practice'
-import type { VoicingList } from './useLitNotes'
+import { useLitNotes, type VoicingList } from './useLitNotes'
 import { useEngine } from '../engine/EngineContext'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from './SessionContext'
@@ -17,6 +17,7 @@ export function useSessionActions() {
   const { session, dispatch } = useSession()
   const { settings, dispatch: dispatchSettings } = useSettings()
   const engine = useEngine()
+  const { voicingFrets } = useLitNotes()
 
   // A setting that was just changed is passed in, as the closure still holds the old value.
   function startQuestion(override: { direction?: Direction; fixedRoot?: Pitch | null } = {}) {
@@ -54,8 +55,14 @@ export function useSessionActions() {
     engine.play(question.pitches, question.direction === 'harmonic' ? 'block' : 'arpeggio')
   }
 
-  // The lit Explore notes, low to high; nothing lit plays nothing.
+  // With a guitar voicing shown, its fretted pitches (Play one at a time, Block strummed); else the lit Explore notes, low to high.
+  // Nothing lit plays nothing.
   function playLit(mode: PlayMode) {
+    if (voicingFrets) {
+      const pitches = voicingPitches(voicingFrets)
+      if (pitches.length > 0) engine.play(pitches, mode === 'block' ? 'strum' : mode)
+      return
+    }
     const pitches = [...session.workspace.pitches].sort((a, b) => a - b)
     if (pitches.length > 0) engine.play(pitches, mode)
   }

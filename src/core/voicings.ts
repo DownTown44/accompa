@@ -96,6 +96,11 @@ export function moveFret(frets: readonly (number | null)[], string: number, fret
   return frets.map((f, s) => (s === string ? fret : f))
 }
 
+// The sounding pitches of the frets, bass to treble; muted strings are silent, doubled pitches kept.
+export function voicingPitches(frets: readonly (number | null)[], tuning: readonly Pitch[] = STANDARD_GUITAR_TUNING): Pitch[] {
+  return frets.flatMap((fret, string) => (fret === null ? [] : [pitchAt(tuning, string, fret)])).sort((a, b) => a - b)
+}
+
 const fret0 = (range: FretRange) => Math.max(range.low, 0)
 
 // The fretted notes (open strings excluded) as a span and a count of distinct frets.
