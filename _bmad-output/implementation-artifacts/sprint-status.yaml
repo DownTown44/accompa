@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-25-2026 22:30
+last_updated: 10-26-2026 17:12
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -79,7 +79,7 @@ development_status:
   4-5-common-shapes-rank-first: done
   4-6-hand-edit-a-voicing: done
   4-7-hear-the-voicing-strummed-or-arpeggiated: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
 
   epic-5: backlog
   5-1-choose-chord-practice-and-hear-a-chord: backlog
@@ -201,3 +201,47 @@ action_items:
     owner: "Apor (planning)"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
+  - id: "epic-4-retro-item-17-reconcile-epics-md-story-4-3-prd-fr-17-a"
+    epic: 4
+    action: "Reconcile epics.md Story 4.3, PRD FR-17 and the Epic 4 context to the
+      as-built voicing rules (finger rule, 5th droppable only on seventh chords, maxFret
+      12, bucket width 6, ranking order)"
+    owner: "Apor approves, dev applies"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-4-retro-item-18-build-a-shared-voicing-list-provider-so"
+    epic: 4
+    action: "Build a shared voicing-list provider so ranking runs once per change,
+      then restore the ExploreStepper test timeout to the default"
+    owner: "dev, story-shaped"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-4-retro-item-19-listen-to-the-strum-and-tune-strum_sprea"
+    epic: 4
+    action: "Listen to the strum and tune STRUM_SPREAD if needed; look at the first
+      voicing for E, F and D in the app"
+    owner: "Apor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-4-retro-item-20-put-golden-examples-the-first-result-for"
+    epic: 4
+    action: "Put golden examples (the first result for named inputs) in the I/O matrix
+      of any story that generates or ranks results and have the owner confirm them
+      before build"
+    owner: "Apor (planning)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-4-retro-item-21-confirm-planning-assumption-lines-that-s"
+    epic: 4
+    action: "Confirm planning ASSUMPTION lines that shape visible behaviour with a
+      concrete picture before the epic list is written"
+    owner: "Apor with the PM"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-4-retro-item-22-tell-implementers-to-assert-exact-outcom"
+    epic: 4
+    action: "Tell implementers to assert exact outcomes, never loosen a test to pass
+      and never leave an assertion that cannot fail (prompt and AGENTS.md pitfall)"
+    owner: "dev"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
