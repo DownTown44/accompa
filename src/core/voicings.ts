@@ -99,15 +99,23 @@ function shapeOf(v: GuitarVoicing): { span: number; distinct: number } {
   return { span: frets.length === 0 ? 0 : Math.max(...frets) - Math.min(...frets), distinct: new Set(frets).size }
 }
 
-// The voicings ordered by register distance bucket, then more sounding strings, then smaller fret span, then fewer distinct
+// The voicings ordered by register distance bucket, then a common-shape match first, then more sounding strings, then smaller fret span, then fewer distinct
 // fretted frets (a barre beats a spread-out shape), then exact distance, then generator order.
-export function rankVoicings(voicings: readonly GuitarVoicing[], sourceMean: number, bucketWidth: number = VOICING_RULES.bucketWidth): GuitarVoicing[] {
+// `shapes` are the chord's instantiated common shapes; an open shape (one with an open string) counts only in bucket 0.
+export function rankVoicings(
+  voicings: readonly GuitarVoicing[],
+  sourceMean: number,
+  bucketWidth: number = VOICING_RULES.bucketWidth,
+  shapes: readonly (readonly (number | null)[])[] = [],
+): GuitarVoicing[] {
   return voicings
     .map((v, i) => {
       const distance = Math.abs(mean(v.pitches) - sourceMean)
-      return { v, i, distance, bucket: Math.floor(distance / bucketWidth), ...shapeOf(v) }
+      const bucket = Math.floor(distance / bucketWidth)
+      const match = shapes.some((s) => s.length === v.frets.length && s.every((f, k) => f === v.frets[k]) && (bucket === 0 || !s.includes(0)))
+      return { v, i, distance, bucket, match: match ? 0 : 1, ...shapeOf(v) }
     })
-    .sort((a, b) => a.bucket - b.bucket || b.v.pitches.length - a.v.pitches.length || a.span - b.span || a.distinct - b.distinct || a.distance - b.distance || a.i - b.i)
+    .sort((a, b) => a.bucket - b.bucket || a.match - b.match || b.v.pitches.length - a.v.pitches.length || a.span - b.span || a.distinct - b.distinct || a.distance - b.distance || a.i - b.i)
     .map(({ v }) => v)
 }
 

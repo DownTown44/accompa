@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass, type PitchClass } from '../../src/core/pitch'
 import { CHORD_QUALITIES } from '../../src/core/theory'
+import { shapeFrets } from '../../src/core/shapes'
 import { generateVoicings, mean, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../src/core/voicings'
 
 const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
@@ -177,5 +178,73 @@ describe('rankVoicings', () => {
       if (mean(ranked[i]!.pitches) === mean(ranked[i + 1]!.pitches)) expect(twice.indexOf(ranked[i]!)).toBeLessThanOrEqual(twice.indexOf(ranked[i + 1]!))
     }
     expect(all).toEqual(copy)
+  })
+})
+
+describe('rankVoicings with common shapes', () => {
+  const fretText = (frets: readonly (number | null)[]) => frets.map((f) => (f === null ? 'x' : f)).join(' ')
+  const text = (v: GuitarVoicing) => fretText(v.frets)
+  const rank = (name: string, source: number, root: PitchClass = C, withShapes = true) => {
+    const q = quality(name)
+    return rankVoicings(generateVoicings({ root, quality: q }), source, VOICING_RULES.bucketWidth, withShapes ? shapeFrets({ root, quality: q }) : []).map(text)
+  }
+  const A = 9 as PitchClass
+  const v = (...frets: (number | null)[]): GuitarVoicing => ({ frets, pitches: frets.flatMap((f, s) => (f === null ? [] : [pitchAt(STANDARD_GUITAR_TUNING, s, f)])).sort((a, b) => a - b) })
+
+  it('ranks the open C first in the low register, where unshaped ranking picks another', () => {
+    const source = mean([48, 52, 55])
+    expect(rank('major', source)[0]).toBe('x 3 2 0 1 0')
+    expect(rank('major', source, C, false)[0]).toBe('x 3 5 0 5 0')
+  })
+
+  it('still ranks the E-shape barre first for C4 E4 G4', () => {
+    expect(rank('major', mean([60, 64, 67]))[0]).toBe('8 10 10 9 8 8')
+  })
+
+  it('does not rank the open C first in a higher register, but a movable shape', () => {
+    const ranked = rank('major', mean([72, 76, 79]))
+    expect(ranked[0]).not.toBe('x 3 2 0 1 0')
+    expect(shapeFrets({ root: C, quality: quality('major') }).map(fretText)).toContain(ranked[0])
+  })
+
+  it('ranks the open A minor first where unshaped ranking picks another', () => {
+    const source = mean([48, 51, 55])
+    expect(rank('minor', source, A)[0]).toBe('x 0 2 2 1 0')
+    expect(rank('minor', source, A, false)[0]).toBe('5 0 2 5 5 0')
+  })
+
+  it('ranks a match ahead of a six-string non-match in the same bucket', () => {
+    const match = v(null, 3, 5, 5, 5, 3)
+    const other = v(8, 10, 10, 9, 8, 8)
+    expect(rankVoicings([other, match], 60, 1000, [match.frets])[0]).toBe(match)
+    expect(rankVoicings([other, match], 60, 1000)[0]).toBe(other)
+  })
+
+  it('counts an open shape as a match only in bucket 0', () => {
+    const open = v(null, 3, 2, 0, 1, 0)
+    // Same bucket 1, and the non-match is ahead on every later key (more strings, smaller span).
+    const other = v(3, 2, 0, 0, 0, 3)
+    const far = (open.pitches.reduce((a, b) => a + b, 0) / open.pitches.length) + 8
+    const bucket = (x: GuitarVoicing) => Math.floor(Math.abs(mean(x.pitches) - far) / 6)
+    expect(bucket(open)).toBe(bucket(other))
+    expect(bucket(open)).toBeGreaterThan(0)
+    expect(rankVoicings([open, other], far, 6, [open.frets])[0]).toBe(other)
+    // Near the open shape, in bucket 0, the match wins.
+    const near = mean(open.pitches)
+    expect(rankVoicings([other, open], near, 6, [open.frets])[0]).toBe(open)
+  })
+
+  it('keeps the unshaped order for a quality with no templates', () => {
+    for (const name of ['diminished', 'augmented', 'm7b5', 'dim7']) {
+      const q = quality(name)
+      const all = generateVoicings({ root: C, quality: q })
+      expect(rankVoicings(all, 60, 6, shapeFrets({ root: C, quality: q }))).toEqual(rankVoicings(all, 60, 6))
+    }
+  })
+
+  it('ranks the A-shape barre first for C7 in the low register, where unshaped ranking picks another', () => {
+    const source = mean([48, 52, 55, 58])
+    expect(rank('dom7', source)[0]).toBe('x 3 5 3 5 3')
+    expect(rank('dom7', source, C, false)[0]).toBe('8 7 8 5 5 8')
   })
 })

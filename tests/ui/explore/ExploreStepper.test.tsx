@@ -6,6 +6,7 @@ import { click, key } from '../support/dom'
 import { press } from '../support/keys'
 import { pitch, pitchClass } from '../../../src/core/pitch'
 import { CHORD_QUALITIES } from '../../../src/core/theory'
+import { shapeFrets } from '../../../src/core/shapes'
 import { generateVoicings, mean, rankVoicings, VOICING_RULES } from '../../../src/core/voicings'
 import { initialSession, sessionReducer } from '../../../src/ui/session/session'
 import { STANDARD_GUITAR_TUNING } from '../../../src/core/instruments'
@@ -28,7 +29,7 @@ function open(pitches = [60, 64, 67]) {
 const ranked = () => {
   const quality = CHORD_QUALITIES.find((q) => q.name === 'major')!
   const list = generateVoicings({ root: pitchClass(pitch(60)), quality, bass: pitchClass(pitch(60)) } as never, STANDARD_GUITAR_TUNING, VOICING_RULES)
-  return rankVoicings(list, mean([pitch(60), pitch(64), pitch(67)]), VOICING_RULES.bucketWidth)
+  return rankVoicings(list, mean([pitch(60), pitch(64), pitch(67)]), VOICING_RULES.bucketWidth, shapeFrets({ root: pitchClass(pitch(60)), quality }))
 }
 const expectedLit = (i: number) =>
   ranked()[i]!.frets.flatMap((fret, string) => (fret === null ? [] : [`${string}:${fret}`])).sort().join()

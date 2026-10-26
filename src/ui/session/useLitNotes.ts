@@ -4,6 +4,7 @@ import { pitchClass, type PitchClass } from '../../core/pitch'
 import { STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
 import type { Pitch } from '../../core/pitch'
 import { CHORD_QUALITIES } from '../../core/theory'
+import { shapeFrets } from '../../core/shapes'
 import { generateVoicings, mean, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../core/voicings'
 import type { Workspace } from '../../core/model'
 import { useSettings } from '../settings/SettingsContext'
@@ -52,7 +53,7 @@ function rankedVoicings(pitches: readonly Pitch[], workspace: Pick<Workspace, 'r
   if (!lead) return undefined
   const quality = CHORD_QUALITIES.find((q) => q.name === readingChoice(lead).quality)
   if (!quality) return undefined
-  const list = rankVoicings(generateVoicings({ root: lead.root, quality, bass: lead.bass }, STANDARD_GUITAR_TUNING, VOICING_RULES), mean(pitches), VOICING_RULES.bucketWidth)
+  const list = rankVoicings(generateVoicings({ root: lead.root, quality, bass: lead.bass }, STANDARD_GUITAR_TUNING, VOICING_RULES), mean(pitches), VOICING_RULES.bucketWidth, shapeFrets({ root: lead.root, quality }))
   return { list, frets: list.map((v) => v.frets), lead, intervals: quality.intervals }
 }
 
