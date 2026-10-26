@@ -157,11 +157,11 @@ describe('Explore guitar', () => {
     })
 
     it('marks open strings with a ring and muted strings with an x on exactly the unused strings', () => {
-      fromSession(41, 45, 48)
-      expect(lit()).toEqual(['0:1', '1:0', '2:3', '3:2'])
+      fromSession(59, 62, 65)
+      expect(lit()).toEqual(['1:2', '2:0', '3:4', '4:3', '5:1'])
       expect(openRings()).toBe(1)
       expect(mutedStrings()).toEqual([0, 1, 2, 3, 4, 5].filter((s) => !strings().includes(s)))
-      expect(mutedStrings()).toEqual([4, 5])
+      expect(mutedStrings()).toEqual([0])
     })
 
     it('puts a high chord high on the neck', () => {
@@ -186,32 +186,29 @@ describe('Explore guitar', () => {
       expect(mutedStrings()).toEqual([])
     })
 
-    it('says 5th left out when the best voicing omits the 5th, and not for C major', () => {
+    it('shows a full voicing of F A C and no Status line', () => {
       fromSession(41, 45, 48)
-      expect(lit()).toEqual(['0:1', '1:0', '2:3', '3:2'])
-      expect(status()).toBe('5th left out')
+      expect(lit()).toEqual(['0:1', '1:3', '2:3', '3:2'])
+      expect(status()).toBe('')
       expect(legend()).toEqual(['root F', '3rd A (M3)', '5th C (P5)'])
-      cleanup()
-      build(60, 64, 67)
-      expect(status()).not.toContain('5th left out')
     })
 
     it('puts the bass note of a slash chord lowest', () => {
       build(64, 67, 72)
       expect(readout()).toContain('C major')
-      expect(lit()).toEqual(['0:12', '1:10', '2:10', '3:12', '4:13', '5:12'])
+      expect(lit()).toEqual(['0:12', '1:15', '2:14', '3:12', '4:13', '5:12'])
       expect(lowestSounding() % 12).toBe(4)
     })
 
     it('follows a chosen root: the ring moves and the lowest note stays the bass', () => {
       build(60, 64, 68)
-      expect(rooted()).toEqual(['0:8', '2:10', '5:8'])
+      expect(rooted()).toEqual(['0:20', '3:17'])
       press('i')
       press('r')
       click(key(64))
       press('i')
-      expect(lit()).toEqual(['0:8', '1:11', '2:10', '3:9', '4:9', '5:8'])
-      expect(rooted()).toEqual(['3:9'])
+      expect(lit()).toEqual(['0:20', '1:19', '2:18', '3:17', '4:17'])
+      expect(rooted()).toEqual(['1:19', '4:17'])
       expect([...document.querySelectorAll('[data-root]')].every((n) => n.getAttribute('data-role') === 'root')).toBe(true)
       expect(lowestSounding() % 12).toBe(0)
     })

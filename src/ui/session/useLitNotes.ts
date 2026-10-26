@@ -23,8 +23,6 @@ export interface LitNotes {
   readonly muted?: readonly number[]
   // Explore guitar only: a named chord has no playable voicing, so nothing is placed.
   readonly noVoicing?: boolean
-  // Explore guitar only: the shown voicing leaves out the chord's 5th.
-  readonly fifthLeftOut?: boolean
   // Explore guitar only: the frets of the shown voicing (the edited ones once edited); a fret click edits these.
   readonly voicingFrets?: readonly (number | null)[]
 }
@@ -46,7 +44,6 @@ interface Shown {
   readonly count: number
   readonly frets: readonly (readonly (number | null)[])[]
   readonly roles: readonly Role[]
-  readonly fifthLeftOut: boolean
   // The voicing is the user's hand edit, not a list entry; its index is -1.
   readonly edited: boolean
 }
@@ -71,14 +68,12 @@ function shownOf({ list, frets, lead, intervals }: Ranked, selected: Workspace['
   const index = found < 0 ? 0 : found
   const voicing = list[index] ?? null
   const stepOf = (p: Pitch) => intervals.findIndex((i) => i === (pitchClass(p) - lead.root + 12) % 12)
-  const steps = new Set(voicing?.pitches.map(stepOf))
   return {
     voicing,
     index,
     count: list.length,
     frets,
     roles: voicing === null ? [] : voicing.pitches.map((p) => ROLE_BY_STEP[stepOf(p)] ?? 'none'),
-    fifthLeftOut: voicing !== null && !steps.has(2),
     edited: false,
   }
 }
@@ -93,7 +88,6 @@ function editedOf(ranked: Ranked | undefined, frets: readonly (number | null)[],
     count: ranked?.list.length ?? 0,
     frets: ranked?.frets ?? NO_FRETS,
     roles: sounding.map((p) => roles[workspace.pitches.indexOf(p)] ?? 'none'),
-    fifthLeftOut: false,
     edited: true,
   }
 }
@@ -158,7 +152,7 @@ export function useLitNotes(): LitNotes {
 }
 
 // The lit notes with the guitar side replaced by the shown voicing; the piano side and readout stay on the lit notes.
-function voicingNotes(pitches: readonly Pitch[], root: Pitch | undefined, roles: readonly Role[], { voicing, roles: voicingRoles, fifthLeftOut }: Shown): LitNotes {
+function voicingNotes(pitches: readonly Pitch[], root: Pitch | undefined, roles: readonly Role[], { voicing, roles: voicingRoles }: Shown): LitNotes {
   if (voicing === null) return { pitches, root, roles, positions: [], positionRoles: [], muted: [], noVoicing: true }
   const sounding = voicing.frets.flatMap((fret, string) => (fret === null ? [] : [{ string, fret }]))
   const byPitch = [...sounding].sort((a, b) => STANDARD_GUITAR_TUNING[a.string]! + a.fret - (STANDARD_GUITAR_TUNING[b.string]! + b.fret))
@@ -171,7 +165,6 @@ function voicingNotes(pitches: readonly Pitch[], root: Pitch | undefined, roles:
     positionRoles: voicingRoles,
     rootPosition,
     muted: voicing.frets.flatMap((fret, string) => (fret === null ? [string] : [])),
-    fifthLeftOut,
     voicingFrets: voicing.frets,
   }
 }

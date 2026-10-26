@@ -8,7 +8,9 @@ export interface VoicingRules {
   readonly maxSpan: number
   // An open string is allowed only when every fretted note is at or below this fret.
   readonly openPositionMaxFret: number
-  // Chord steps (0 root, 1 3rd, 2 5th, 3 7th) a voicing may leave out; every other step is required.
+  // The most fingers a shape may need; see `fingersNeeded`.
+  readonly maxFingers: number
+  // Chord steps (0 root, 1 3rd, 2 5th, 3 7th) a voicing may leave out, and only on a chord with a 7th; every other step is required.
   readonly droppableSteps: readonly number[]
   // Register distance, in semitones, that one ranking bucket covers.
   readonly bucketWidth: number
@@ -17,6 +19,7 @@ export interface VoicingRules {
 export const VOICING_RULES: VoicingRules = {
   maxSpan: 4,
   openPositionMaxFret: 5,
+  maxFingers: 4,
   droppableSteps: [2],
   bucketWidth: 6,
 }
@@ -41,6 +44,18 @@ export interface GuitarVoicing {
   readonly frets: readonly (number | null)[]
 }
 
+// The fingers a shape needs: one per fretted note (fret above 0), except that the notes on the lowest
+// fretted fret, when two or more, are one finger (a barre) unless an open string lies between the barre's outer strings.
+export function fingersNeeded(frets: readonly (number | null)[]): number {
+  const fretted = frets.filter((f): f is number => f !== null && f > 0)
+  if (fretted.length === 0) return 0
+  const lowest = Math.min(...fretted)
+  const on = frets.flatMap((f, s) => (f === lowest ? [s] : []))
+  if (on.length < 2) return fretted.length
+  const open = frets.some((f, s) => f === 0 && s > on[0]! && s < on[on.length - 1]!)
+  return open ? fretted.length : fretted.length - on.length + 1
+}
+
 // Every playable voicing of the chord, unranked, in a fixed order (frets ascending, muted last); muted strings only outside the sounding ones; the lowest note is the bass or root when possible; empty when none fits.
 export function generateVoicings(
   chord: VoicingChord,
@@ -50,7 +65,7 @@ export function generateVoicings(
 ): GuitarVoicing[] {
   const steps = chord.quality.intervals
   const stepOf = (p: Pitch): number => steps.findIndex((i) => i === (pitchClass(p) - chord.root + 12) % 12)
-  const required = steps.reduce((mask, _, step) => (rules.droppableSteps.includes(step) ? mask : mask | (1 << step)), 0)
+  const required = steps.reduce((mask, _, step) => (steps.length > 3 && rules.droppableSteps.includes(step) ? mask : mask | (1 << step)), 0)
   const high = Math.min(range.high, GUITAR_FRETS)
   const options = tuning.map((_, string) => {
     const found: { fret: number; step: number }[] = []
@@ -66,7 +81,7 @@ export function generateVoicings(
   const walk = (string: number, min: number, max: number, mask: number, phase: number) => {
     if (string === tuning.length) {
       const open = frets.includes(0)
-      if ((mask & required) === required && !(open && max > rules.openPositionMaxFret)) {
+      if ((mask & required) === required && !(open && max > rules.openPositionMaxFret) && fingersNeeded(frets) <= rules.maxFingers) {
         const pitches = frets.flatMap((fret, s) => (fret === null ? [] : [pitchAt(tuning, s, fret)]))
         found.push({ pitches: pitches.sort((a, b) => a - b), frets: [...frets] })
       }

@@ -40,8 +40,7 @@ export function Shell() {
       : session.mode === 'explore'
         ? lit.noVoicing
           ? NO_VOICING_NOTE
-          : (beyondFretboardNote(beyondFretboard(lit.pitches), lit.muted ? 0 : leftOutCount(lit.pitches, session.workspace.positions)) ??
-            (lit.fifthLeftOut ? '5th left out' : undefined))
+          : beyondFretboardNote(beyondFretboard(lit.pitches), lit.muted ? 0 : leftOutCount(lit.pitches, session.workspace.positions))
         : undefined
   const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
   const message =

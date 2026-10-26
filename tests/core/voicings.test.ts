@@ -3,7 +3,7 @@ import { pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass, type PitchClass } from '../../src/core/pitch'
 import { CHORD_QUALITIES } from '../../src/core/theory'
 import { shapeFrets } from '../../src/core/shapes'
-import { generateVoicings, mean, moveFret, rankVoicings, VOICING_RULES, voicingPitches, type GuitarVoicing } from '../../src/core/voicings'
+import { fingersNeeded, generateVoicings, mean, moveFret, rankVoicings, VOICING_RULES, voicingPitches, type GuitarVoicing } from '../../src/core/voicings'
 
 const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
 const C = pitchClass(pitch(60))
@@ -47,12 +47,54 @@ describe('generateVoicings', () => {
     }
   })
 
-  it('includes open, muted and a dropped 5th', () => {
+  it('includes open and muted strings and the open C shape', () => {
     const all = generateVoicings(chord('major'))
     expect(all.some((v) => v.frets.includes(0))).toBe(true)
     expect(all.some((v) => v.frets.includes(null))).toBe(true)
-    expect(all.some((v) => !classesOf(v).has(7))).toBe(true)
     expect(all.some((v) => v.frets.join() === ',3,2,0,1,0')).toBe(true)
+  })
+
+  it.each(['major', 'minor', 'diminished', 'augmented'])('keeps root, 3rd and 5th in every %s voicing', (name) => {
+    const q = quality(name)
+    const all = generateVoicings(chord(name))
+    expect(all.length).toBeGreaterThan(0)
+    for (const v of all) for (const interval of q.intervals) expect(classesOf(v).has(interval)).toBe(true)
+  })
+
+  it.each(['maj7', 'dom7', 'min7', 'm7b5', 'dim7'])('may omit the 5th of a %s but never the root, 3rd or 7th', (name) => {
+    const q = quality(name)
+    const all = generateVoicings(chord(name))
+    expect(all.some((v) => !classesOf(v).has(q.intervals[2]!))).toBe(true)
+    for (const v of all) for (const step of [0, 1, 3]) expect(classesOf(v).has(q.intervals[step]!)).toBe(true)
+  })
+
+  describe('finger rule', () => {
+    const shapes = (name: string) => generateVoicings(chord(name)).map((v) => v.frets.map((f) => (f === null ? 'x' : f)).join(' '))
+
+    it('counts a barre as one finger', () => {
+      expect(fingersNeeded([8, 10, 10, 9, 8, 8])).toBe(4)
+      expect(fingersNeeded([null, 3, 5, 5, 5, 3])).toBe(4)
+      expect(fingersNeeded([null, 3, 2, 0, 1, 0])).toBe(3)
+    })
+
+    it('does not count a barre when an open string lies inside it', () => {
+      expect(fingersNeeded([3, 2, 3, 0, 3, 3])).toBe(5)
+      expect(fingersNeeded([3, null, null, 0, null, 3])).toBe(2)
+    })
+
+    it('rejects five fingers and keeps the common C shapes', () => {
+      expect(fingersNeeded([8, 7, 5, 5, 8, 8])).toBe(5)
+      const c = shapes('major')
+      expect(c).toContain('8 10 10 9 8 8')
+      expect(c).toContain('x 3 5 5 5 3')
+      expect(c).toContain('x 3 2 0 1 0')
+      expect(c).not.toContain('8 7 5 5 8 8')
+      expect(shapes('dom7')).not.toContain('3 2 3 0 3 3')
+    })
+
+    it('needs at most the maximum fingers in every voicing of the nine qualities', () => {
+      for (const q of CHORD_QUALITIES) for (const v of generateVoicings(chord(q.name))) expect(fingersNeeded(v.frets)).toBeLessThanOrEqual(VOICING_RULES.maxFingers)
+    })
   })
 
   it('always keeps the 7th on a seventh chord', () => {
@@ -245,7 +287,7 @@ describe('rankVoicings with common shapes', () => {
   it('ranks the A-shape barre first for C7 in the low register, where unshaped ranking picks another', () => {
     const source = mean([48, 52, 55, 58])
     expect(rank('dom7', source)[0]).toBe('x 3 5 3 5 3')
-    expect(rank('dom7', source, C, false)[0]).toBe('8 7 8 5 5 8')
+    expect(rank('dom7', source, C, false)[0]).toBe('8 7 5 5 5 6')
   })
 })
 

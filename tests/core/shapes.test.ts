@@ -59,10 +59,10 @@ describe('shapeFrets', () => {
       for (const frets of shapeFrets({ root, quality: q })) {
         const classes = new Set(frets.flatMap((f, s) => (f === null ? [] : [pitchClass(pitchAt(STANDARD_GUITAR_TUNING, s, f))])))
         const chordClasses = q.intervals.map((i) => (root + i) % 12)
-        // No extra notes; none missing but the 5th, which the generator may drop (open C7 `x 3 2 3 1 0` has none).
+        // No extra notes; none missing but the 5th of a seventh chord, which the generator may drop (open C7 `x 3 2 3 1 0` has none).
         for (const c of classes) expect(chordClasses).toContain(c)
         chordClasses.forEach((c, step) => {
-          if (step !== 2) expect(classes.has(c as PitchClass)).toBe(true)
+          if (step !== 2 || q.intervals.length === 3) expect(classes.has(c as PitchClass)).toBe(true)
         })
         expect(generated.has(text(frets))).toBe(true)
       }
