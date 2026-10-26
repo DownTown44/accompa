@@ -11,10 +11,10 @@ Apor asked for the whole epic to be built first and discussed afterwards. Each s
 
 ## 4.3 Generate and show the best voicing (core/voicings.ts)
 
-- Rules: max span 4 (open strings excluded); the lowest sounding note is the bass of the reading, else the root (a C major must not show as C/E), else any note if none exists; no muted string between sounding strings; an open string only when every fretted note is at or below fret 5; root and 3rd required, the 7th required on seventh chords, only the 5th droppable. Chord tones may double across strings.
+- Rules: max span 4 (open strings excluded); the lowest sounding note is the bass of the reading, else the root (a C major must not show as C/E), else any note if none exists; no muted string between sounding strings; an open string only when every fretted note is at or below fret 5; root and 3rd required, the 7th required on seventh chords. Chord tones may double across strings.
 - Ranking: register bucket (6 semitones; `x 3 5 5 5 3` and the 8th-fret barre count as one register), then more sounding strings, then smaller fret span, then fewer different fretted frets, then exact distance, then generator order. Source register = mean pitch of all lit notes, including any beyond the fretboard.
 - One or two lit notes, or notes with no chord name, keep the Story 3.9 placement. A fret click while a voicing shows used to keep the 3.8 rule (Story 4.6 replaced it).
-- `5th left out` shows as a Status line when the shown voicing omits the 5th (a beyond-fretboard note wins when both apply).
+- Changed after Apor tried it (2026-10-26): at most four fingers (a fretted note is a finger; the notes at the lowest fretted fret share one finger as a barre unless an open string lies between the barre's outer strings), the 5th is required on triads and droppable only on seventh chords, and the `5th left out` Status line was removed. `8 7 5 5 8 8` and `3 2 3 0 3 3` are no longer voicings.
 - Not taken: any note may be lowest; inner mutes allowed; open strings at any fret.
 
 ## 4.4 Stepper
@@ -43,7 +43,7 @@ Apor asked for the whole epic to be built first and discussed afterwards. Each s
 
 ## Known weak spots to try out
 
-- A swapped C major shows the 8th-fret barre; other chords may show odd first shapes (`F A C` shows `1 0 3 2 x x` with no 5th). The ranking has no notion of difficulty beyond span and distinct frets.
+- A swapped C major shows the 8th-fret barre (49 voicings in all); the first shape for E, F and D in the register of octave 4 is also the E-shape barre high on the neck, because the register ranking comes first and open shapes count only within the source register.
 - The voicing lists are long (96 for C major), and ranking by register means the first few are all barres near the register you built.
 - Performance: the voicing list is computed in several hooks per change, and one stepper test's timeout was raised to 20 s. Not noticeable in Chrome, but worth a shared provider if it ever lags.
 - Strum timing was checked only against a fake audio clock; nobody has listened to it yet.
