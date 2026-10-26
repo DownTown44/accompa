@@ -97,3 +97,57 @@
   outline: var(--spacing-focus-ring-width) solid var(--color-focus);
   outline-offset: var(--spacing-focus-ring-offset);
 }
+
+/* One reserved row between the alternatives and the legend; empty unless the guitar has two or more voicings. */
+.voicing-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--spacing-voicing-height);
+}
+
+.voicing-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--type-legend-size);
+  font-weight: var(--type-legend-weight);
+  white-space: nowrap;
+}
+
+.voicing-count {
+  min-width: 9em;
+  text-align: center;
+}
+
+.voicing-arrow,
+.voicing-end {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.voicing-arrow {
+  padding: 0;
+  border: 0;
+  border-radius: var(--rounded-full);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.voicing-end {
+  color: var(--color-muted);
+}
+
+.voicing-arrow:hover {
+  background: var(--color-interval-tint);
+}
+
+.voicing-arrow:focus-visible {
+  outline: var(--spacing-focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--spacing-focus-ring-offset);
+}

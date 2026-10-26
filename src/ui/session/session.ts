@@ -45,6 +45,7 @@ export type SessionAction =
   | { type: 'chooseReading'; reading: ReadingChoice }
   | { type: 'chooseRoot'; pitch: Pitch }
   | { type: 'armRoot' }
+  | { type: 'selectVoicing'; frets: readonly (number | null)[] }
   | { type: 'setQuestion'; question: Question }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
@@ -132,7 +133,7 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return { ...state, cleared: null, rootArmed: next.length > 0 && state.rootArmed, workspace }
     }
     case 'chooseReading': {
-      const { reading, root, ...rest } = state.workspace
+      const { reading, root, voicing: _voicing, ...rest } = state.workspace
       const { reading: choice } = action
       const named = orderedReadings(state.workspace.pitches).some((r) => isReading(r, choice))
       if (!named || (root === undefined && reading && sameChoice(reading, choice))) return state
@@ -140,13 +141,18 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     }
     case 'chooseRoot': {
       const { pitch } = action
-      const { pitches, reading, root, ...rest } = state.workspace
+      const { pitches, reading, root, voicing: _voicing, ...rest } = state.workspace
       if (state.mode !== 'explore' || !pitches.includes(pitch)) return state
       const found = readingRootedOn(pitches, pitch)
       const choice = found ? readingChoice(found) : undefined
       const same = root === pitch && (choice ? reading !== undefined && sameChoice(reading, choice) : reading === undefined)
       if (same) return state.rootArmed ? { ...state, rootArmed: false } : state
       return { ...state, rootArmed: false, workspace: { pitches, ...rest, root: pitch, ...(choice ? { reading: choice } : {}) } }
+    }
+    case 'selectVoicing': {
+      const { voicing } = state.workspace
+      if (state.mode !== 'explore' || (voicing !== undefined && voicing.length === action.frets.length && voicing.every((f, i) => f === action.frets[i]))) return state
+      return { ...state, workspace: { ...state.workspace, voicing: action.frets } }
     }
     case 'armRoot':
       if (state.rootArmed) return { ...state, rootArmed: false }

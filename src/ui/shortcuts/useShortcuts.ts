@@ -1,6 +1,8 @@
 import { useLayoutEffect, useEffect, useRef } from 'react'
 import { INTERVALS } from '../../core/theory'
 import { INTERVAL_KEYS } from '../listen/intervalKeys'
+import { useSession } from '../session/SessionContext'
+import { useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
 
 const textInputTypes = new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number'])
@@ -22,18 +24,28 @@ function hasModifier(event: KeyboardEvent): boolean {
   return event.ctrlKey || event.altKey || event.metaKey
 }
 
+// Left and Right step voicings from the instrument, the stepper's arrows, or no control at all.
+function mayStep(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return true
+  if (target.closest('.piano, .fretboard, .voicing-stepper') !== null) return true
+  return !isControl(target)
+}
+
 export function useShortcuts() {
   const actions = useSessionActions()
-  const latest = useRef(actions)
+  const { session } = useSession()
+  const list = useVoicingList()
+  const latest = useRef({ actions, list, steps: false })
 
   useLayoutEffect(() => {
-    latest.current = actions
+    latest.current = { actions, list, steps: session.mode === 'explore' && session.instrument === 'guitar' && list.count >= 2 }
   })
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || hasModifier(event) || isTextField(event.target)) return
-      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano, toggleSetup, toggleHelp, dismiss, armRoot } = latest.current
+      const { actions, list, steps } = latest.current
+      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano, toggleSetup, toggleHelp, dismiss, armRoot, stepVoicing } = actions
       const key = event.key.toLowerCase()
       const keyIndex = INTERVAL_KEYS.indexOf(event.key)
       if (keyIndex >= 0) {
@@ -42,6 +54,11 @@ export function useShortcuts() {
       else if (key === 'p') toggleSetup()
       else if (key === 'r') {
         if (!isControl(event.target)) armRoot()
+      } else if (key === 'arrowleft' || key === 'arrowright') {
+        if (steps && mayStep(event.target)) {
+          event.preventDefault()
+          stepVoicing(key === 'arrowright' ? 1 : -1, list)
+        }
       } else if (key === 'escape') dismiss()
       else if (event.key === '?') toggleHelp()
       else if (key === 'i') toggleInstrument()

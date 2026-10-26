@@ -5,6 +5,7 @@ import type { PlayMode } from '../../audio/engine'
 import { canGuess } from '../../core/guess'
 import { COMMON_RANGE } from '../../core/instruments'
 import { generateQuestion } from '../../core/practice'
+import type { VoicingList } from './useLitNotes'
 import { useEngine } from '../engine/EngineContext'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from './SessionContext'
@@ -127,6 +128,11 @@ export function useSessionActions() {
     releaseNote,
     selectMode,
     armRoot: () => dispatch({ type: 'armRoot' }),
+    // One voicing along the ranked list, never past either end; the list comes from useVoicingList.
+    stepVoicing: (direction: 1 | -1, list: VoicingList) => {
+      const frets = list.frets[list.index + direction]
+      if (frets !== undefined) dispatch({ type: 'selectVoicing', frets })
+    },
     chooseReading: (reading: ReadingChoice) => dispatch({ type: 'chooseReading', reading }),
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),

@@ -82,9 +82,10 @@
   --spacing-readout-gap: 14px;
   --spacing-legend-height: 34px;
   --spacing-alternatives-height: 34px;
+  --spacing-voicing-height: 40px;
   --spacing-readout-block-height: calc(
     var(--type-readout-size) * var(--type-readout-line-height) + var(--spacing-readout-gap) + var(--spacing-alternatives-height) +
-      var(--spacing-readout-gap) + var(--spacing-legend-height)
+      var(--spacing-readout-gap) + var(--spacing-voicing-height) + var(--spacing-readout-gap) + var(--spacing-legend-height)
   );
   --spacing-interval-gap: 10px;
   --spacing-control-gap: 18px;
