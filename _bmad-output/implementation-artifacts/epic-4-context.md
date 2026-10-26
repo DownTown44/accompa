@@ -54,8 +54,8 @@ Apor builds a chord on the piano, swaps to the fretboard with it carried over, s
 
 ## Cross-Story Dependencies
 
-- Story 4.1 is retired: carry-over, swap back, the empty prompt and the out-of-range readout behaviour were delivered by Stories 3.8 and 3.9, so Epic 4 builds on them directly. Build order is 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, with no renumbering.
-- 4.2 (region) comes first so that 4.3 can honour it.
+- Story 4.1 is retired: carry-over, swap back, the empty prompt and the out-of-range readout behaviour were delivered by Stories 3.8 and 3.9, so Epic 4 builds on them directly. Build order is 4.3, 4.4, 4.5, 4.6, 4.7; Story 4.2 (fret region) is deferred until after 4.4 and may be dropped; no renumbering.
+- 4.3 takes an optional fret range in the generator (pure, tested); the region bar (4.2) is deferred and, if built, only narrows what 4.3 generates.
 - 4.3 holds the generator, the register-distance ranking and the display of the best-ranked voicing; 4.4 adds only the stepper over that ranked list; 4.5 adds the template tie-break (the ranking function must accept template data).
 - 4.6 (hand-edit) needs 4.3 and 4.4 (the voicing shown and the stepper state); 4.7 needs the shown or edited voicing from 4.6 and extends the Epic 1 audio engine with strum mode.
 - Builds on Epic 3: the chord, namer readings and chosen root, and the one-note-per-string placement from Stories 3.8 and 3.9.
