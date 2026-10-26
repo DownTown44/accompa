@@ -15,6 +15,7 @@ Apor asked for the whole epic to be built first and discussed afterwards. Each s
 - Ranking: register bucket (6 semitones; `x 3 5 5 5 3` and the 8th-fret barre count as one register), then more sounding strings, then smaller fret span, then fewer different fretted frets, then exact distance, then generator order. Source register = mean pitch of all lit notes, including any beyond the fretboard.
 - One or two lit notes, or notes with no chord name, keep the Story 3.9 placement. A fret click while a voicing shows used to keep the 3.8 rule (Story 4.6 replaced it).
 - Changed after Apor tried it (2026-10-26): at most four fingers (a fretted note is a finger; the notes at the lowest fretted fret share one finger as a barre unless an open string lies between the barre's outer strings), the 5th is required on triads and droppable only on seventh chords, and the `5th left out` Status line was removed. `8 7 5 5 8 8` and `3 2 3 0 3 3` are no longer voicings.
+- Also changed after Apor tried it: no voicing uses a fret above 12 (`maxFret`), because the neck repeats and chords are not usually played there; a high chord shows the nearest voicings at or below fret 12, and the fretboard still draws 22 frets. Every quality has voicings for all twelve roots under that limit.
 - Not taken: any note may be lowest; inner mutes allowed; open strings at any fret.
 
 ## 4.4 Stepper
