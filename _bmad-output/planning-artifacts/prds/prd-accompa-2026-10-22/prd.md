@@ -87,7 +87,7 @@ Chord scope: triads (major, minor, diminished, augmented) and 7ths (maj7, dom7, 
 - FR-14: Chord naming in Explore: the user toggles any notes and the app names the chord.
 
 **Transfer to guitar**
-- FR-15: Swapping to the fretboard keeps the chord. All positions of the chord's notes show across the neck, with the root highlighted and other notes marked by role (3rd, 5th, 7th). User can limit the view to a fret region.
+- FR-15: Swapping to the fretboard keeps the chord and shows it as a playable voicing in the register of the source chord (FR-16, FR-18), with the root highlighted and other notes marked by role (3rd, 5th, 7th). Swapping back keeps the chord. User can limit the view to a fret region.
 
 **Voicings**
 - FR-16: User can find a playable guitar voicing for the chord and change it. A voicing is a specific set of fretted notes, at most one per string, with unused strings muted. Voicings exist because a triad built on the piano usually maps to a guitar barre chord, and one chord can be played several ways on guitar.

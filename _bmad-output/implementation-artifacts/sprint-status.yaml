@@ -72,7 +72,7 @@ development_status:
   epic-3-retrospective: done
 
   epic-4: backlog
-  4-1-carry-the-chord-to-the-fretboard: backlog
+  4-1-carry-the-chord-to-the-fretboard: done # retired: delivered by 3-8 and 3-9, voicing shown by 4-3
   4-2-limit-the-fretboard-to-a-fret-region: backlog
   4-3-generate-every-playable-guitar-voicing: backlog
   4-4-step-through-voicings-nearest-register-first: backlog

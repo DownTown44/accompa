@@ -234,7 +234,7 @@ Split from Story 3.8; built after it, reusing its placement function.
 **Then** the extra notes stay in the workspace and are lit again on the piano.
 
 ## Epic 4: Find the chord on guitar
-Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
+Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
 **FRs covered:** FR15, FR16, FR17, FR18, FR19, FR20
 
 ### Epic 5: Chord ear practice
@@ -1062,43 +1062,11 @@ Built after Story 3.1 and before Story 3.2; it was split from 3.1 so the naming 
 
 ## Epic 4: Find the chord on guitar
 
-Apor swaps to the fretboard with the chord carried over, sees every chord position, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
+Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
 
 ### Story 4.1: Carry the chord to the fretboard
 
-As Apor,
-I want to swap to the guitar and see where every chord note lives,
-So that I can start finding a way to play the chord.
-
-**Covers:** FR15; AD-5; UX-DR5, UX-DR6, UX-DR8
-
-**Acceptance Criteria:**
-
-**Given** a chord built on the piano
-**When** I swap to Guitar (`I` or the toggle)
-**Then** the chord carries over from the workspace
-**And** every position of each chord note across the 22 frets shows, with the root as a ringed filled circle and the others marked by role shape and colour (3rd, 5th, 7th)
-**And** the legend and readout are the same as on piano.
-
-**Given** I swap back to Piano
-**When** the keyboard renders
-**Then** the same chord and root are still there.
-
-**Given** I swap to Guitar with no chord
-**When** the fretboard renders
-**Then** it is empty and shows the empty prompt.
-
-**Given** a single note is lit
-**When** I swap to Guitar
-**Then** that note shows at every position, with no stepper.
-
-**Given** the chord's pitches may be outside the guitar's range
-**When** a pitch cannot be played on the fretboard
-**Then** it is still listed in the readout and the other notes still show, and the pitch class (not the octave) decides which positions show.
-
-**Given** the pitch-to-position mapping
-**When** it is tested
-**Then** every chord pitch class maps to all positions for standard tuning, with tuning as a parameter.
+**Retired** (sprint change proposal 2026-10-26). Apor wants the chord on the guitar as a playable voicing in the register he built, not every position of each note. What is left of this story was delivered by Stories 3.8 and 3.9: the chord carries to the guitar and back, the empty fretboard shows the empty prompt, and pitches outside the guitar range stay in the readout. The voicing shown on the fretboard is Story 4.3.
 
 ### Story 4.2: Limit the fretboard to a fret region
 
@@ -1112,7 +1080,7 @@ So that I only see shapes I can reach.
 
 **Given** the Fret-region bar over the fret numbers
 **When** I drag across fret numbers
-**Then** the region is set, the bar shows the region fill (accent) with on-fill text, and only chord positions inside the region show.
+**Then** the region is set, the bar shows the region fill (accent) with on-fill text, and only voicings inside the region are generated and shown.
 
 **Given** the region is the whole neck (default)
 **When** I look at the clear control
@@ -1154,10 +1122,18 @@ So that I can play what I built on the piano.
 **When** they run
 **Then** they cover all nine qualities, open strings, muted strings, span limits, dropped 5ths, and a no-voicing case, each checking that the pitch classes are exactly the chord's (allowed omissions aside).
 
+**Given** the pure ranking function
+**When** it ranks voicings for a source chord
+**Then** register distance (absolute difference between mean pitches in semitones) is the primary key, grouped by a bucket-width parameter, and the generator is unchanged
+**And** tests prove a high source chord returns high voicings first and a low one returns low ones first.
+
 **Given** a chord on Guitar with at least one voicing
 **When** the fretboard renders
-**Then** the first generated voicing is shown with fretted markers, open strings as the role shape in a ring at the nut, and muted strings as a muted cross `x`
-**And** other chord positions are dimmed.
+**Then** the best-ranked voicing is shown with fretted markers, open strings as the role shape in a ring at the nut, and muted strings as a muted cross `x`, and nothing else is marked.
+
+**Given** a single note is lit
+**When** I swap to Guitar
+**Then** it keeps the placement from Story 3.9 and no stepper shows.
 
 **Given** no voicing fits
 **When** the fretboard renders
@@ -1176,11 +1152,6 @@ So that a high chord gives me a high shape, not an open chord.
 **Covers:** FR17, FR18; AD-8; UX-DR11, UX-DR19
 
 **Acceptance Criteria:**
-
-**Given** the pure ranking function
-**When** it ranks voicings for a source chord
-**Then** register distance (absolute difference between mean pitches in semitones) is the primary key, grouped by a bucket-width parameter, and the generator is unchanged
-**And** tests prove a high source chord returns high voicings first and a low one returns low ones first.
 
 **Given** voicings exist
 **When** the Voicing stepper renders
