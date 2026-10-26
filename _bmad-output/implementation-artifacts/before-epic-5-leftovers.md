@@ -6,7 +6,7 @@ Written 2026-10-26, after the Epic 4 retrospective. Pick this up in a new sessio
 
 - Epic 4 is merged (PR #28) and `done`. Story 4.1 was retired and 4.2 dropped (`planning-artifacts/sprint-change-proposal-2026-10-26.md`).
 - Retrospective written (`epic-4-retro-2026-10-26.md`), verdict accepted-with-open-items, six action items in `sprint-status.yaml`. Two older items (epic 2 item 11, epic 3 item 16) are closed.
-- Local `main` is ahead of `origin/main` by five docs commits. Apor pushes `main`; never push it from the agent.
+- Local `main` may be ahead of `origin/main` by docs commits (check `git status`). Apor pushes `main`; never push it from the agent.
 - Next epic: Epic 5, chord ear practice (5.1 choose chord practice and hear a chord, 5.2 guess a quality, 5.3 reveal the chord on the instrument).
 
 ## Two decisions needed before drafting Epic 5
