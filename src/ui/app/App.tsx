@@ -23,6 +23,8 @@ import { useLitNotes } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
 import { useShortcuts } from '../shortcuts/useShortcuts'
 
+const NO_VOICING_NOTE = 'No voicing fits these notes.'
+
 export function Shell() {
   useShortcuts()
   useAudioWake()
@@ -36,7 +38,10 @@ export function Shell() {
     session.instrument === 'piano'
       ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart))
       : session.mode === 'explore'
-        ? beyondFretboardNote(beyondFretboard(lit.pitches), leftOutCount(lit.pitches, session.workspace.positions))
+        ? lit.noVoicing
+          ? NO_VOICING_NOTE
+          : (beyondFretboardNote(beyondFretboard(lit.pitches), lit.muted ? 0 : leftOutCount(lit.pitches, session.workspace.positions)) ??
+            (lit.fifthLeftOut ? '5th left out' : undefined))
         : undefined
   const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
   const message =

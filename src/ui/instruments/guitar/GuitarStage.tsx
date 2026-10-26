@@ -8,7 +8,7 @@ import { useLitNotes } from '../../session/useLitNotes'
 
 export function GuitarStage() {
   const { session } = useSession()
-  const { pitches, root, positions, rootPosition, positionRoles } = useLitNotes()
+  const { pitches, root, positions, rootPosition, positionRoles, muted } = useLitNotes()
   const { pressNote, releaseNote } = useSessionActions()
   if (session.instrument !== 'guitar') return null
   const upper = root === undefined ? undefined : pitches.find((p) => p !== root)
@@ -26,7 +26,7 @@ export function GuitarStage() {
       : positionsForPitch(root).reduce<FretPosition | undefined>((best, p) => (best === undefined || p.fret < best.fret ? p : best), undefined)
   return (
     <div className="stage stage-fade">
-      <Fretboard tuning={STANDARD_GUITAR_TUNING} lit={lit} root={ring} roles={exact ? positionRoles : undefined} onNotePress={(note) => pressNote(note.pitch)} onNoteRelease={(note) => releaseNote(note.pitch, { string: note.string, fret: note.fret })} />
+      <Fretboard tuning={STANDARD_GUITAR_TUNING} lit={lit} root={ring} roles={exact ? positionRoles : undefined} muted={exact ? muted : undefined} onNotePress={(note) => pressNote(note.pitch)} onNoteRelease={(note) => releaseNote(note.pitch, { string: note.string, fret: note.fret })} />
     </div>
   )
 }
