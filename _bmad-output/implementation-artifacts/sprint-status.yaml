@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-26-2026 17:12
+last_updated: 10-26-2026 17:13
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -163,7 +163,7 @@ action_items:
     action: "Put the story key in feature and fix commit subjects so evidence tools
       can attribute them"
     owner: "dev"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
   - id: "epic-2-retro-item-12-keep-the-matrix-row-for-the-instrument-n"
     epic: 2
@@ -199,7 +199,7 @@ action_items:
     action: "Keep matrix rows for the instrument not moving and a Listen regression
       in every spec that touches a shared component"
     owner: "Apor (planning)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-25.md"
   - id: "epic-4-retro-item-17-reconcile-epics-md-story-4-3-prd-fr-17-a"
     epic: 4
