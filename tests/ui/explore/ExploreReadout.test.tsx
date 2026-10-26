@@ -79,12 +79,10 @@ describe('Explore live region', () => {
     const session = { ...initialSession, workspace: { pitches: [64, 88, 67, 72].map(pitch), positions: {} } }
     render(<App engine={createFakeEngine()} session={session} />)
     press('i')
-    expect([...document.querySelectorAll('.fretboard [data-lit]')]).toHaveLength(3)
-    const at = (string: number, fret: number) => document.querySelector(`[data-lit="${string}:${fret}"]`)?.getAttribute('data-role')
-    // E4 on the high e string, then G4 and C5 on the next free strings at their lowest frets.
-    expect(at(5, 0)).toBe('third')
-    expect(at(4, 8)).toBe('fifth')
-    expect(at(3, 17)).toBe('root')
+    const roles = [...document.querySelectorAll('.fretboard [data-lit]')].map((n) => `${n.getAttribute('data-lit')}=${n.getAttribute('data-role')}`)
+    // The voicing's pitch classes ignore the octave, but its register follows the mean of all lit
+    // notes, including the one beyond the fretboard.
+    expect(roles).toEqual(['3:9=third', '4:8=fifth', '5:8=root'])
   })
 
   it('draws the same roles on the guitar', () => {

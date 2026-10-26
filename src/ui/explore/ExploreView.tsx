@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import '../shared/shared.css'
 import './explore.css'
 import { exploreReading } from '../../core/explore'
 import { RoleMarker } from '../shared/RoleMarker'
 import { useSession } from '../session/SessionContext'
+import { useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
+import { VoicingStepper } from './VoicingStepper'
 
 const ANNOUNCE_DELAY_MS = 400
 
@@ -24,6 +26,27 @@ export function ExploreView() {
     const timer = setTimeout(() => setAnnounced(spoken), ANNOUNCE_DELAY_MS)
     return () => clearTimeout(timer)
   }, [spoken])
+  const list = useVoicingList()
+  const [stepped, setStepped] = useState('')
+  const last = useRef(list)
+  const lastInstrument = useRef(session.instrument)
+  const instrument = session.instrument
+  // A step moves along the same list; a new chord, a swap or an undo is not announced. An edit is announced as `Voicing edited`.
+  useEffect(() => {
+    const before = last.current
+    const swapped = lastInstrument.current !== instrument
+    last.current = list
+    lastInstrument.current = instrument
+    if (before.frets !== list.frets || before.edited !== list.edited) setStepped('')
+    if (list.edited && !swapped && before !== list) {
+      setStepped('')
+      const timer = setTimeout(() => setStepped('Voicing edited'), ANNOUNCE_DELAY_MS)
+      return () => clearTimeout(timer)
+    }
+    if (before.frets !== list.frets || before.index === list.index || list.count < 2) return
+    const timer = setTimeout(() => setStepped(`Voicing ${list.index + 1} of ${list.count}`), ANNOUNCE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [list, instrument])
   if (session.mode !== 'explore') return null
   return (
     <section className="explore" aria-label="Explore">
@@ -43,6 +66,7 @@ export function ExploreView() {
           </button>
         ))}
       </div>
+      <VoicingStepper />
       <ul className="role-legend" aria-label="Note roles">
         {legend.map((entry) => (
           <li key={entry.role} data-role={entry.role}>
@@ -55,6 +79,9 @@ export function ExploreView() {
       </ul>
       <p className="visually-hidden" aria-live="polite" data-testid="explore-announce">
         {announced}
+      </p>
+      <p className="visually-hidden" aria-live="polite" data-testid="voicing-announce">
+        {stepped}
       </p>
     </section>
   )

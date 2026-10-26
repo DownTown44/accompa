@@ -90,6 +90,7 @@ describe('help hint', () => {
       [['R'], 'Set root'],
       [['P'], 'Setup'],
       [['[', ']'], 'Piano octave down, up'],
+      [['←', '→'], 'Previous, next voicing'],
       [['Esc'], 'Close panel or list; clear notes in Explore'],
       [['?'], 'This list'],
     ])

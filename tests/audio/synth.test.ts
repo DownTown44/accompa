@@ -235,3 +235,49 @@ describe('synth engine', () => {
     expect(engine.status()).toBe('blocked')
   })
 })
+
+describe('synth strum', () => {
+  it('starts note i at i x 40 ms after the first, in list order', () => {
+    const ctx = new FakeContext('running')
+    createSynthEngine(asContext(ctx)).play([67, 60, 64].map(pitch), 'strum')
+    const starts = ctx.oscillators.map((o) => o.startedAt!)
+    expect(starts[1] - starts[0]).toBeCloseTo(0.04, 10)
+    expect(starts[2] - starts[0]).toBeCloseTo(0.08, 10)
+    expect(ctx.oscillators[0].frequency.value).toBeGreaterThan(ctx.oscillators[1].frequency.value)
+  })
+
+  it('starts and stops the last of six notes 5 x 40 ms after the first', () => {
+    const ctx = new FakeContext('running')
+    createSynthEngine(asContext(ctx)).play([40, 45, 50, 55, 59, 64].map(pitch), 'strum')
+    const [first, , , , , last] = ctx.oscillators
+    expect(last.startedAt! - first.startedAt!).toBeCloseTo(0.2, 10)
+    expect(last.stoppedAt! - first.stoppedAt!).toBeCloseTo(0.2, 10)
+    expect(last.stoppedAt! - last.startedAt!).toBeCloseTo(first.stoppedAt! - first.startedAt!, 10)
+  })
+
+  it('scales the peak gain of every note as a block of the same six notes does', () => {
+    const peaks = (mode: 'block' | 'strum') => {
+      const ctx = new FakeContext('running')
+      const gains: FakeGain[] = []
+      ctx.createGain = () => {
+        const g = new FakeGain()
+        gains.push(g)
+        return g
+      }
+      createSynthEngine(asContext(ctx)).play([40, 45, 50, 55, 59, 64].map(pitch), mode)
+      return gains.map((g) => g.gain.linearRampToValueAtTime.mock.calls.map((c) => c[0]))
+    }
+    expect(peaks('strum')).toHaveLength(6)
+    expect(peaks('strum')).toEqual(peaks('block'))
+  })
+
+  it('stops a sounding strum when a new one starts', () => {
+    const ctx = new FakeContext('running')
+    const engine = createSynthEngine(asContext(ctx))
+    engine.play([60, 64].map(pitch), 'strum')
+    const first = [...ctx.oscillators]
+    engine.play([60, 64].map(pitch), 'strum')
+    expect(first.every((o) => o.stoppedNow)).toBe(true)
+    expect(ctx.oscillators).toHaveLength(4)
+  })
+})

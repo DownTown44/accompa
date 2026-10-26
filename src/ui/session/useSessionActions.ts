@@ -4,7 +4,9 @@ import type { FretPosition } from '../../core/instruments'
 import type { PlayMode } from '../../audio/engine'
 import { canGuess } from '../../core/guess'
 import { COMMON_RANGE } from '../../core/instruments'
+import { moveFret, voicingPitches } from '../../core/voicings'
 import { generateQuestion } from '../../core/practice'
+import { useLitNotes, type VoicingList } from './useLitNotes'
 import { useEngine } from '../engine/EngineContext'
 import { useSettings } from '../settings/SettingsContext'
 import { useSession } from './SessionContext'
@@ -15,6 +17,7 @@ export function useSessionActions() {
   const { session, dispatch } = useSession()
   const { settings, dispatch: dispatchSettings } = useSettings()
   const engine = useEngine()
+  const { voicingFrets } = useLitNotes()
 
   // A setting that was just changed is passed in, as the closure still holds the old value.
   function startQuestion(override: { direction?: Direction; fixedRoot?: Pitch | null } = {}) {
@@ -52,8 +55,14 @@ export function useSessionActions() {
     engine.play(question.pitches, question.direction === 'harmonic' ? 'block' : 'arpeggio')
   }
 
-  // The lit Explore notes, low to high; nothing lit plays nothing.
+  // With a guitar voicing shown, its fretted pitches (Play one at a time, Block strummed); else the lit Explore notes, low to high.
+  // Nothing lit plays nothing.
   function playLit(mode: PlayMode) {
+    if (voicingFrets) {
+      const pitches = voicingPitches(voicingFrets)
+      if (pitches.length > 0) engine.play(pitches, mode === 'block' ? 'strum' : mode)
+      return
+    }
     const pitches = [...session.workspace.pitches].sort((a, b) => a - b)
     if (pitches.length > 0) engine.play(pitches, mode)
   }
@@ -104,10 +113,14 @@ export function useSessionActions() {
   }
 
   // Releasing a pressed note lights it, or unlights it when it is already lit.
-  function releaseNote(pitch: Pitch, position?: FretPosition) {
+  // With a voicing shown (its frets passed), a fret on the guitar edits it: the string's note moves there, or is muted when it already sits there.
+  function releaseNote(pitch: Pitch, position?: FretPosition, voicingFrets?: readonly (number | null)[]) {
     if (session.mode !== 'explore') return
     if (session.rootArmed && session.workspace.pitches.includes(pitch)) dispatch({ type: 'chooseRoot', pitch })
-    else dispatch({ type: 'toggleNote', pitch, position })
+    else if (position !== undefined && voicingFrets !== undefined) {
+      const fret = voicingFrets[position.string] === position.fret ? null : position.fret
+      dispatch({ type: 'editVoicing', frets: moveFret(voicingFrets, position.string, fret) })
+    } else dispatch({ type: 'toggleNote', pitch, position })
   }
 
   function selectMode(mode: Mode) {
@@ -127,6 +140,12 @@ export function useSessionActions() {
     releaseNote,
     selectMode,
     armRoot: () => dispatch({ type: 'armRoot' }),
+    // One voicing along the ranked list, never past either end; the list comes from useVoicingList.
+    stepVoicing: (direction: 1 | -1, list: VoicingList) => {
+      // An edited voicing has no place in the list: either arrow's first press selects the first entry.
+      const frets = list.edited ? list.frets[0] : list.frets[list.index + direction]
+      if (frets !== undefined) dispatch({ type: 'selectVoicing', frets })
+    },
     chooseReading: (reading: ReadingChoice) => dispatch({ type: 'chooseReading', reading }),
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
     selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),

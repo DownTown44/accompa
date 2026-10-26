@@ -19,6 +19,7 @@ const ROWS: readonly Row[] = [
   { keys: ['R'], meaning: 'Set root' },
   { keys: ['P'], meaning: 'Setup' },
   { keys: ['[', ']'], meaning: 'Piano octave down, up' },
+  { keys: ['←', '→'], meaning: 'Previous, next voicing' },
   { keys: ['Esc'], meaning: 'Close panel or list; clear notes in Explore' },
   { keys: ['?'], meaning: 'This list' },
 ]

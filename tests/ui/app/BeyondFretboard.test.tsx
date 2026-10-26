@@ -50,7 +50,7 @@ describe('notes lit beyond the fretboard', () => {
   it('says how many were left out beside the notes beyond', () => {
     render(<App engine={createFakeEngine()} session={withNotes(40, 44, 47, 88)} />)
     press('i')
-    expect(note()).toBe('1 note lit beyond the fretboard, 1 left out')
+    expect(note()).toBe('1 note lit beyond the fretboard')
     expect(readout()).toContain('E major')
   })
 
@@ -152,17 +152,16 @@ describe('notes left out for want of a string', () => {
     expect(document.querySelectorAll('.piano [data-root]')).toHaveLength(1)
   })
 
-  it('leaves readout and legend alone when the left-out note is a third, and draws no marker for it', () => {
+  it('shows a voicing of a named chord instead of leaving a note out, with readout and legend unchanged', () => {
     render(<App engine={createFakeEngine()} session={withNotes(40, 47, 44)} />)
     const onPiano = { readout: readout(), legend: legend() }
     expect(onPiano.readout).toContain('E major')
     press('i')
-    expect(note()).toBe('1 note left out: one note per string')
+    expect(note()).not.toContain('left out: one note per string')
     expect(readout()).toBe(onPiano.readout)
     expect(legend()).toEqual(onPiano.legend)
     expect(legend().some((l) => l.startsWith('3rd'))).toBe(true)
-    expect(guitarMarkers()).toHaveLength(2)
-    expect([...document.querySelectorAll('.fretboard [data-role="third"]')]).toHaveLength(0)
+    expect([...document.querySelectorAll('.fretboard [data-lit]')].map((n) => `${n.getAttribute('data-lit')}=${n.getAttribute('data-role')}`)).toEqual(['0:0=root', '1:2=fifth', '2:2=root', '3:1=third'])
   })
 
   it('shows no left-out text and no notes in Listen', () => {

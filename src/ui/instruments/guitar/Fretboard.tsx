@@ -17,6 +17,7 @@ const NUMBER_Y = 344
 const NAME_X = 58
 const OPEN_RING_RADIUS = 19
 const OPEN_X = 108
+const MUTED_HALF = 8
 const THICKEST_STRING = 3.25
 const THINNEST_STRING = 1.0
 
@@ -35,12 +36,14 @@ interface FretboardProps {
   root?: FretPosition
   // The role of each lit position, aligned with `lit`; the default is the root marker and a dot.
   roles?: readonly Role[]
+  // Strings drawn as muted, with an `x` at the nut; the default is none.
+  muted?: readonly number[]
   onNotePress?: (note: FretNote) => void
   onNoteRelease?: (note: FretNote) => void
 }
 
 // Presentational: draws the board and reports presses; it owns no musical state or sound.
-export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, roles, onNotePress, onNoteRelease }: FretboardProps) {
+export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, roles, muted, onNotePress, onNoteRelease }: FretboardProps) {
   const held = useRef<string | null>(null)
   const fretWidth = (BOARD_RIGHT - NUT_X) / frets
   const wireX = (fret: number) => NUT_X + fret * fretWidth
@@ -132,6 +135,14 @@ export function Fretboard({ tuning, frets = GUITAR_FRETS, lit, root, roles, onNo
           {fret === 0 && <circle className="fb-open-ring" cx={OPEN_X} cy={stringY(string)} r={OPEN_RING_RADIUS} />}
           <RoleMarker role={role} cx={cellX(fret)} cy={stringY(string)} plain={!roles} />
         </g>
+      ))}
+      {muted?.map((string) => (
+        <path
+          key={`x${string}`}
+          className="fb-muted"
+          data-muted={string}
+          d={`M${OPEN_X - MUTED_HALF} ${stringY(string) - MUTED_HALF} l${2 * MUTED_HALF} ${2 * MUTED_HALF} m0 ${-2 * MUTED_HALF} l${-2 * MUTED_HALF} ${2 * MUTED_HALF}`}
+        />
       ))}
     </svg>
   )

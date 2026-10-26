@@ -4,3 +4,6 @@ export const legend = () => [...document.querySelectorAll('.role-legend li')].ma
 export const readout = () => document.querySelector('.readout-interval')?.textContent
 export const bigLabel = () => document.querySelector('.readout-interval span')!.textContent
 export const alts = () => [...document.querySelectorAll('.reading-alt')] as HTMLButtonElement[]
+export const status = () => document.querySelector('.status-note')?.textContent ?? ''
+export const mutedStrings = () => [...document.querySelectorAll('.fb-muted')].map((n) => Number(n.getAttribute('data-muted')))
+export const openRings = () => document.querySelectorAll('.fb-open-ring').length

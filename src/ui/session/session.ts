@@ -9,7 +9,7 @@ import {
 } from '../../core/model'
 import { canGuess } from '../../core/guess'
 import { isReading, litPositions, orderedReadings, pitchesOnString, readingChoice, readingRootedOn, sameChoice, toggleLit } from '../../core/explore'
-import type { FretPosition } from '../../core/instruments'
+import { pitchAt, STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
 import type { Interval, Pitch } from '../../core/pitch'
 import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 
@@ -45,6 +45,8 @@ export type SessionAction =
   | { type: 'chooseReading'; reading: ReadingChoice }
   | { type: 'chooseRoot'; pitch: Pitch }
   | { type: 'armRoot' }
+  | { type: 'selectVoicing'; frets: readonly (number | null)[] }
+  | { type: 'editVoicing'; frets: readonly (number | null)[] }
   | { type: 'setQuestion'; question: Question }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
@@ -132,21 +134,44 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       return { ...state, cleared: null, rootArmed: next.length > 0 && state.rootArmed, workspace }
     }
     case 'chooseReading': {
-      const { reading, root, ...rest } = state.workspace
+      const { reading, root, voicing, edited, ...rest } = state.workspace
       const { reading: choice } = action
       const named = orderedReadings(state.workspace.pitches).some((r) => isReading(r, choice))
       if (!named || (root === undefined && reading && sameChoice(reading, choice))) return state
-      return { ...state, workspace: { ...rest, reading: choice } }
+      return { ...state, workspace: { ...rest, reading: choice, ...(edited && voicing ? { voicing, edited } : {}) } }
     }
     case 'chooseRoot': {
       const { pitch } = action
-      const { pitches, reading, root, ...rest } = state.workspace
+      const { pitches, reading, root, voicing, edited, ...rest } = state.workspace
       if (state.mode !== 'explore' || !pitches.includes(pitch)) return state
       const found = readingRootedOn(pitches, pitch)
       const choice = found ? readingChoice(found) : undefined
       const same = root === pitch && (choice ? reading !== undefined && sameChoice(reading, choice) : reading === undefined)
       if (same) return state.rootArmed ? { ...state, rootArmed: false } : state
-      return { ...state, rootArmed: false, workspace: { pitches, ...rest, root: pitch, ...(choice ? { reading: choice } : {}) } }
+      return { ...state, rootArmed: false, workspace: { pitches, ...rest, root: pitch, ...(choice ? { reading: choice } : {}), ...(edited && voicing ? { voicing, edited } : {}) } }
+    }
+    case 'selectVoicing': {
+      const { voicing, edited } = state.workspace
+      if (state.mode !== 'explore' || (!edited && voicing !== undefined && voicing.length === action.frets.length && voicing.every((f, i) => f === action.frets[i]))) return state
+      const { edited: _edited, ...rest } = state.workspace
+      return { ...state, workspace: { ...rest, voicing: action.frets } }
+    }
+    case 'editVoicing': {
+      const { frets } = action
+      if (state.mode !== 'explore' || state.instrument !== 'guitar' || frets.length !== STANDARD_GUITAR_TUNING.length) return state
+      const { reading, root } = state.workspace
+      const sounding = frets.flatMap((fret, string) => (fret === null ? [] : [{ string, fret, pitch: pitchAt(STANDARD_GUITAR_TUNING, string, fret) }]))
+      const pitches = [...new Set(sounding.map((s) => s.pitch))].sort((a, b) => a - b)
+      const positions: Record<number, FretPosition> = {}
+      for (const { string, fret, pitch } of sounding) if (!(pitch in positions)) positions[pitch] = { string, fret }
+      const workspace = pruneReading({
+        pitches,
+        positions,
+        ...(reading ? { reading } : {}),
+        ...(root !== undefined && pitches.includes(root) ? { root } : {}),
+        ...(pitches.length >= 2 ? { voicing: frets, edited: true as const } : {}),
+      })
+      return { ...state, cleared: null, rootArmed: pitches.length > 0 && state.rootArmed, workspace }
     }
     case 'armRoot':
       if (state.rootArmed) return { ...state, rootArmed: false }
