@@ -60,3 +60,12 @@ Apor builds a chord on the piano, swaps to the fretboard with it carried over, s
 - 4.6 (hand-edit) needs 4.3 and 4.4 (the voicing shown and the stepper state); 4.7 needs the shown or edited voicing from 4.6 and extends the Epic 1 audio engine with strum mode.
 - Builds on Epic 3: the chord, namer readings and chosen root, and the one-note-per-string placement from Stories 3.8 and 3.9.
 - Epic 5 (chord ear practice) later reuses the fretboard to reveal chords.
+
+## Patterns Built So Far
+
+- Voicings (`core/voicings.ts`): `generateVoicings(chord, tuning, rules, range?)` returns every playable voicing (frets per string, `null` muted; pitches bass to treble); `VOICING_RULES` holds max span 4, `maxFret` 12, `openPositionMaxFret` 5, `maxFingers` 4 (a barre at the lowest fretted fret is one finger unless an open string lies inside it), bucket width 6 and the droppable 5th (seventh chords only). The lowest note is the reading's bass or its root; no muted string between sounding ones. `rankVoicings(voicings, sourceMean, bucketWidth, shapes)` sorts by register bucket, template match, more sounding strings, smaller fret span, fewer distinct frets, exact distance, generator order. `voicingPitches(frets)` and `moveFret(frets, string, fret)` are the pure helpers.
+- Shapes (`core/shapes.ts`): `shapeFrets(chord)` instantiates the E-shape and A-shape barres, a top triad and the standard open shapes as data; standard tuning only; an open shape matches only in bucket 0.
+- Session: `Workspace.voicing` (selected frets) and `Workspace.edited` are written only by `selectVoicing` and `editVoicing`; a changed note, reading or root drops the selection and the stepper reopens on voicing 1. An edit rewrites `Workspace.pitches` from the fretted pitches; fewer than two notes drops it.
+- UI: `useLitNotes` derives the shown voicing on each render (`useShown`, `useVoicingList`, `canStep`, `showsStepper`); a fret click edits a pictured voicing and keeps the 3.8 rule when no voicing shows. `ExploreView` renders the `VoicingStepper` row (reserved on both instruments, the readout block height token includes it for Explore and Listen) and the polite announcers. Left and Right step; they are in the shortcut list.
+- Audio: `PlayMode` has `'strum'` (`STRUM_SPREAD` 40 ms in `audio/synth.ts`); with a guitar voicing shown, Block strums its pitches and Play arpeggiates them.
+- Epic 5's Reveal should show the revealed chord on the guitar as a voicing through the same derived path, not by lighting every position.
