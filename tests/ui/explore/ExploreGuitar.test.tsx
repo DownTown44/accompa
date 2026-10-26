@@ -47,6 +47,19 @@ describe('Explore guitar', () => {
     expect(lit()).toEqual(['62'])
   })
 
+  it('keeps the replace rule while no voicing is shown: a single note, then an interval', () => {
+    render(<App engine={createFakeEngine()} />)
+    press('i')
+    click(cell(3, 5))
+    click(cell(3, 7))
+    expect(lit()).toEqual(['3:7'])
+    click(cell(1, 5))
+    expect(lit()).toEqual(['1:5', '3:7'])
+    click(cell(1, 7))
+    expect(lit()).toEqual(['1:7', '3:7'])
+    expect(document.querySelector('.voicing-stepper')).toBeNull()
+  })
+
   it('replaces one note of a pair and names the new pair', () => {
     render(<App engine={createFakeEngine()} />)
     press('i')
@@ -59,7 +72,7 @@ describe('Explore guitar', () => {
     expect(readout()).toContain('P5')
   })
 
-  it('follows the notes that remain when one note of a pictured chord is replaced', () => {
+  it('edits the shown voicing in place when one note of a pictured chord is moved', () => {
     render(<App engine={createFakeEngine()} />)
     press('i')
     click(cell(2, 10))
@@ -68,14 +81,12 @@ describe('Explore guitar', () => {
     click(cell(5, 7))
     expect(readout()).toContain('Cmaj7')
     expect(legend()).toEqual(['root C', '3rd E (M3)', '5th G (P5)', '7th B (M7)'])
+    const before = lit().filter((m) => !m!.startsWith('3:'))
     click(cell(3, 11))
-    expect(lit()).toEqual(['2:10', '3:11', '4:8', '5:7'])
-    expect(lit()).not.toContain('3:9')
+    expect(lit()).toEqual(['0:8', '1:10', '2:10', '3:11', '4:8', '5:7'])
+    expect(lit().filter((m) => !m!.startsWith('3:'))).toEqual(before)
     expect(readout()).not.toContain('Cmaj7')
-    expect(roleAt('2:10')).toBe('root')
-    expect(roleAt('3:11')).toBe('none')
-    expect(roleAt('4:8')).toBe('none')
-    expect(roleAt('5:7')).toBe('none')
+    expect(['0:8', '1:10', '2:10', '3:11', '4:8', '5:7'].map(roleAt)).toEqual(['root', 'none', 'none', 'none', 'none', 'none'])
     expect(legend()).toEqual(['root C'])
   })
 
@@ -219,14 +230,11 @@ describe('Explore guitar', () => {
       expect(lit()).toEqual(['0:8', '1:10', '2:10', '3:9', '4:8', '5:8'])
     })
 
-    it('recomputes the voicing from the lit notes after a click', () => {
+    it('edits the voicing in place after a click', () => {
       build(60, 64, 67)
       click(cell(0, 8))
-      const after = lit()
+      expect(lit()).toEqual(['1:10', '2:10', '3:9', '4:8', '5:8'])
       expect(readout()).toContain('C major')
-      cleanup()
-      fromSession(60, 64, 67, 48)
-      expect(lit()).toEqual(after)
     })
   })
 })

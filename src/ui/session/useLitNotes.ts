@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { exploreReading, litPositions, orderedReadings, readingChoice, readingRootedOn, type Role } from '../../core/explore'
 import { pitchClass, type PitchClass } from '../../core/pitch'
-import { STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
+import { pitchAt, STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
 import type { Pitch } from '../../core/pitch'
 import { CHORD_QUALITIES } from '../../core/theory'
 import { shapeFrets } from '../../core/shapes'
@@ -25,7 +25,11 @@ export interface LitNotes {
   readonly noVoicing?: boolean
   // Explore guitar only: the shown voicing leaves out the chord's 5th.
   readonly fifthLeftOut?: boolean
+  // Explore guitar only: the frets of the shown voicing (the edited ones once edited); a fret click edits these.
+  readonly voicingFrets?: readonly (number | null)[]
 }
+
+const NO_FRETS: readonly (readonly (number | null)[])[] = []
 
 const ROLE_BY_STEP = ['root', 'third', 'fifth', 'seventh'] as const
 
@@ -43,6 +47,8 @@ interface Shown {
   readonly frets: readonly (readonly (number | null)[])[]
   readonly roles: readonly Role[]
   readonly fifthLeftOut: boolean
+  // The voicing is the user's hand edit, not a list entry; its index is -1.
+  readonly edited: boolean
 }
 
 // Every playable voicing of the chord the lit notes read as, best first; undefined unless they form a named chord.
@@ -73,31 +79,57 @@ function shownOf({ list, frets, lead, intervals }: Ranked, selected: Workspace['
     frets,
     roles: voicing === null ? [] : voicing.pitches.map((p) => ROLE_BY_STEP[stepOf(p)] ?? 'none'),
     fifthLeftOut: voicing !== null && !steps.has(2),
+    edited: false,
+  }
+}
+
+// The hand-edited frets as the shown voicing: roles from the namer's reading of the edited pitches, the list the generated voicings of those pitches.
+function editedOf(ranked: Ranked | undefined, frets: readonly (number | null)[], workspace: Pick<Workspace, 'pitches' | 'reading' | 'root'>): Shown {
+  const sounding = frets.flatMap((fret, string) => (fret === null ? [] : [pitchAt(STANDARD_GUITAR_TUNING, string, fret)])).sort((a, b) => a - b)
+  const { roles } = exploreReading(workspace.pitches, workspace.reading, workspace.root)
+  return {
+    voicing: { pitches: sounding, frets },
+    index: -1,
+    count: ranked?.list.length ?? 0,
+    frets: ranked?.frets ?? NO_FRETS,
+    roles: sounding.map((p) => roles[workspace.pitches.indexOf(p)] ?? 'none'),
+    fifthLeftOut: false,
+    edited: true,
   }
 }
 
 function useShown(): Shown | undefined {
   const { session } = useSession()
-  const { pitches, reading, root, voicing } = session.workspace
+  const { pitches, reading, root, voicing, edited } = session.workspace
   const onGuitar = session.mode === 'explore' && session.instrument === 'guitar'
   const ranked = useMemo(() => (onGuitar ? rankedVoicings(pitches, { reading, root }) : undefined), [onGuitar, pitches, reading, root])
-  return useMemo(() => (ranked ? shownOf(ranked, voicing) : undefined), [ranked, voicing])
+  return useMemo(() => {
+    if (!onGuitar) return undefined
+    if (edited && voicing) return editedOf(ranked, voicing, { pitches, reading, root })
+    return ranked ? shownOf(ranked, voicing) : undefined
+  }, [onGuitar, ranked, voicing, edited, pitches, reading, root])
 }
 
 // The stepper's view of the ranked list: how many voicings there are and which one is shown.
-const NO_FRETS: VoicingList['frets'] = []
-
 export interface VoicingList {
   readonly count: number
+  // -1 while the voicing is edited.
   readonly index: number
+  readonly edited: boolean
   // The frets of every voicing, best first.
   readonly frets: readonly (readonly (number | null)[])[]
 }
 
 export function useVoicingList(): VoicingList {
   const shown = useShown()
-  return useMemo(() => ({ count: shown?.count ?? 0, index: shown?.index ?? 0, frets: shown?.frets ?? NO_FRETS }), [shown])
+  return useMemo(() => ({ count: shown?.count ?? 0, index: shown?.index ?? 0, edited: shown?.edited ?? false, frets: shown?.frets ?? NO_FRETS }), [shown])
 }
+
+// The stepper shows, and the arrows step, with two or more voicings, or one or more while the voicing is edited.
+// The stepper row shows while edited (arrows inert without a list) or with two or more voicings.
+export const showsStepper = (list: VoicingList): boolean => list.edited || list.count >= 2
+
+export const canStep = (list: VoicingList): boolean => (list.edited ? list.count >= 1 : list.count >= 2)
 
 // Listen lights a revealed question or a chosen fixed root, and nothing else; Explore lights its own workspace.
 export function useLitNotes(): LitNotes {
@@ -140,5 +172,6 @@ function voicingNotes(pitches: readonly Pitch[], root: Pitch | undefined, roles:
     rootPosition,
     muted: voicing.frets.flatMap((fret, string) => (fret === null ? [string] : [])),
     fifthLeftOut,
+    voicingFrets: voicing.frets,
   }
 }

@@ -32,7 +32,9 @@ export interface Workspace {
   // The lit pitch the user made the root; wins over the reading's root. Not persisted.
   readonly root?: Pitch
   // The guitar voicing the user stepped to, as its frets; absent means the best-ranked. Not persisted.
+  // With `edited`, these are the hand-edited frets and `pitches` are the sounding pitches.
   readonly voicing?: readonly (number | null)[]
+  readonly edited?: true
 }
 
 // Written only by practice rounds; never touches the workspace.

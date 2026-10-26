@@ -29,15 +29,24 @@ export function ExploreView() {
   const list = useVoicingList()
   const [stepped, setStepped] = useState('')
   const last = useRef(list)
-  // A step moves along the same list; a new chord, a swap or an undo is not announced.
+  const lastInstrument = useRef(session.instrument)
+  const instrument = session.instrument
+  // A step moves along the same list; a new chord, a swap or an undo is not announced. An edit is announced as `Voicing edited`.
   useEffect(() => {
     const before = last.current
+    const swapped = lastInstrument.current !== instrument
     last.current = list
-    if (before.frets !== list.frets) setStepped('')
+    lastInstrument.current = instrument
+    if (before.frets !== list.frets || before.edited !== list.edited) setStepped('')
+    if (list.edited && !swapped && before !== list) {
+      setStepped('')
+      const timer = setTimeout(() => setStepped('Voicing edited'), ANNOUNCE_DELAY_MS)
+      return () => clearTimeout(timer)
+    }
     if (before.frets !== list.frets || before.index === list.index || list.count < 2) return
     const timer = setTimeout(() => setStepped(`Voicing ${list.index + 1} of ${list.count}`), ANNOUNCE_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [list])
+  }, [list, instrument])
   if (session.mode !== 'explore') return null
   return (
     <section className="explore" aria-label="Explore">

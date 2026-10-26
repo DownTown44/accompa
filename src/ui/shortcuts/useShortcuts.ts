@@ -2,7 +2,7 @@ import { useLayoutEffect, useEffect, useRef } from 'react'
 import { INTERVALS } from '../../core/theory'
 import { INTERVAL_KEYS } from '../listen/intervalKeys'
 import { useSession } from '../session/SessionContext'
-import { useVoicingList } from '../session/useLitNotes'
+import { canStep, useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
 
 const textInputTypes = new Set(['text', 'search', 'email', 'url', 'tel', 'password', 'number'])
@@ -38,7 +38,7 @@ export function useShortcuts() {
   const latest = useRef({ actions, list, steps: false })
 
   useLayoutEffect(() => {
-    latest.current = { actions, list, steps: session.mode === 'explore' && session.instrument === 'guitar' && list.count >= 2 }
+    latest.current = { actions, list, steps: session.mode === 'explore' && session.instrument === 'guitar' && canStep(list) }
   })
 
   useEffect(() => {

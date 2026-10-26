@@ -3,7 +3,7 @@ import { pitchAt, STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass, type PitchClass } from '../../src/core/pitch'
 import { CHORD_QUALITIES } from '../../src/core/theory'
 import { shapeFrets } from '../../src/core/shapes'
-import { generateVoicings, mean, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../src/core/voicings'
+import { generateVoicings, mean, moveFret, rankVoicings, VOICING_RULES, type GuitarVoicing } from '../../src/core/voicings'
 
 const quality = (name: string) => CHORD_QUALITIES.find((q) => q.name === name)!
 const C = pitchClass(pitch(60))
@@ -246,5 +246,15 @@ describe('rankVoicings with common shapes', () => {
     const source = mean([48, 52, 55, 58])
     expect(rank('dom7', source)[0]).toBe('x 3 5 3 5 3')
     expect(rank('dom7', source, C, false)[0]).toBe('8 7 8 5 5 8')
+  })
+})
+
+describe('moveFret', () => {
+  it('moves one string, mutes with null, and leaves the input and other strings alone', () => {
+    const frets = [null, 3, 2, 0, 1, 0]
+    expect(moveFret(frets, 4, 3)).toEqual([null, 3, 2, 0, 3, 0])
+    expect(moveFret(frets, 1, null)).toEqual([null, null, 2, 0, 1, 0])
+    expect(moveFret(frets, 0, 0)).toEqual([0, 3, 2, 0, 1, 0])
+    expect(frets).toEqual([null, 3, 2, 0, 1, 0])
   })
 })

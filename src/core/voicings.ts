@@ -91,6 +91,11 @@ export function generateVoicings(
   return grounded.length > 0 ? grounded : found
 }
 
+// The frets with one string moved to `fret`; null mutes it. Pure; the other strings are kept.
+export function moveFret(frets: readonly (number | null)[], string: number, fret: number | null): (number | null)[] {
+  return frets.map((f, s) => (s === string ? fret : f))
+}
+
 const fret0 = (range: FretRange) => Math.max(range.low, 0)
 
 // The fretted notes (open strings excluded) as a span and a count of distinct frets.

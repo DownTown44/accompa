@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef } from 'react'
 import { useSession } from '../session/SessionContext'
-import { useVoicingList } from '../session/useLitNotes'
+import { showsStepper, useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
 
 type Arrow = 'previous' | 'next'
 
 const focusFirstInstrument = () => document.querySelector<HTMLElement>('.piano, .fretboard')?.focus()
 
-// One reserved row: `◀ Voicing 1 of N ▶` on the guitar with two or more voicings, empty otherwise.
+// One reserved row: `◀ Voicing 1 of N ▶` on the guitar with two or more voicings, `◀ Voicing edited ▶` while edited, empty otherwise.
 export function VoicingStepper() {
   const { session } = useSession()
   const list = useVoicingList()
@@ -20,9 +20,10 @@ export function VoicingStepper() {
   focused.current =
     previousRef.current && active === previousRef.current ? 'previous' : nextRef.current && active === nextRef.current ? 'next' : null
 
-  const visible = session.mode === 'explore' && session.instrument === 'guitar' && list.count >= 2
-  const atStart = list.index <= 0
-  const atEnd = list.index >= list.count - 1
+  const visible = session.mode === 'explore' && session.instrument === 'guitar' && showsStepper(list)
+  // While edited both arrows are live when a generated voicing exists, else inert.
+  const atStart = list.edited ? list.count === 0 : list.index <= 0
+  const atEnd = list.edited ? list.count === 0 : list.index >= list.count - 1
 
   useLayoutEffect(() => {
     const was = focused.current
@@ -47,7 +48,7 @@ export function VoicingStepper() {
             </button>
           )}
           <span className="voicing-count">
-            Voicing {list.index + 1} of {list.count}
+            {list.edited ? 'Voicing edited' : `Voicing ${list.index + 1} of ${list.count}`}
           </span>
           {atEnd ? (
             <span className="voicing-end" aria-disabled="true">
