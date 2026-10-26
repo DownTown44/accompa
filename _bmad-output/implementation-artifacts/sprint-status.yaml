@@ -75,7 +75,7 @@ development_status:
   4-1-carry-the-chord-to-the-fretboard: done # retired: delivered by 3-8 and 3-9, voicing shown by 4-3
   4-2-limit-the-fretboard-to-a-fret-region: backlog # deferred by Apor until after 4-4; may be dropped
   4-3-generate-every-playable-guitar-voicing: review
-  4-4-step-through-voicings-nearest-register-first: backlog
+  4-4-step-through-voicings-nearest-register-first: review
   4-5-common-shapes-rank-first: backlog
   4-6-hand-edit-a-voicing: backlog
   4-7-hear-the-voicing-strummed-or-arpeggiated: backlog
