@@ -32,7 +32,7 @@ FR11: Every note shown can be heard. v1 uses synthesized sound, with a sound cho
 FR12: In Explore, the user builds a chord on the keyboard by clicking individual notes. Each clicked note sounds and is marked, the root is marked differently (lowest note by default, the user can change it), and the app names the chord live and shows the intervals from the root.
 FR13: User plays the chord as a block or as an arpeggio.
 FR14: Chord naming in Explore: the user toggles any notes and the app names the chord.
-FR15: Swapping to the fretboard keeps the chord. All positions of the chord's notes show across the neck, with the root highlighted and other notes marked by role (3rd, 5th, 7th). User can limit the view to a fret region.
+FR15: Swapping to the fretboard keeps the chord and shows it as a playable voicing in the register of the source chord (FR16, FR18), with the root highlighted and other notes marked by role (3rd, 5th, 7th). Swapping back keeps the chord.
 FR16: User can find a playable guitar voicing for the chord and change it. A voicing is a specific set of fretted notes, at most one per string, with unused strings muted.
 FR17: The app generates every playable voicing (reachable fret span, essential chord tones present) and the user steps through them. Common shapes (open, barre) rank first. Rules: max fret span 4 frets; open strings do not count toward the span; root and 3rd always present; 7th mandatory on seventh chords; only the 5th may be dropped; register distance is the distance between mean pitches (AD-8).
 FR18: Voicings match the register of the source chord. A chord built high on the piano maps to the nearest-register guitar voicing, not an open chord.
@@ -78,7 +78,7 @@ NFR12: Exact dependency versions are pinned in package.json per the architecture
 - AD-11: injected randomness (next interval, random root, next chord).
 - Instrument parameters: guitar is six strings in standard tuning (E A D G B E) with 22 frets; tuning is a parameter to core functions. Each instrument's pitch range lives in one `core/instruments` module (piano default MIDI 36 to 96). Practice logic picks random roots so every note fits the active instrument's range.
 - MIDI input is later: leave a seam so a note-on can drive the same click-to-sound path.
-- Voicing generation must tolerate hand-edits and fret regions (empty result is valid).
+- Voicing generation must tolerate hand-edits (empty result is valid).
 
 ### UX Design Requirements
 
@@ -93,7 +93,7 @@ UX-DR8: Role legend under the readout (`root C`, `3rd E`, `5th G`, `7th`) updati
 UX-DR9: Action button component with a key-hint cap and a primary variant (apricot). One primary per row. Explore: Play (`Space`, an arpeggio low to high), Block (`Enter`, primary). Listen: Play again (`Space`), Reveal (`Enter`), which becomes Next after Reveal (`Enter` again).
 UX-DR10: Interval button row (12 buttons, m2 to P8, keys `1`-`9`, `0`, `-`, `=`). Wrong state: wrong fill, inset 2px muted ring, struck-through label, `aria-disabled`, accessible name like `m3, tried`. Pool-excluded buttons are disabled and at least 55% opacity. Correct advances and auto-plays.
 UX-DR11: Voicing stepper `◀ Voicing 1 of N ▶` (40 x 40px arrow targets, Left / Right keys, no wrap, inert end arrow shown as `·` with `aria-disabled`, with the focus-move rules). Hidden when there are fewer than two notes or no voicing.
-UX-DR12: Fret-region bar: drag across fret numbers to set the region; quiet `Clear fret region` button outside the track (hit area at least 28px, disabled when the region is the whole neck); stepper recomputes for the region.
+UX-DR12 (dropped with Story 4.2, sprint change proposal 2026-10-26): Fret-region bar: drag across fret numbers to set the region; quiet `Clear fret region` button outside the track (hit area at least 28px, disabled when the region is the whole neck); stepper recomputes for the region.
 UX-DR13: Setup panel: 560px non-modal floating overlay under the strip at the right; `P` or the gear Setup opener toggles it, `Esc` closes and returns focus to the opener. Contains pool chips (m2 to P8), segmented controls for Direction, Root, Sound and Theme, and setup labels associated with their controls.
 UX-DR14: Pool chip behavior: on/off carried by fill, text color and weight (no check glyph); the last ticked chip cannot be unticked (`aria-disabled`, focusable, non-colour cue, live hint `Keep at least one interval.`).
 UX-DR15: Setup opener (gear, 38px circle, `aria-expanded`, accessible name `Setup`) and Help hint (`?` circle that reveals the shortcuts list on hover or focus, `?` toggles, `Esc` dismisses).
@@ -124,7 +124,7 @@ FR11: Epic 1 - Synthesized sound with a sound choice in the setup panel
 FR12: Epic 3 - Build a chord by clicking piano notes, live name and root
 FR13: Epic 3 - Play chord as block or arpeggio
 FR14: Epic 3 - Chord naming from toggled notes
-FR15: Epic 4 - Chord carries to fretboard, role markers, fret region
+FR15: Epic 4 - Chord carries to the fretboard as a voicing, role markers
 FR16: Epic 4 - Find and change a playable guitar voicing
 FR17: Epic 4 - Generate and step through all voicings, common shapes first
 FR18: Epic 4 - Voicings match the source chord's register
@@ -234,7 +234,7 @@ Split from Story 3.8; built after it, reusing its placement function.
 **Then** the extra notes stay in the workspace and are lit again on the piano.
 
 ## Epic 4: Find the chord on guitar
-Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
+Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can hand-edit a voicing and hear it strummed or arpeggiated.
 **FRs covered:** FR15, FR16, FR17, FR18, FR19, FR20
 
 ### Epic 5: Chord ear practice
@@ -1062,7 +1062,7 @@ Built after Story 3.1 and before Story 3.2; it was split from 3.1 so the naming 
 
 ## Epic 4: Find the chord on guitar
 
-Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can limit the view to a fret region, hand-edit a voicing and hear it strummed or arpeggiated.
+Apor swaps to the fretboard with the chord carried over, sees a playable voicing in the register he built, and steps through ranked, register-matched voicings. He can hand-edit a voicing and hear it strummed or arpeggiated.
 
 ### Story 4.1: Carry the chord to the fretboard
 
@@ -1070,34 +1070,7 @@ Apor swaps to the fretboard with the chord carried over, sees a playable voicing
 
 ### Story 4.2: Limit the fretboard to a fret region
 
-As Apor,
-I want to focus on one part of the neck,
-So that I only see shapes I can reach.
-
-**Covers:** FR15; UX-DR12
-
-**Acceptance Criteria:**
-
-**Given** the Fret-region bar over the fret numbers
-**When** I drag across fret numbers
-**Then** the region is set, the bar shows the region fill (accent) with on-fill text, and only voicings inside the region are generated and shown.
-
-**Given** the region is the whole neck (default)
-**When** I look at the clear control
-**Then** the quiet muted cross sits to the right of the bar on the page background, is disabled, and looks the same.
-
-**Given** a region is set
-**When** I click the `Clear fret region` button
-**Then** the whole neck returns
-**And** the button is a real button with a hit area of at least 28px, the standard focus ring, and keyboard operation.
-
-**Given** the region is set
-**When** I swap instruments and back
-**Then** the region is kept for the session and not persisted.
-
-**Given** the region is drag-only
-**When** I use the keyboard
-**Then** no keyboard way to set the region is required (accepted limit), while Clear stays keyboard operable.
+**Dropped** (sprint change proposal 2026-10-26). A chord has a limited number of playable voicings, and Story 4.4 steps through them nearest register first, so a region bar adds a drag-only control for little. Revisit only if the stepper proves too slow in use.
 
 ### Story 4.3: Generate every playable guitar voicing
 
@@ -1139,9 +1112,9 @@ So that I can play what I built on the piano.
 **When** the fretboard renders
 **Then** it is empty with only the Status note `No voicing fits here. Try widening the region.` under it, and notes stay lit on piano.
 
-**Given** the region from Story 4.2
-**When** it is set
-**Then** generation respects it and only returns voicings inside the region.
+**Given** an optional fret range passed to the generator
+**When** it runs
+**Then** it returns only voicings inside the range.
 
 ### Story 4.4: Step through voicings, nearest register first
 

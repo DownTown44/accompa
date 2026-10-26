@@ -78,3 +78,11 @@ Line 105, OLD: "Guitar view: that note at every position inside the region, no s
 ## 5. Implementation handoff
 
 Scope: moderate. PM (John) applies P1 to P7 after approval; the dev agent regenerates the Epic 4 context and the sprint-status edit (P8) is made on `main` with the other docs; the next story to spec is 4.2 or 4.3, Apor's choice. Success: no planning document describes every-position display, 4.3 shows the best-ranked voicing, and Epic 4's build order matches this document.
+
+## Addendum 2026-10-26: Story 4.2 dropped
+
+Apor decided the fret-region bar is not needed: a chord has a limited number of playable voicings, and Story 4.4 steps through them nearest register first. Story 4.2 is dropped, not deferred.
+
+Applied: `epics.md` (Story 4.2 marked dropped, FR15 inventory and map, UX-DR12, Epic 4 intro, the 4.3 region AC now describes the generator's optional range), PRD FR-15 (region clause removed), `epic-4-context.md`. Sprint status: `4-2-...` is set to `done` with a "dropped" comment in the housekeeping commit after Story 4.3 merges, to avoid a merge conflict with the story branch.
+
+Still to reconcile, because they describe the bar or the region-based Status text: `EXPERIENCE.md` lines 26, 59, 86, 91, 108, 151, 179, 198, 200; `DESIGN.md` lines 205, 259, 327, 337, 370, 375; `ARCHITECTURE-SPINE.md` lines 177, 179. The Status text `No voicing fits here. Try widening the region.` has no region to widen once the bar is gone, so Story 4.3's spec (frozen, already approved) needs a new wording, awaiting Apor's choice.
