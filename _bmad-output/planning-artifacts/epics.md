@@ -34,7 +34,7 @@ FR13: User plays the chord as a block or as an arpeggio.
 FR14: Chord naming in Explore: the user toggles any notes and the app names the chord.
 FR15: Swapping to the fretboard keeps the chord and shows it as a playable voicing in the register of the source chord (FR16, FR18), with the root highlighted and other notes marked by role (3rd, 5th, 7th). Swapping back keeps the chord.
 FR16: User can find a playable guitar voicing for the chord and change it. A voicing is a specific set of fretted notes, at most one per string, with unused strings muted.
-FR17: The app generates every playable voicing (reachable fret span, essential chord tones present) and the user steps through them. Common shapes (open, barre) rank first. Rules: max fret span 4 frets; open strings do not count toward the span; root and 3rd always present; 7th mandatory on seventh chords; only the 5th may be dropped; register distance is the distance between mean pitches (AD-8).
+FR17: The app generates every playable voicing (reachable fret span, essential chord tones present) and the user steps through them. Common shapes (open, barre) rank first. Rules: max fret span 4 frets; open strings do not count toward the span; root and 3rd always present; 7th mandatory on seventh chords; the 5th required on triads and droppable only on seventh chords; at most four fingers (a barre at the lowest fretted fret counts as one finger unless an open string lies inside it); an open string only when every fretted note is at or below fret 5; no fret above 12; no muted string between sounding strings; register distance is the distance between mean pitches (AD-8), grouped in buckets of 6 semitones, then common-shape match, then more sounding strings, then smaller fret span, then fewer distinct fretted frets, then exact distance. (As built; reconciled 2026-10-27.)
 FR18: Voicings match the register of the source chord. A chord built high on the piano maps to the nearest-register guitar voicing, not an open chord.
 FR19: User can hand-edit a voicing by moving notes on the fretboard. The app keeps naming the resulting chord.
 FR20: User can play the voicing (strummed and as an arpeggio) to hear it.
@@ -1084,7 +1084,7 @@ So that I can play what I built on the piano.
 
 **Given** the voicing parameters
 **When** I inspect `core/`
-**Then** max fret span 4, open strings excluded from the span, root and 3rd always present, the 7th mandatory on seventh chords, only the 5th droppable, and register bucket width live as tunable constants in one place.
+**Then** max fret span 4, open strings excluded from the span, at most four fingers, no fret above 12, open strings only at or below fret 5, root and 3rd always present, the 7th mandatory on seventh chords, the 5th mandatory on triads and droppable only on seventh chords, and register bucket width 6 live as tunable constants in one place (as built; reconciled 2026-10-27).
 
 **Given** a chord, tuning and constraints
 **When** the pure generator runs
@@ -1097,7 +1097,7 @@ So that I can play what I built on the piano.
 
 **Given** the pure ranking function
 **When** it ranks voicings for a source chord
-**Then** register distance (absolute difference between mean pitches in semitones) is the primary key, grouped by a bucket-width parameter, and the generator is unchanged
+**Then** register distance (absolute difference between mean pitches in semitones) is the primary key, grouped by a bucket-width parameter, followed by the playability keys (more sounding strings, smaller fret span, fewer distinct fretted frets, exact distance), and the generator is unchanged
 **And** tests prove a high source chord returns high voicings first and a low one returns low ones first.
 
 **Given** a chord on Guitar with at least one voicing
@@ -1110,7 +1110,7 @@ So that I can play what I built on the piano.
 
 **Given** no voicing fits
 **When** the fretboard renders
-**Then** it is empty with only the Status note `No voicing fits here. Try widening the region.` under it, and notes stay lit on piano.
+**Then** it is empty with only the Status note `No voicing fits these notes.` under it, and notes stay lit on piano.
 
 **Given** an optional fret range passed to the generator
 **When** it runs

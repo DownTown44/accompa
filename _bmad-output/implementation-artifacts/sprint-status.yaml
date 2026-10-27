@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-26-2026 17:13
+last_updated: 10-27-2026 12:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -71,7 +71,7 @@ development_status:
   3-9-carry-piano-notes-to-the-guitar-one-per-string: done
   epic-3-retrospective: done
 
-  epic-4: in-progress
+  epic-4: done
   4-1-carry-the-chord-to-the-fretboard: done # retired: delivered by 3-8 and 3-9, voicing shown by 4-3
   4-2-limit-the-fretboard-to-a-fret-region: done # dropped, see sprint-change-proposal-2026-10-26
   4-3-generate-every-playable-guitar-voicing: done
@@ -79,8 +79,8 @@ development_status:
   4-5-common-shapes-rank-first: done
   4-6-hand-edit-a-voicing: done
   4-7-hear-the-voicing-strummed-or-arpeggiated: done
-  4-8-spell-chords-without-double-accidentals: review
-  4-9-keep-the-notes-i-click-on-the-guitar: review
+  4-8-spell-chords-without-double-accidentals: done
+  4-9-keep-the-notes-i-click-on-the-guitar: done
   epic-4-retrospective: done
 
   epic-5: backlog
@@ -209,7 +209,7 @@ action_items:
       as-built voicing rules (finger rule, 5th droppable only on seventh chords, maxFret
       12, bucket width 6, ranking order)"
     owner: "Apor approves, dev applies"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-4-retro-item-18-build-a-shared-voicing-list-provider-so"
     epic: 4

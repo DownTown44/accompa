@@ -20,14 +20,14 @@ Apor builds a chord on the piano, swaps to the fretboard with it carried over, s
 
 - Guitar is six strings, standard tuning (E A D G B E), 22 frets; tuning is a parameter to core functions (no tuning UI).
 - Generation returns every playable voicing, unranked: at most one fretted note per string, unused strings muted. It is total: no voicing means an empty list, never an exception.
-- Voicing parameters are tunable constants kept in one place in `core/`: max fret span 4, open strings excluded from the span, root and 3rd always present, 7th mandatory on seventh chords, only the 5th droppable, register bucket width.
+- Voicing parameters are tunable constants kept in one place in `core/`: max fret span 4, open strings excluded from the span, root and 3rd always present, 7th mandatory on seventh chords, the 5th required on triads and droppable only on seventh chords, at most four fingers (a barre counts as one unless an open string lies inside it), no fret above 12 (`maxFret`), open strings only at or below fret 5, register bucket width 6 (as built; reconciled 2026-10-27).
 - Ranking is a separate pure function, built in Story 4.3 alongside the generator. Primary key is register distance (absolute difference of mean pitch to the source chord, in semitones), grouped by bucket width; tests prove a high source chord returns high voicings first and a low one low voicings first. Story 4.5 adds the template tie-break within a bucket (a fixed open shape ranks first only within the source register; non-matching voicings follow the matches).
 - Common shapes are curated data (movable shapes relative to the root, open shapes fixed). A test asserts every template yields exactly its chord's pitch classes. A quality with no templates falls back to generated voicings only.
 - Pitch class, not octave, decides which notes a voicing may use; chord pitches outside the guitar range stay in the readout.
 - Generation respects the fret region: only voicings inside it are generated and shown.
 - Fret region is drag-only (accepted limit), session-only, not persisted; Clear must be a real, keyboard-operable button with a hit area of at least 28px.
 - Playback: Block (`Enter`) strums bass to treble with a short even spread; Play (`Space`) sounds notes one at a time bass to treble; muted strings are silent; an edited voicing plays the edited pitches.
-- Tests cover all nine qualities, open and muted strings, span limits, dropped 5ths, and a no-voicing case, checking pitch classes exactly match the chord (allowed omissions aside).
+- Tests cover all nine qualities, open and muted strings, span limits, dropped 5ths, and a no-voicing case, checking pitch classes exactly match the chord (allowed omissions aside). As built the ranking order is: register bucket, template match (4.5), more sounding strings, smaller fret span, fewer distinct fretted frets, exact distance, generator order.
 
 ## Technical Decisions
 
