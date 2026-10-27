@@ -216,7 +216,7 @@ action_items:
     action: "Build a shared voicing-list provider so ranking runs once per change,
       then restore the ExploreStepper test timeout to the default"
     owner: "dev, story-shaped"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-4-retro-item-19-listen-to-the-strum-and-tune-strum_sprea"
     epic: 4
