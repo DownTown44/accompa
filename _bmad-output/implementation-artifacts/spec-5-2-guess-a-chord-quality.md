@@ -2,7 +2,8 @@
 title: 'Story 5.2: Guess a chord quality'
 type: 'feature'
 created: '2026-10-27'
-status: 'draft'
+status: 'done'
+baseline_commit: 'd8929bcfc813dc5f409b6d3f95dbda11669e287a'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -19,7 +20,7 @@ context:
 
 ## Boundaries & Constraints
 
-**Always:** Build on 5.1 (`Practice.chordQuestion`, `Settings.chordPool`, `Settings.practice`). Nine buttons in `CHORD_QUALITIES` order, keys `1`-`9`, in the existing `.interval-row`, with the Interval button classes and key-hint caps, so the row keeps its height. A quality is in play when it is in `Settings.chordPool` or is the answer; out-of-play buttons carry `data-out-of-pool` (opacity 0.55, never lower, and `aria-disabled`). A guess counts when in play, not yet tried, and the question is not revealed (same rule as `canGuess`, made generic in `src/core/guess.ts`, interval tests unchanged). Wrong: button gets `wrong`, `aria-disabled`, accessible name `Minor, tried`; hint `Minor is not it — try another.`; the chord is unchanged and `Space` still replays it. Correct: hint `Minor. Next chord is playing.` and a new chord is drawn from the pool with the 5.1 generator and played as a block. Hints sit in the existing polite `.guess-hint`; nothing shows a score or streak. Buttons are disabled when `practice.revealed` (5.3 sets it). A pool or practice change leaves the current question answerable; its answer stays in play. Wrong marks clear when a new chord is drawn.
+**Always:** Build on 5.1 (`Practice.chordQuestion`, `Settings.chordPool`, `Settings.practice`). Nine buttons in `CHORD_QUALITIES` order, keys `1`-`9`, in the existing `.interval-row`, with the Interval button classes and key-hint caps, so the row keeps its height. A quality is in play when it is in `Settings.chordPool` or is the answer; out-of-play buttons carry `data-out-of-pool` (opacity 0.55, never lower, and `aria-disabled`). A guess counts when in play, not yet tried, and the question is not revealed (same rule as `canGuess`, made generic in `src/core/guess.ts`, interval tests unchanged). Wrong: button gets `wrong`, `aria-disabled`, accessible name `Minor, tried`; hint `Minor is not it — try another.`; the chord is unchanged and `Space` still replays it. Correct: hint `Minor. Next chord is playing.` and a new chord is drawn from the pool with the 5.1 generator and played as a block. Hints sit in the existing polite `.guess-hint`; nothing shows a score or streak. Buttons are disabled when `practice.revealed` (5.3 sets it). A pool or practice change leaves the current question answerable; its answer stays in play. Wrong marks clear when a new chord is drawn. The button labels and the hint words are the short names `Major, Minor, Diminished, Augmented, Maj7, Dom7, Min7, m7♭5, Dim7` (decided by Apor on 2026-10-27).
 
 **Never:** No change to the interval flow, `Practice.question`, `wrongMarks`, or `Workspace`. No Reveal or Next behavior: both stay inert in Chords until 5.3, as 5.1 decided. No chord name from anywhere but `nameChord` (button labels are fixed text, not a reading). No touch or narrow-viewport handling. No new dependency.
 
@@ -39,10 +40,6 @@ context:
 | Explore | switch away and back | same chord, wrong marks kept, workspace same reference | N/A |
 
 </frozen-after-approval>
-
-## Open Questions
-
-- What the nine buttons say (hint text uses the same words) — options: short names `Major, Minor, Diminished, Augmented, Maj7, Dom7, Min7, m7♭5, Dim7` (match the epic's `Minor`, fit nine in a row; sevenths read as chord-chart shorthand) / spelled out `Major 7th, Dominant 7th, Minor 7th, Half-diminished, Diminished 7th` (clearer, but wider buttons and the row may crowd at 1280 px; `m7♭5` becomes `Half-diminished`, which the rest of the app does not use).
 
 ## Code Map
 
@@ -66,6 +63,23 @@ context:
 
 **Acceptance Criteria:**
 - Given chord Listen with a question, when I click the right quality, then the hint names it with no praise and the next chord plays.
+
+## Implementation Notes
+
+## Spec Change Log
+
+## Review Triage Log
+
+| # | Layer | Finding | Verdict | Route | Evidence |
+|---|-------|---------|---------|-------|----------|
+| 1 | gap | Guessing a chord quality in Explore (keys 1-9 with Chords selected) is ignored only by an untested `mode !== 'listen'` guard | medium | patch | Every guess test runs in Listen; an Explore test is added and checked to fail without the guard. |
+| 2 | blind, gap | `qualityLabel` has a dead middle fallback; nothing checks that every quality has a label | low | patch | `LABELS[name] ?? CHORD_QUALITIES.find(...)?.name ?? name` ends in the same raw name; the fallback is deleted and a test iterates `CHORD_QUALITIES`. |
+| 3 | edge, blind | Marks can survive a new chord drawn by another path | low | rejected | A chord is drawn only by `chordRight` (which clears the marks) or lazily by `setChordQuestion` when none exists, so no marks exist then. |
+| 4 | edge, blind | The `chordRight` reducer trusts its caller; two key presses before a re-render draw an extra chord | low | rejected | The interval flow has the same shape (`guess` validates, the reducer applies); a double press inside one frame is not a path a keyboard user meets, and the fix adds a parameter. |
+| 5 | edge, blind, gap | `chordRight` and `chordWrong` feedback does not clear on replay, mode change or pool change | low | rejected | The spec states no clearing rule; the hint is replaced by the next guess and the interval hint behaves the same way after a replay. |
+| 6 | edge | Key 1-9 with a control focused returns early instead of falling through the chain | low | rejected | The early return is the existing behaviour for keys with a focused control; nothing follows the chain for these keys. |
+| 7 | edge | An empty chord pool is not guarded before the next draw | low | rejected | The last chip cannot be unticked (Story 5.1), so the pool is never empty. |
+| 8 | blind | Qualities are plain strings; `inPool` repeats `inPlay`; `INTERVAL_KEYS` is reused; the labels duplicate quality naming; the UI tests are brittle; blocked clicks give no feedback | low | rejected | Same shape as the interval flow and the 5.1 pool; the button labels are fixed text by Apor's decision; seeded `Math.random` is the existing test pattern; `aria-disabled` is the specified cue. |
 
 ## Verification
 
