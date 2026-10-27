@@ -39,9 +39,10 @@ export interface Session {
 }
 
 export type SessionAction =
-  | { type: 'setMode'; mode: Mode }
-  | { type: 'setInstrument'; instrument: Instrument }
-  | { type: 'toggleInstrument' }
+  // `chords` says Chords practice is active, so the piano window fits the revealed chord rather than the interval.
+  | { type: 'setMode'; mode: Mode; chords?: boolean }
+  | { type: 'setInstrument'; instrument: Instrument; chords?: boolean }
+  | { type: 'toggleInstrument'; chords?: boolean }
   | { type: 'toggleNote'; pitch: Pitch; position?: FretPosition }
   | { type: 'chooseReading'; reading: ReadingChoice }
   | { type: 'chooseRoot'; pitch: Pitch }
@@ -53,6 +54,7 @@ export type SessionAction =
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
+  | { type: 'revealChord' }
   | { type: 'guess'; interval: Interval; pool: readonly Interval[] }
   | { type: 'guessChord'; quality: string; pool: readonly string[] }
   | { type: 'chordRight'; question: ChordQuestion }
@@ -79,10 +81,12 @@ export const initialSession: Session = {
 }
 
 // A revealed question, or the lit Explore notes, must be visible when the piano is showing.
-function fitRevealed(state: Session): Session {
+// `chords` picks which question counts, so a hidden chord (or interval) never shifts the window.
+function fitRevealed(state: Session, chords = false): Session {
   if (state.instrument !== 'piano') return state
-  const { question, revealed } = state.practice
-  const shown = state.mode === 'explore' ? state.workspace.pitches : revealed && question ? question.pitches : null
+  const { question, revealed, chordQuestion, chordRevealed } = state.practice
+  const revealedPitches = chords ? (chordRevealed && chordQuestion ? chordQuestion.pitches : null) : revealed && question ? question.pitches : null
+  const shown = state.mode === 'explore' ? state.workspace.pitches : revealedPitches
   if (shown === null) return state
   const pianoStart = fitWindow(state.pianoStart, shown)
   return pianoStart === state.pianoStart ? state : { ...state, pianoStart }
@@ -98,11 +102,11 @@ function pruneReading(workspace: Workspace): Workspace {
 export function sessionReducer(state: Session, action: SessionAction): Session {
   switch (action.type) {
     case 'setMode':
-      return fitRevealed({ ...state, mode: action.mode, rootArmed: false })
+      return fitRevealed({ ...state, mode: action.mode, rootArmed: false }, action.chords)
     case 'setInstrument':
-      return fitRevealed({ ...state, instrument: action.instrument })
+      return fitRevealed({ ...state, instrument: action.instrument }, action.chords)
     case 'toggleInstrument':
-      return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' })
+      return fitRevealed({ ...state, instrument: state.instrument === 'piano' ? 'guitar' : 'piano' }, action.chords)
     case 'toggleNote': {
       const { pitch, position } = action
       const { pitches, positions, reading, root } = state.workspace
@@ -188,9 +192,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
         feedback: null,
       }
-    // Touches the chord question only; the interval question stays.
+    // A new chord: unrevealed, no marks, no feedback; the interval question stays.
     case 'setChordQuestion':
-      return { ...state, practice: { ...state.practice, chordQuestion: action.question } }
+      return { ...state, practice: { ...state.practice, chordQuestion: action.question, chordRevealed: false, chordWrongMarks: [] }, feedback: null }
     case 'clearQuestion':
       return {
         ...state,
@@ -202,6 +206,10 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     case 'reveal': {
       if (!state.practice.question || state.practice.revealed) return state
       return fitRevealed({ ...state, practice: { ...state.practice, revealed: true }, feedback: null })
+    }
+    case 'revealChord': {
+      if (!state.practice.chordQuestion || state.practice.chordRevealed) return state
+      return fitRevealed({ ...state, practice: { ...state.practice, chordRevealed: true }, feedback: null }, true)
     }
     case 'guess': {
       const { question, revealed, wrongMarks } = state.practice
@@ -216,9 +224,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     }
     // A wrong chord guess marks the quality; the chord stays.
     case 'guessChord': {
-      const { chordQuestion, revealed, chordWrongMarks = [] } = state.practice
+      const { chordQuestion, chordRevealed, chordWrongMarks = [] } = state.practice
       const { quality, pool } = action
-      if (!chordQuestion || revealed || chordQuestion.quality === quality) return state
+      if (!chordQuestion || chordRevealed || chordQuestion.quality === quality) return state
       if (!canGuess(quality, pool, chordQuestion.quality, chordWrongMarks)) return state
       return {
         ...state,
@@ -228,8 +236,8 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
     }
     // A right chord guess stores the next chord, clears the marks and names the guessed quality.
     case 'chordRight': {
-      const { chordQuestion, revealed } = state.practice
-      if (!chordQuestion || revealed) return state
+      const { chordQuestion, chordRevealed } = state.practice
+      if (!chordQuestion || chordRevealed) return state
       return {
         ...state,
         practice: { ...state.practice, chordQuestion: action.question, chordWrongMarks: [] },

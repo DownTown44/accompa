@@ -14,7 +14,8 @@ export function GuitarStage() {
   const upper = root === undefined ? undefined : pitches.find((p) => p !== root)
   const pair = root !== undefined && upper !== undefined ? closestPair(root, upper) : null
   const all = [...new Set(pitches)].flatMap((p) => positionsForPitch(p))
-  const exact = session.mode === 'explore' && positions !== undefined
+  // Explore and a revealed chord place exact positions; interval Listen has none.
+  const exact = positions !== undefined
   const lit = exact ? positions : pair ? [pair.root, pair.upper] : all
   // A lone root lights every position and rings the one with the lowest fret.
   const ring = exact

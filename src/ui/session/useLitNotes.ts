@@ -139,6 +139,19 @@ export const showsStepper = (list: VoicingList): boolean => list.edited || list.
 
 export const canStep = (list: VoicingList): boolean => (list.edited ? list.count >= 1 : list.count >= 2)
 
+// A revealed chord question on the guitar: the best-ranked voicing in the question's register, with no stepper.
+function useChordReveal(): Shown | undefined {
+  const { session } = useSession()
+  const { settings } = useSettings()
+  const { chordQuestion, chordRevealed } = session.practice
+  const active = session.mode === 'listen' && settings.practice === 'chords' && chordRevealed === true && chordQuestion !== undefined && session.instrument === 'guitar'
+  return useMemo(() => {
+    if (!active || !chordQuestion) return undefined
+    const ranked = rankedOnce(chordQuestion.pitches, { root: chordQuestion.root })
+    return ranked ? shownOf(ranked, undefined) : { voicing: null, index: 0, count: 0, frets: NO_FRETS, roles: [], edited: false }
+  }, [active, chordQuestion])
+}
+
 // Listen lights a revealed question or a chosen fixed root, and nothing else; Explore lights its own workspace.
 export function useLitNotes(): LitNotes {
   const { session } = useSession()
@@ -146,7 +159,14 @@ export function useLitNotes(): LitNotes {
   const { question, revealed, fixedRoot } = session.practice
   const { pitches, reading, root: chosenRoot } = session.workspace
   const shown = useShown()
+  const chordShown = useChordReveal()
+  const { chordQuestion, chordRevealed } = session.practice
   const chords = settings.practice === 'chords'
+  if (session.mode === 'listen' && chords && chordRevealed && chordQuestion) {
+    const { roles } = exploreReading(chordQuestion.pitches, undefined, chordQuestion.root)
+    if (chordShown) return voicingNotes(chordQuestion.pitches, chordQuestion.root, roles, chordShown)
+    return { pitches: chordQuestion.pitches, root: chordQuestion.root, roles }
+  }
   if (session.mode === 'listen' && !chords && revealed && question) return { pitches: question.pitches, root: question.root }
   if (session.mode === 'listen' && !chords && settings.rootMode === 'fixed' && fixedRoot !== null) return { pitches: [fixedRoot], root: fixedRoot }
   if (session.mode === 'explore') {

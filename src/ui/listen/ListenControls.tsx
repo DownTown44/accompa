@@ -11,7 +11,8 @@ export function ListenControls() {
   const { play, revealOrNext } = useSessionActions()
   const chords = settings.practice === 'chords'
   if (session.mode !== 'listen') return null
-  const { question, revealed } = session.practice
+  const { question, chordQuestion } = session.practice
+  const revealed = chords ? session.practice.chordRevealed : session.practice.revealed
   return (
     <div className="controls">
       <button
@@ -28,14 +29,14 @@ export function ListenControls() {
       <button
         type="button"
         className="action-button action-primary"
-        aria-disabled={question && !chords ? undefined : true}
+        aria-disabled={(chords ? chordQuestion : question) ? undefined : true}
         aria-keyshortcuts="Enter"
         onClick={(event) => {
           focusInstrument(event)
           revealOrNext()
         }}
       >
-        {revealed && !chords ? 'Next' : 'Reveal'} <span className="key-hint" aria-hidden="true">Enter</span>
+        {revealed ? 'Next' : 'Reveal'} <span className="key-hint" aria-hidden="true">Enter</span>
       </button>
     </div>
   )
