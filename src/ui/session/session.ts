@@ -154,7 +154,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       const { voicing, edited } = state.workspace
       if (state.mode !== 'explore' || (!edited && voicing !== undefined && voicing.length === action.frets.length && voicing.every((f, i) => f === action.frets[i]))) return state
       const { edited: _edited, ...rest } = state.workspace
-      return { ...state, workspace: { ...rest, voicing: action.frets } }
+      // Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
+      // Leaving a hand edit forgets the positions it wrote, so the notes are carried again and the generated list shows.
+      return { ...state, workspace: { ...rest, ...(edited ? { positions: {} } : {}), voicing: action.frets } }
     }
     case 'editVoicing': {
       const { frets } = action
