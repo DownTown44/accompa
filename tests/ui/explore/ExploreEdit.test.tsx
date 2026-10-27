@@ -94,6 +94,17 @@ describe('Hand-edit a voicing', () => {
     expect(count()).toMatch(/^Voicing 1 of \d+$/)
   })
 
+  it('edits again with a fret click after leaving an edit', () => {
+    open()
+    click(cell(5, 5))
+    press('ArrowRight')
+    expect(count()).toMatch(/^Voicing 1 of \d+$/)
+    const [first] = lit() as string[]
+    const [string, fret] = first!.split(':').map(Number) as [number, number]
+    click(cell(string, fret === 0 ? 1 : fret - 1))
+    expect(count()).toBe('Voicing edited')
+  })
+
   it('announces the edit like a step', () => {
     open()
     click(cell(4, 3))

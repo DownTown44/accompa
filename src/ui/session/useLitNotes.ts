@@ -94,14 +94,17 @@ function editedOf(ranked: Ranked | undefined, frets: readonly (number | null)[],
 
 function useShown(): Shown | undefined {
   const { session } = useSession()
-  const { pitches, reading, root, voicing, edited } = session.workspace
+  const { pitches, reading, root, voicing, edited, positions } = session.workspace
   const onGuitar = session.mode === 'explore' && session.instrument === 'guitar'
+  // Notes clicked on the guitar stay as clicked: a generated voicing shows only for a chord carried from the piano.
+  // Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
+  const carried = !pitches.some((p) => p in positions)
   const ranked = useMemo(() => (onGuitar ? rankedVoicings(pitches, { reading, root }) : undefined), [onGuitar, pitches, reading, root])
   return useMemo(() => {
     if (!onGuitar) return undefined
     if (edited && voicing) return editedOf(ranked, voicing, { pitches, reading, root })
-    return ranked ? shownOf(ranked, voicing) : undefined
-  }, [onGuitar, ranked, voicing, edited, pitches, reading, root])
+    return ranked && carried ? shownOf(ranked, voicing) : undefined
+  }, [onGuitar, ranked, carried, voicing, edited, pitches, reading, root])
 }
 
 // The stepper's view of the ranked list: how many voicings there are and which one is shown.

@@ -21,6 +21,16 @@ describe('selectVoicing', () => {
     expect(after.workspace.positions).toBe(before.workspace.positions)
   })
 
+  it('forgets the positions only when it leaves a hand edit', () => {
+    const edited = sessionReducer({ ...chord(), instrument: 'guitar' }, { type: 'editVoicing', frets: [null, 3, 2, 0, 1, 3] })
+    expect(Object.keys(edited.workspace.positions).length).toBeGreaterThan(0)
+    const left = sessionReducer(edited, { type: 'selectVoicing', frets })
+    expect(left.workspace.positions).toEqual({})
+    expect(left.workspace.edited).toBeUndefined()
+    const plain = sessionReducer({ ...chord(), workspace: { ...chord().workspace, positions: { [C]: { string: 1, fret: 3 } } } }, { type: 'selectVoicing', frets })
+    expect(plain.workspace.positions).toEqual({ [C]: { string: 1, fret: 3 } })
+  })
+
   it('does nothing outside Explore or when the frets are already stored', () => {
     const listen = sessionReducer(chord(), { type: 'setMode', mode: 'listen' })
     expect(sessionReducer(listen, { type: 'selectVoicing', frets })).toBe(listen)
