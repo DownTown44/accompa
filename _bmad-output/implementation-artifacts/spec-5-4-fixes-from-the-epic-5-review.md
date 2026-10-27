@@ -2,7 +2,7 @@
 title: 'Story 5.4: Fixes from the Epic 5 review'
 type: 'feature'
 created: '2026-10-27'
-status: 'in-review'
+status: 'done'
 baseline_commit: '18cb57241802c6cd1331bd8044eb1d0e04fdef8b'
 route: 'dispatch'
 review_loop_iteration: 0
@@ -81,6 +81,18 @@ The wrong marks stay shown after the reveal as today. Setup chip edits touch the
 ## Spec Change Log
 
 ## Review Triage Log
+
+| # | Layer | Finding | Verdict | Route | Evidence |
+|---|-------|---------|---------|-------|----------|
+| 1 | blind | The short names `Maj`, `Min`, `Dim`, `Aug` have no full-name label and `Dim` sits next to `Dim7` | low | rejected | Apor chose these names on 2026-10-27; the chips and buttons are plain text and carry no `aria-label` or `title` that could still show the old names (`SetupPanel.tsx:112`). |
+| 2 | blind | The hint `Maj.` is silent for assistive tech and the cue to press Next is gone | low | false | `.guess-hint` is `aria-live="polite"` (`ListenView.tsx:36`) and the button reads Next after the reveal. |
+| 3 | blind, gap | `askMinor` and the Next test depend on a mocked `Math.random`; no assertion that the draw is minor | low | rejected | Seeded `Math.random` is the existing pattern in these test files and the pitches `[40,43,47]` are asserted. |
+| 4 | blind | The high dim7 guitar test hard-codes frets and sits in a guess story | low | rejected | The spec requires it (retro action item 1, Apor's decision to keep the range uncapped); `chordReveal.test.tsx` is the Listen reveal file. |
+| 5 | blind | More edge tests wanted: Setup or pool change while revealed, Explore round trip with a hint, Reveal after a right guess | low | rejected | The paths reuse the 5.3 reveal state already tested; each needs a new fixture for a state the reducer cannot leave inconsistent. |
+| 6 | blind | Possible dead imports in `useSessionActions.ts` | low | false | `npm run check` (tsc, boundaries, tests) passes. |
+| 7 | blind | No layout evidence and no docs update | low | false | The Chrome check at 1280 x 800 held (instrument top 366, Status note 725, no scroll, both themes); `epics.md` carries Story 5.4. |
+| 8 | edge | `chordRight` trusts the caller and reveals for any dispatcher | low | rejected | Same shape as the interval `reveal`; only `guessChord` dispatches it (5.2 triage 4). |
+| 9 | edge | Chip accessible names may still show raw names | low | false | The chips have no `aria-label` or `title`; the text is `qualityLabel`. |
 
 ## Design Notes
 
