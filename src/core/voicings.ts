@@ -48,7 +48,9 @@ export interface GuitarVoicing {
 }
 
 // The fingers a shape needs: one per fretted note (fret above 0), except that the notes on the lowest
-// fretted fret, when two or more, are one finger (a barre) unless an open string lies between the barre's outer strings.
+// fretted fret, when two or more, are one finger (a barre) unless an open string lies between the barre's outer strings,
+// or unless the barre includes neither the lowest nor the highest sounding string (a middle barre cannot lie across
+// the higher fretted outer strings).
 export function fingersNeeded(frets: readonly (number | null)[]): number {
   const fretted = frets.filter((f): f is number => f !== null && f > 0)
   if (fretted.length === 0) return 0
@@ -56,7 +58,9 @@ export function fingersNeeded(frets: readonly (number | null)[]): number {
   const on = frets.flatMap((f, s) => (f === lowest ? [s] : []))
   if (on.length < 2) return fretted.length
   const open = frets.some((f, s) => f === 0 && s > on[0]! && s < on[on.length - 1]!)
-  return open ? fretted.length : fretted.length - on.length + 1
+  const sounding = frets.flatMap((f, s) => (f !== null ? [s] : []))
+  const reachesOuter = on.includes(sounding[0]!) || on.includes(sounding[sounding.length - 1]!)
+  return open || !reachesOuter ? fretted.length : fretted.length - on.length + 1
 }
 
 // Every playable voicing of the chord, unranked, in a fixed order (frets ascending, muted last); muted strings only outside the sounding ones; the lowest note is the bass or root when possible; empty when none fits.
