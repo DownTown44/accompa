@@ -20,7 +20,7 @@ describe('Explore alternative readings', () => {
     render(<App engine={createFakeEngine()} />)
     dim7()
     expect(bigLabel()).toBe('Cdim7')
-    expect(altText()).toEqual(['E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(altText()).toEqual(['D♯dim7/C', 'F♯dim7/C', 'Adim7/C'])
     expect(alts().every((b) => b.type === 'button')).toBe(true)
   })
 
@@ -31,7 +31,7 @@ describe('Explore alternative readings', () => {
     const sounded = engine.plays.length
     fireEvent.click(alts()[2]!)
     expect(bigLabel()).toBe('Adim7/C')
-    expect(altText()).toEqual(['Cdim7', 'E♭dim7/C', 'F♯dim7/C'])
+    expect(altText()).toEqual(['Cdim7', 'D♯dim7/C', 'F♯dim7/C'])
     expect(rooted()).toEqual(['69'])
     expect(legend()).toEqual(['root A', '3rd C (m3)', '5th E♭ (d5)', '7th G♭ (d7)'])
     expect(lit()).toEqual(['60', '63', '66', '69'])

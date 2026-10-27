@@ -151,7 +151,7 @@ describe('exploreReading', () => {
 
   it('spells a flat third and a diminished fifth', () => {
     expect(legend(60, 63, 66)).toEqual(['root C', '3rd E♭ (m3)', '5th G♭ (d5)'])
-    expect(legend(60, 63, 66, 69)[3]).toBe('7th B𝄫 (d7)')
+    expect(legend(60, 63, 66, 69)[3]).toBe('7th A (d7)')
     expect(legend(60, 64, 68)[2]).toBe('5th G♯ (A5)')
     expect(legend(60, 64, 67, 70)[3]).toBe('7th B♭ (m7)')
   })
@@ -187,8 +187,8 @@ describe('chosen reading', () => {
 
   it('lists the alternatives in namer order after the first reading', () => {
     const { readings, alternatives, readout } = exploreReading(dim7)
-    expect(readings.map((r) => r.symbol)).toEqual(['Cdim7', 'E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
-    expect(alternatives.map((r) => r.symbol)).toEqual(['E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(readings.map((r) => r.symbol)).toEqual(['Cdim7', 'D♯dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(alternatives.map((r) => r.symbol)).toEqual(['D♯dim7/C', 'F♯dim7/C', 'Adim7/C'])
     expect(readout?.label).toBe('Cdim7')
     expect(exploreReading(aug).alternatives).toHaveLength(2)
   })
@@ -206,7 +206,7 @@ describe('chosen reading', () => {
     expect(r.root).toBe(69)
     expect(r.roles).toEqual(['third', 'fifth', 'seventh', 'root'])
     expect(r.legend.map((e) => `${e.label} ${e.note} ${e.degree ?? ''}`.trim())).toEqual(['root A', '3rd C m3', '5th E♭ d5', '7th G♭ d7'])
-    expect(r.readings.map((x) => x.symbol)).toEqual(['Adim7/C', 'Cdim7', 'E♭dim7/C', 'F♯dim7/C'])
+    expect(r.readings.map((x) => x.symbol)).toEqual(['Adim7/C', 'Cdim7', 'D♯dim7/C', 'F♯dim7/C'])
   })
 
   it('falls back to the first reading when the chosen one is gone', () => {
@@ -244,7 +244,7 @@ describe('exploreReading with a chosen root', () => {
 
   it('wins over the reading choice and ignores a root that is not lit', () => {
     const choice = { root: pitchClass(p(69)), quality: 'dim7' }
-    expect(exploreReading(notes(60, 63, 66, 69), choice, p(63)).readout?.label).toBe('E♭dim7/C')
+    expect(exploreReading(notes(60, 63, 66, 69), choice, p(63)).readout?.label).toBe('D♯dim7/C')
     expect(exploreReading(notes(60, 63, 66, 69), choice, p(72))).toEqual(exploreReading(notes(60, 63, 66, 69), choice))
   })
 

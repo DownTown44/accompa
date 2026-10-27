@@ -1246,6 +1246,21 @@ So that I can check it against my own guitar.
 **When** the voicing plays
 **Then** the engine takes the ordered pitch list and owns all timing, so callers pass no timestamps.
 
+### Story 4.8: Spell chords without double accidentals
+
+As Apor,
+I want chord and interval names that never need a double flat or double sharp,
+So that I read `D♯m7♭5` and not `E♭m7♭5` with a `B𝄫`.
+
+**Covers:** FR13; added after Apor tried Epic 4 (replaces the Epic 3 decision that double accidentals use the glyphs `𝄫` and `𝄪`)
+
+**Acceptance Criteria:**
+
+**Given** a chord whose usual root spelling would put a double flat or double sharp on a chord tone
+**When** it is named and its notes are spelled
+**Then** its root takes the enharmonic twin that avoids it (`E♭m7♭5` reads `D♯m7♭5`, `F♯aug` reads `G♭aug`), and where no twin exists a tone that would need a double takes its single-accidental name (`Baug` is `B D♯ G`)
+**And** no name, note list, legend entry or interval readout shows `𝄫` or `𝄪`.
+
 ## Epic 5: Chord ear practice
 
 Apor does the Listen flow with chord qualities: a pool of qualities, optional guess, Reveal lighting the chord on the active instrument.
@@ -1266,7 +1281,7 @@ So that I can train my ear for chord quality as I did for intervals.
 
 **Given** Chords is selected and I open Listen
 **When** a question starts
-**Then** a random chord from the chord pool (a Setup chip group of the nine qualities, all selected by default) plays as a block, and the readout shows `Which chord?`.
+**Then** a random chord from the chord pool (a Setup chip group of the nine qualities, all selected by default) plays as a plain block on both instruments (not a strum; decided by Apor on 2026-10-27), and the readout shows `Which chord?`.
 
 **Given** the pool
 **When** I untick chips
@@ -1335,7 +1350,7 @@ So that I connect what I heard with its structure.
 
 **Given** Reveal on Guitar
 **When** the notes light
-**Then** each chord note shows at one position, the cluster nearest the lowest frets [ASSUMPTION: Epic 5 does not depend on voicings from Epic 4].
+**Then** the chord shows as the best-ranked playable voicing in the register of the question chord, derived the same way as the Explore guitar (open and muted markers included, no stepper) (decided by Apor on 2026-10-27, replacing the nearest-low-frets cluster).
 
 **Given** Next
 **When** I press `Enter` or click it

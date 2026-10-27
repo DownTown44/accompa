@@ -9,7 +9,7 @@ Written 2026-10-26, after the Epic 4 retrospective. Pick this up in a new sessio
 - Local `main` may be ahead of `origin/main` by docs commits (check `git status`). Apor pushes `main`; never push it from the agent.
 - Next epic: Epic 5, chord ear practice (5.1 choose chord practice and hear a chord, 5.2 guess a quality, 5.3 reveal the chord on the instrument).
 
-## Two decisions needed before drafting Epic 5
+## Two decisions needed before drafting Epic 5 (both decided 2026-10-27: the recommended option; written into `epics.md` Stories 5.1 and 5.3)
 
 1. **Reveal on the guitar (Story 5.3).** `epics.md` says each chord note shows at one position near the lowest frets, with `[ASSUMPTION: Epic 5 does not depend on voicings from Epic 4]`. Epic 4 changed that.
    - Recommended: reveal the chord as the best-ranked playable voicing, as the Explore guitar does.
@@ -20,11 +20,11 @@ Written 2026-10-26, after the Epic 4 retrospective. Pick this up in a new sessio
 
 ## Housekeeping (docs)
 
-| Item | What | Owner |
-|------|------|-------|
-| Stale epic text | `epics.md` Story 4.3, PRD FR-17 and `epic-4-context.md` still say "only the 5th droppable" and lack the finger rule (at most four fingers, a barre counts as one unless an open string lies inside it), the fret 12 limit (`maxFret`) and register bucket width 6. Retro action item 1. | Apor approves, dev applies |
-| Stale deferred work | In `deferred-work.md`: the Listen root setting shipped as Story 1.12, click-to-set-root as Story 3.6, and the two out-of-range-pitch entries are covered by the beyond-the-fretboard note and the pitch-class voicings. The CI workflow entry is still open (no `.github` folder). Annotate, never delete. | dev |
-| AGENTS.md pitfall | One line: the stepper row is part of the shared readout block height (`--spacing-readout-block-height`), so changing it moves Listen too. AGENTS.md is Apor's file; do not edit it without being asked. | Apor |
+| Item                | What                                                                                                                                                                                                                                                                                                       | Owner                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Stale epic text     | `epics.md` Story 4.3, PRD FR-17 and `epic-4-context.md` still say "only the 5th droppable" and lack the finger rule (at most four fingers, a barre counts as one unless an open string lies inside it), the fret 12 limit (`maxFret`) and register bucket width 6. Retro action item 1.                    | Apor approves, dev applies |
+| Stale deferred work | In `deferred-work.md`: the Listen root setting shipped as Story 1.12, click-to-set-root as Story 3.6, and the two out-of-range-pitch entries are covered by the beyond-the-fretboard note and the pitch-class voicings. The CI workflow entry is still open (no `.github` folder). Annotate, never delete. | dev                        |
+| AGENTS.md pitfall   | One line: the stepper row is part of the shared readout block height (`--spacing-readout-block-height`), so changing it moves Listen too. AGENTS.md is Apor's file; do not edit it without being asked.                                                                                                    | Apor                       |
 
 ## Code follow-ups (not blocking)
 
