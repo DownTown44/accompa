@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 18:00
+last_updated: 10-27-2026 19:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -255,14 +255,14 @@ action_items:
       below fret 12, drops the 5th) with a test or an accepted-deviation note; the
       question range stays uncapped (Apor)"
     owner: "dev"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
   - id: "epic-5-retro-item-24-use-the-short-quality-names-qualitylabel"
     epic: 5
     action: "Use the short quality names (qualityLabel) on the Setup chord chips instead
       of raw dom7 and m7b5"
     owner: "dev"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
   - id: "epic-5-retro-item-25-record-the-recurring-rejected-review-fin"
     epic: 5
