@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 17:00
+last_updated: 10-27-2026 18:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -83,11 +83,11 @@ development_status:
   4-9-keep-the-notes-i-click-on-the-guitar: done
   epic-4-retrospective: done
 
-  epic-5: in-progress
+  epic-5: done
   5-1-choose-chord-practice-and-hear-a-chord: done
   5-2-guess-a-chord-quality: done
-  5-3-reveal-the-chord-on-the-instrument: review
-  epic-5-retrospective: optional
+  5-3-reveal-the-chord-on-the-instrument: done
+  epic-5-retrospective: done
 action_items:
   - id: "epic-1-retro-item-1-extract-one-guess-validity-rule-used-by"
     epic: 1
@@ -223,7 +223,7 @@ action_items:
     action: "Listen to the strum and tune STRUM_SPREAD if needed; look at the first
       voicing for E, F and D in the app"
     owner: "Apor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-4-retro-item-20-put-golden-examples-the-first-result-for"
     epic: 4
@@ -247,3 +247,32 @@ action_items:
     owner: "dev"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
+  - id: "epic-5-retro-item-23-pin-the-high-register-guitar-reveal-77-8"
+    epic: 5
+    action: "Pin the high-register guitar reveal (77 80 83 86: best voicing at or
+      below fret 12, drops the 5th) with a test or an accepted-deviation note; the
+      question range stays uncapped (Apor)"
+    owner: "dev"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
+  - id: "epic-5-retro-item-24-use-the-short-quality-names-qualitylabel"
+    epic: 5
+    action: "Use the short quality names (qualityLabel) on the Setup chord chips instead
+      of raw dom7 and m7b5"
+    owner: "dev"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
+  - id: "epic-5-retro-item-25-record-the-recurring-rejected-review-fin"
+    epic: 5
+    action: "Record the recurring rejected review findings (untyped quality strings,
+      empty-pool guards, stale hint clearing, SetupPanel re-indent, practice switch
+      during reveal) in the project context"
+    owner: "Apor with bmad-project-context"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
+  - id: "epic-5-retro-item-26-give-pr-merge-commits-a-story-key-so-evi"
+    epic: 5
+    action: "Give PR merge commits a story key so evidence tools attribute them"
+    owner: "Apor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"

@@ -1299,7 +1299,7 @@ So that I can train my ear for chord quality as I did for intervals.
 
 **Given** the Setup panel
 **When** I look at it
-**Then** a Practice segmented control (Intervals, Chords) selects what Listen asks, with a Setup label, the shared selected treatment, and Intervals as the default [ASSUMPTION: the UX spec does not place this control].
+**Then** a Practice segmented control (Intervals, Chords) selects what Listen asks, with a Setup label, the shared selected treatment, and Intervals as the default (placement confirmed by Apor on 2026-10-27).
 
 **Given** Chords is selected and I open Listen
 **When** a question starts
@@ -1333,7 +1333,7 @@ So that I can test my ear without a score.
 
 **Given** chord Listen shows a question
 **When** the controls render
-**Then** one answer button per quality in the pool shows (the nine qualities map to keys `1` to `9`), styled as Interval buttons with key-hint caps, and qualities outside the pool show disabled at no less than 55% opacity [ASSUMPTION: layout and keys are set here per UX-DR25].
+**Then** one answer button per quality in the pool shows (the nine qualities map to keys `1` to `9`), styled as Interval buttons with key-hint caps, and qualities outside the pool show disabled at no less than 55% opacity (layout and keys confirmed by Apor on 2026-10-27).
 
 **Given** I choose the correct quality
 **When** the guess is evaluated
