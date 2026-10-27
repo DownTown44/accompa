@@ -18,7 +18,7 @@ describe('nameChord', () => {
 
   it('lists symmetric sets root position first', () => {
     expect(names([60, 64, 68])).toEqual(['Caug', 'Eaug/C', 'A♭aug/C'])
-    expect(names([60, 63, 66, 69])).toEqual(['Cdim7', 'E♭dim7/C', 'F♯dim7/C', 'Adim7/C'])
+    expect(names([60, 63, 66, 69])).toEqual(['Cdim7', 'D♯dim7/C', 'F♯dim7/C', 'Adim7/C'])
   })
 
   it('names an added sixth only as a minor seventh', () => {
