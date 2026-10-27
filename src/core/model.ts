@@ -77,7 +77,7 @@ export type Sound = 'synthesized'
 
 export type Theme = 'system' | 'light' | 'dark'
 
-// What the user chooses before practising; the pool of intervals, how they sound and how the app looks.
+// What the user chooses before practising; practice kind, interval and chord pools, direction, root mode, how they sound and how the app looks.
 export interface Settings {
   // Intervals or chords; never saved.
   readonly practice: PracticeKind

@@ -13,7 +13,7 @@ interface Row {
 const ROWS: readonly Row[] = [
   { keys: ['Space'], meaning: 'Play, or replay' },
   { keys: ['Enter'], meaning: 'Reveal, then next; Block in Explore' },
-  { keys: ['1–9', '0', '-', '='], meaning: 'Pick m2 to P8' },
+  { keys: ['1–9', '0', '-', '='], meaning: 'Pick m2 to P8; a chord quality in chord practice' },
   { keys: ['M'], meaning: 'Listen or Explore' },
   { keys: ['I'], meaning: 'Piano or Guitar' },
   { keys: ['R'], meaning: 'Set root' },

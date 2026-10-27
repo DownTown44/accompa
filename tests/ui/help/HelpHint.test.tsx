@@ -84,7 +84,7 @@ describe('help hint', () => {
     expect(rows).toEqual([
       [['Space'], 'Play, or replay'],
       [['Enter'], 'Reveal, then next; Block in Explore'],
-      [['1–9', '0', '-', '='], 'Pick m2 to P8'],
+      [['1–9', '0', '-', '='], 'Pick m2 to P8; a chord quality in chord practice'],
       [['M'], 'Listen or Explore'],
       [['I'], 'Piano or Guitar'],
       [['R'], 'Set root'],

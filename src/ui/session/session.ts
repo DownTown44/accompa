@@ -17,7 +17,7 @@ import { DEFAULT_WINDOW_START, fitWindow, shiftWindow } from '../../core/piano'
 export type { Instrument }
 export type Mode = 'listen' | 'explore'
 
-// The last guess result; the wording is derived from the interval when shown.
+// The last guess result; the wording is derived from the guess when shown.
 export type Feedback =
   | { readonly kind: 'wrong'; readonly interval: Interval }
   | { readonly kind: 'chordWrong'; readonly quality: string }
@@ -162,7 +162,7 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
       const { voicing, edited } = state.workspace
       if (state.mode !== 'explore' || (!edited && voicing !== undefined && voicing.length === action.frets.length && voicing.every((f, i) => f === action.frets[i]))) return state
       const { edited: _edited, ...rest } = state.workspace
-      // Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
+      // isCarried (core/explore) reads Workspace.positions as the marker for notes clicked on the guitar, so a change to how positions are written changes which chords get a voicing.
       // Leaving a hand edit forgets the positions it wrote, so the notes are carried again and the generated list shows.
       return { ...state, workspace: { ...rest, ...(edited ? { positions: {} } : {}), voicing: action.frets } }
     }

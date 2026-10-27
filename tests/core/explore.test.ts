@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, leftOutCount, litPositions, MAX_LIT, pairInterval, pitchesOnString, placeLit, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
+import { beyondFretboard, beyondFretboardNote, exploreReading, exploreReadout, isCarried, leftOutCount, litPositions, MAX_LIT, pairInterval, pitchesOnString, placeLit, readingRootedOn, sameChoice, toggleLit } from '../../src/core/explore'
 import { STANDARD_GUITAR_TUNING } from '../../src/core/instruments'
 import { pitch, pitchClass } from '../../src/core/pitch'
 
@@ -361,5 +361,24 @@ describe('placeLit', () => {
     const { positions, leftOut } = placeLit([p(40), p(41), p(42)], {})
     expect(leftOut).toEqual([41, 42])
     expect(positions).toEqual([{ string: 0, fret: 0 }, null, null])
+  })
+})
+
+describe('isCarried', () => {
+  const at = { string: 0, fret: 0 }
+  it('is true with no remembered positions', () => {
+    expect(isCarried({ pitches: [pitch(40), pitch(44)], positions: {} })).toBe(true)
+  })
+  it('is true with no lit notes', () => {
+    expect(isCarried({ pitches: [], positions: { 40: at } })).toBe(true)
+  })
+  it('is false when a lit pitch has a remembered position', () => {
+    expect(isCarried({ pitches: [pitch(40)], positions: { 40: at } })).toBe(false)
+  })
+  it('is true when positions are remembered only for other pitches', () => {
+    expect(isCarried({ pitches: [pitch(40), pitch(44)], positions: { 45: at } })).toBe(true)
+  })
+  it('is false when any lit pitch has a position', () => {
+    expect(isCarried({ pitches: [pitch(40), pitch(44), pitch(47)], positions: { 45: at, 44: at } })).toBe(false)
   })
 })
