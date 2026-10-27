@@ -90,6 +90,15 @@
   font-weight: 600;
 }
 
+.segment:has(input:disabled),
+.segment input:disabled {
+  cursor: default;
+}
+
+.segment:has(input:disabled) {
+  opacity: 0.55;
+}
+
 .segment:has(input:focus-visible) {
   outline: var(--spacing-focus-ring-width) solid var(--color-focus);
   outline-offset: var(--spacing-focus-ring-offset);

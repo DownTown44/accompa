@@ -1,8 +1,10 @@
-import type { Direction, RootMode, Settings, Sound, Theme } from '../../core/model'
+import type { Direction, PracticeKind, RootMode, Settings, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
-import { INTERVALS } from '../../core/theory'
+import { CHORD_QUALITIES, INTERVALS } from '../../core/theory'
 
 export type SettingsAction =
+  | { type: 'setPractice'; practice: PracticeKind }
+  | { type: 'toggleChordPool'; quality: string }
   | { type: 'togglePool'; interval: Interval }
   | { type: 'setDirection'; direction: Direction }
   | { type: 'setRootMode'; rootMode: RootMode }
@@ -21,6 +23,20 @@ export function settingsReducer(state: Settings, action: SettingsAction): Settin
         : INTERVALS.map((definition) => definition.semitones).filter((value) => value === interval || pool.includes(value))
       if (next.length === 0) return state
       return { ...state, pool: next }
+    }
+    // Applies from the next question; never saved.
+    case 'setPractice':
+      return state.practice === action.practice ? state : { ...state, practice: action.practice }
+    // Same rule as the interval pool: the last chip stays, the pool stays in quality order, never saved.
+    case 'toggleChordPool': {
+      const { chordPool } = state
+      const { quality } = action
+      if (!CHORD_QUALITIES.some((q) => q.name === quality)) return state
+      const next = chordPool.includes(quality)
+        ? chordPool.filter((name) => name !== quality)
+        : CHORD_QUALITIES.map((q) => q.name).filter((name) => name === quality || chordPool.includes(name))
+      if (next.length === 0) return state
+      return { ...state, chordPool: next }
     }
     // Applies from the next question; the one in play keeps the direction it was drawn with.
     case 'setDirection':

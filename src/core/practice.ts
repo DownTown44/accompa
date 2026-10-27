@@ -1,5 +1,6 @@
 import type { PitchRange } from './instruments'
-import type { Direction, Question } from './model'
+import type { ChordQuestion, Direction, Question } from './model'
+import { CHORD_QUALITIES } from './theory'
 import { pitch, pitchClass, type Interval, type Pitch } from './pitch'
 
 // Returns a number in [0, 1). Randomness is always injected so tests can seed it.
@@ -27,6 +28,23 @@ export function generateQuestion({ pool, range, random, direction, fixedRoot }: 
   const high = pitch(low + semitones)
   if (direction === 'descending') return { direction, root: high, interval: semitones, pitches: [high, low] }
   return { direction, root: low, interval: semitones, pitches: [low, high] }
+}
+
+export interface ChordQuestionOptions {
+  // Quality names; must hold at least one of the nine.
+  readonly pool: readonly string[]
+  readonly range: PitchRange
+  readonly random: Random
+}
+
+// The quality is drawn first (in quality order), then a root so every note fits the range.
+export function generateChordQuestion({ pool, range, random }: ChordQuestionOptions): ChordQuestion {
+  const qualities = CHORD_QUALITIES.filter((q) => pool.includes(q.name))
+  const quality = qualities[pick(qualities.length, random)]!
+  const span = quality.intervals[quality.intervals.length - 1]!
+  const roots = range.high - span - range.low + 1
+  const root = pitch(range.low + pick(roots, random))
+  return { root, quality: quality.name, pitches: quality.intervals.map((i) => pitch(root + i)) }
 }
 
 // The root is the note heard first; of the matching pitches whose whole interval fits, the one nearest the target wins, ties to the lower.

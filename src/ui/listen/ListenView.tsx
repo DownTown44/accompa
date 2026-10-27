@@ -2,10 +2,21 @@ import '../shared/shared.css'
 import './listen.css'
 import { INTERVALS } from '../../core/theory'
 import { useSession } from '../session/SessionContext'
+import { useSettings } from '../settings/SettingsContext'
 
 export function ListenView() {
   const { session } = useSession()
+  const { settings } = useSettings()
   if (session.mode !== 'listen') return null
+  if (settings.practice === 'chords') {
+    return (
+      <section className="listen" aria-label="Listen">
+        <p className="readout-question">Which chord?</p>
+        <p className="guess-hint" aria-live="polite"></p>
+        <p className="visually-hidden" aria-live="polite"></p>
+      </section>
+    )
+  }
   const { question, revealed } = session.practice
   const definition = revealed && question ? INTERVALS.find((i) => i.semitones === question.interval) : undefined
   const { feedback } = session

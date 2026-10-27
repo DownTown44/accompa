@@ -1,12 +1,15 @@
 import '../shared/shared.css'
 import './listen.css'
 import { useSession } from '../session/SessionContext'
+import { useSettings } from '../settings/SettingsContext'
 import { useSessionActions } from '../session/useSessionActions'
 import { focusInstrument } from '../shared/focus'
 
 export function ListenControls() {
   const { session } = useSession()
+  const { settings } = useSettings()
   const { play, revealOrNext } = useSessionActions()
+  const chords = settings.practice === 'chords'
   if (session.mode !== 'listen') return null
   const { question, revealed } = session.practice
   return (
@@ -25,14 +28,14 @@ export function ListenControls() {
       <button
         type="button"
         className="action-button action-primary"
-        aria-disabled={question ? undefined : true}
+        aria-disabled={question && !chords ? undefined : true}
         aria-keyshortcuts="Enter"
         onClick={(event) => {
           focusInstrument(event)
           revealOrNext()
         }}
       >
-        {revealed ? 'Next' : 'Reveal'} <span className="key-hint" aria-hidden="true">Enter</span>
+        {revealed && !chords ? 'Next' : 'Reveal'} <span className="key-hint" aria-hidden="true">Enter</span>
       </button>
     </div>
   )
