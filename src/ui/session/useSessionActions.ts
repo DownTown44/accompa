@@ -127,16 +127,14 @@ export function useSessionActions() {
     }
   }
 
-  // A right guess names the quality and plays the next chord; a wrong one marks it and the chord stays.
+  // A right guess reveals the chord and names the quality, silently; Next plays the next one; a wrong one marks it and the chord stays.
   function guessChord(quality: string) {
     const { chordQuestion, chordRevealed, chordWrongMarks = [] } = session.practice
     const { chordPool } = settings
     if (session.mode !== 'listen' || settings.practice !== 'chords' || !chordQuestion || chordRevealed) return
     if (!canGuess(quality, chordPool, chordQuestion.quality, chordWrongMarks)) return
     if (quality === chordQuestion.quality) {
-      const question = generateChordQuestion({ pool: chordPool, range: COMMON_RANGE, random: Math.random })
-      dispatch({ type: 'chordRight', question })
-      engine.play(question.pitches, 'block')
+      dispatch({ type: 'chordRight' })
     } else {
       dispatch({ type: 'guessChord', quality, pool: chordPool })
     }

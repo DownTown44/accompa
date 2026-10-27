@@ -6,7 +6,7 @@ import { useSettings } from '../settings/SettingsContext'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
 import { focusInstrument } from '../shared/focus'
-import { qualityLabel } from './chordLabels'
+import { qualityLabel } from '../shared/chordLabels'
 import { INTERVAL_KEYS } from './intervalKeys'
 
 export function ChordButtons() {

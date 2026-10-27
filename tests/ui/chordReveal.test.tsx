@@ -72,6 +72,16 @@ describe('chord reveal reducer', () => {
     expect(next.practice.question).toBe(state.practice.question)
   })
 
+  it('a right guess reveals touching practice and feedback only', () => {
+    const base = { ...state, workspace: { pitches: [50] as Pitch[], positions: {} } }
+    const next = sessionReducer(base, { type: 'chordRight' })
+    expect(next.practice.chordRevealed).toBe(true)
+    expect(next.practice.chordQuestion).toBe(cMajor)
+    expect(next.workspace).toBe(base.workspace)
+    expect(next.practice.question).toBe(base.practice.question)
+    expect(next.practice.revealed).toBe(false)
+  })
+
   it('an interval reveal never reveals the chord, and the reverse', () => {
     const interval = { direction: 'harmonic' as const, root: 40 as Pitch, interval: 1 as never, pitches: [40, 41] as Pitch[] }
     const both = sessionReducer({ ...state, practice: { ...state.practice, question: interval } }, { type: 'reveal' })
@@ -132,16 +142,32 @@ describe('chord reveal in the app', () => {
     expect(document.querySelector('.interval-button.wrong')).toBeNull()
   })
 
-  it('after a right guess, Enter reveals the new chord and Enter again draws another', () => {
+  it('after a right guess by key, the chord is revealed silently and Enter draws another', () => {
     openChords()
     press('1')
+    expect(engine.plays).toHaveLength(0)
+    expect(lit()).toEqual(['60', '64', '67'])
+    expect(screen.getByRole('button', { name: /Next/ })).toBeTruthy()
+    press('Enter')
     expect(engine.plays).toHaveLength(1)
-    const next = engine.plays[0]!.pitches
-    press('Enter')
-    expect(lit()).toEqual(next.map(String).sort())
-    press('Enter')
-    expect(engine.plays).toHaveLength(2)
     expect(lit()).toEqual([])
+  })
+
+  it('after a right guess by click, the Next button draws another chord', () => {
+    openChords()
+    fireEvent.click(document.querySelector('.interval-row button')!)
+    expect(engine.plays).toHaveLength(0)
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }))
+    expect(engine.plays).toHaveLength(1)
+    expect(engine.plays[0]!.mode).toBe('block')
+  })
+
+  it('the high dim7 on the guitar is a 3-note shape at or below fret 12 (accepted deviation)', () => {
+    openChords(asked({ root: 77 as Pitch, quality: 'dim7', pitches: [77, 80, 83, 86] as Pitch[] }))
+    press('i')
+    press('Enter')
+    expect(lit()).toEqual(['3:10', '4:9', '5:10'])
+    expect(document.querySelectorAll('[data-muted]')).toHaveLength(3)
   })
 
   it('Space after a reveal replays the plain block of the question pitches', () => {

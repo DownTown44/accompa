@@ -1,7 +1,7 @@
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CHORD_QUALITIES } from '../../src/core/theory'
-import { qualityLabel } from '../../src/ui/listen/chordLabels'
+import { qualityLabel } from '../../src/ui/shared/chordLabels'
 import { App } from '../../src/ui/app/App'
 import { initialSession, sessionReducer } from '../../src/ui/session/session'
 import { createFakeEngine, type FakeEngine } from './support/fakeEngine'
@@ -29,12 +29,13 @@ const hint = () => document.querySelector('.guess-hint')!.textContent
 const marked = () => [...row().querySelectorAll('.wrong .interval-label')].map((b) => b.textContent)
 const named = (label: string) => buttons().find((b) => b.querySelector('.interval-label')!.textContent === label)!
 
-// The chord is major [40,44,47]; with Major unticked, the next chord is minor [40,43,47].
+// The chord is major [40,44,47]; with Maj unticked, Next draws minor [40,43,47].
 function askMinor() {
   fireEvent.click(opener())
   fireEvent.click(radio('Chords'))
-  fireEvent.click(chip('major'))
-  fireEvent.click(named('Major'))
+  fireEvent.click(chip('Maj'))
+  fireEvent.click(named('Maj'))
+  press('Enter')
   engine.plays.length = 0
   fireEvent.click(opener())
 }
@@ -44,10 +45,10 @@ describe('chord guess', () => {
     fireEvent.click(opener())
     fireEvent.click(radio('Chords'))
     expect(buttons().map((b) => b.querySelector('.interval-label')!.textContent)).toEqual([
-      'Major',
-      'Minor',
-      'Diminished',
-      'Augmented',
+      'Maj',
+      'Min',
+      'Dim',
+      'Aug',
       'Maj7',
       'Dom7',
       'Min7',
@@ -57,14 +58,53 @@ describe('chord guess', () => {
     expect(buttons().map((b) => b.querySelector('.key-hint')!.textContent)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9'])
   })
 
-  it('names the quality on a correct guess and plays the next chord as a block', () => {
+  it('reveals the chord on a correct guess, names the quality and plays nothing', () => {
     fireEvent.click(opener())
     fireEvent.click(radio('Chords'))
-    fireEvent.click(chip('major'))
+    fireEvent.click(chip('Maj'))
     engine.plays.length = 0
-    fireEvent.click(named('Major'))
-    expect(hint()).toBe('Major. Next chord is playing.')
+    fireEvent.click(named('Maj'))
+    expect(hint()).toBe('Maj.')
+    expect(document.querySelector('.readout-question')!.textContent).not.toBe('Which chord?')
+    expect([...document.querySelectorAll('[data-lit]')].map((n) => n.getAttribute('data-role'))).toEqual(['root', 'third', 'fifth'])
+    expect(document.querySelectorAll('.role-legend li')).toHaveLength(3)
+    expect(buttons()).toHaveLength(9)
+    for (const b of buttons()) expect(b.getAttribute('aria-disabled')).toBe('true')
+    expect(screen.getByRole('button', { name: /Next/ })).toBeTruthy()
+    expect(engine.plays).toHaveLength(0)
+  })
+
+  it('plays one new block on Next after a correct guess, with marks and hint cleared', () => {
+    fireEvent.click(opener())
+    fireEvent.click(radio('Chords'))
+    fireEvent.click(chip('Maj'))
+    fireEvent.click(opener())
+    fireEvent.click(named('Dim7'))
+    fireEvent.click(named('Maj'))
+    engine.plays.length = 0
+    press('Enter')
     expect(engine.plays).toEqual([{ pitches: [40, 43, 47], mode: 'block' }])
+    expect(hint()).toBe('')
+    expect(marked()).toEqual([])
+    expect(document.querySelectorAll('[data-lit]')).toHaveLength(0)
+    expect(document.querySelector('.readout-question')!.textContent).toBe('Which chord?')
+  })
+
+  it('keeps the wrong marks shown after a correct reveal', () => {
+    askMinor()
+    fireEvent.click(named('Dim7'))
+    fireEvent.click(named('Min'))
+    expect(marked()).toEqual(['Dim7'])
+    expect(hint()).toBe('Min.')
+  })
+
+  it('reveals as today after a wrong guess then Reveal, clearing the hint', () => {
+    askMinor()
+    fireEvent.click(named('Dim7'))
+    press('Enter')
+    expect(hint()).toBe('')
+    expect(document.querySelectorAll('[data-lit]').length).toBeGreaterThan(0)
+    expect(engine.plays).toHaveLength(0)
   })
 
   it('marks a wrong guess once, keeps the chord and still replays it', () => {
@@ -83,18 +123,18 @@ describe('chord guess', () => {
 
   it('dims out-of-pool buttons, ignores them, and keeps the answer in play', () => {
     askMinor()
-    const major = named('Major')
+    const major = named('Maj')
     expect(major.hasAttribute('data-out-of-pool')).toBe(true)
     expect(major.getAttribute('aria-disabled')).toBe('true')
     fireEvent.click(major)
     expect(marked()).toEqual([])
-    expect(named('Minor').hasAttribute('data-out-of-pool')).toBe(false)
+    expect(named('Min').hasAttribute('data-out-of-pool')).toBe(false)
     fireEvent.click(opener())
-    fireEvent.click(chip('minor'))
+    fireEvent.click(chip('Min'))
     fireEvent.click(opener())
-    expect(named('Minor').hasAttribute('data-out-of-pool')).toBe(false)
-    fireEvent.click(named('Minor'))
-    expect(hint()).toBe('Minor. Next chord is playing.')
+    expect(named('Min').hasAttribute('data-out-of-pool')).toBe(false)
+    fireEvent.click(named('Min'))
+    expect(hint()).toBe('Min.')
   })
 
   it('guesses with keys 1 to 9 and ignores 0, - and =', () => {
@@ -108,8 +148,9 @@ describe('chord guess', () => {
     press('9')
     expect(hint()).toBe('Dim7 is not it — try another.')
     press('2')
-    expect(hint()).toBe('Minor. Next chord is playing.')
-    expect(marked()).toEqual([])
+    expect(hint()).toBe('Min.')
+    expect(marked()).toEqual(['Dim7'])
+    expect(engine.plays).toHaveLength(0)
   })
 
   it('keeps interval keys working in Intervals', () => {
@@ -144,7 +185,7 @@ describe('chord guess, revealed and restricted pool', () => {
   it('shows seven buttons out of the pool, disabled and inert, with a pool of major and minor', () => {
     fireEvent.click(opener())
     fireEvent.click(radio('Chords'))
-    for (const name of ['augmented', 'diminished', 'maj7', 'dom7', 'min7', 'm7b5', 'dim7']) fireEvent.click(chip(name))
+    for (const name of ['Aug', 'Dim', 'Maj7', 'Dom7', 'Min7', 'm7♭5', 'Dim7']) fireEvent.click(chip(name))
     fireEvent.click(opener())
     engine.plays.length = 0
     const out = buttons().filter((b) => b.hasAttribute('data-out-of-pool'))
@@ -175,14 +216,17 @@ describe('chord guess outside Listen', () => {
     expect(engine.plays.at(-1)).toEqual({ pitches: [40, 44, 47], mode: 'block' })
   })
 
-  it('has a label for every quality', () => {
-    for (const q of CHORD_QUALITIES) expect(qualityLabel(q.name)).not.toBe(q.name)
+  it('has one short label per quality, the same on chips and buttons', () => {
+    expect(CHORD_QUALITIES.map((q) => qualityLabel(q.name))).toEqual(['Maj', 'Min', 'Dim', 'Aug', 'Maj7', 'Dom7', 'Min7', 'm7♭5', 'Dim7'])
+    fireEvent.click(opener())
+    fireEvent.click(radio('Chords'))
+    const chipLabels = [...document.querySelectorAll('.setup-chip')].map((c) => c.textContent)
+    expect(chipLabels).toEqual(buttons().map((b) => b.querySelector('.interval-label')!.textContent))
   })
 })
 
 describe('chord guess reducer', () => {
   const question = { root: 40 as never, quality: 'minor', pitches: [40, 43, 47] as never }
-  const next = { root: 41 as never, quality: 'major', pitches: [41, 45, 48] as never }
   const asked = sessionReducer(listenSession, { type: 'setChordQuestion', question })
 
   it('marks a wrong guess touching only the chord marks and feedback', () => {
@@ -204,12 +248,14 @@ describe('chord guess reducer', () => {
     expect(sessionReducer(revealed, { type: 'guessChord', quality: 'major', pool: ['major'] })).toBe(revealed)
   })
 
-  it('stores the next chord, clears marks and names the quality', () => {
+  it('reveals the chord, keeps the question and marks and names the quality', () => {
     const wrong = sessionReducer(asked, { type: 'guessChord', quality: 'major', pool: ['major'] })
-    const state = sessionReducer(wrong, { type: 'chordRight', question: next })
-    expect(state.practice.chordQuestion).toBe(next)
-    expect(state.practice.chordWrongMarks).toEqual([])
+    const state = sessionReducer(wrong, { type: 'chordRight' })
+    expect(state.practice.chordQuestion).toBe(question)
+    expect(state.practice.chordRevealed).toBe(true)
+    expect(state.practice.chordWrongMarks).toBe(wrong.practice.chordWrongMarks)
     expect(state.feedback).toEqual({ kind: 'chordRight', quality: 'minor' })
+    expect(sessionReducer(state, { type: 'chordRight' })).toBe(state)
     expect(state.workspace).toBe(asked.workspace)
     expect(state.practice.question).toBe(asked.practice.question)
     expect(initialSession.practice.chordWrongMarks).toBeUndefined()

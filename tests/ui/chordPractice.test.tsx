@@ -80,13 +80,13 @@ describe('chord Listen', () => {
   it('keeps the current chord when the pool changes and refuses the last chip', () => {
     openChords()
     expect(chips()).toHaveLength(9)
-    fireEvent.click(chip('major'))
+    fireEvent.click(chip('Maj'))
     press(' ')
     expect(engine.plays[1]!.pitches).toEqual([40, 44, 47])
     for (const c of chips().slice(2)) fireEvent.click(c)
-    fireEvent.click(chip('minor'))
+    fireEvent.click(chip('Min'))
     expect(document.querySelector('.setup-note')?.textContent).toBe('Keep at least one chord quality.')
-    expect(chip('minor').getAttribute('aria-pressed')).toBe('true')
+    expect(chip('Min').getAttribute('aria-pressed')).toBe('true')
   })
 
   it('disables Direction and Root in Chords and restores the interval question', () => {
@@ -111,7 +111,7 @@ describe('matrix rows', () => {
 
   it('replays the same chord after Explore and back in the app', () => {
     openChords()
-    fireEvent.click(chip('minor'))
+    fireEvent.click(chip('Min'))
     expect(document.querySelector('.listen')).not.toBeNull()
     press('m')
     expect(document.querySelector('.listen')).toBeNull()
@@ -128,8 +128,8 @@ describe('matrix rows', () => {
     fireEvent.click(chip('M2'))
     fireEvent.click(radio('Dark'))
     fireEvent.click(radio('Chords'))
-    fireEvent.click(chip('major'))
-    fireEvent.click(chip('dim7'))
+    fireEvent.click(chip('Maj'))
+    fireEvent.click(chip('Dim7'))
     expect(chips()).toHaveLength(9)
     expect(chips().filter((c) => c.getAttribute('aria-pressed') === 'true')).toHaveLength(7)
     cleanup()
@@ -147,9 +147,9 @@ describe('matrix rows', () => {
 
   it('shows the nine chord chips for Chords and none of the interval chips', () => {
     fireEvent.click(opener())
-    expect(chips().map((c) => c.textContent)).not.toContain('major')
+    expect(chips().map((c) => c.textContent)).not.toContain('Maj')
     fireEvent.click(radio('Chords'))
-    expect(chips().map((c) => c.textContent)).toEqual(['major', 'minor', 'diminished', 'augmented', 'maj7', 'dom7', 'min7', 'm7b5', 'dim7'])
+    expect(chips().map((c) => c.textContent)).toEqual(['Maj', 'Min', 'Dim', 'Aug', 'Maj7', 'Dom7', 'Min7', 'm7♭5', 'Dim7'])
   })
 
   it('turns Reveal into Next on Enter and back on the next Enter', () => {

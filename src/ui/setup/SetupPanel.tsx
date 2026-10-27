@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Direction, PracticeKind, RootMode, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
 import { CHORD_QUALITIES, INTERVALS } from '../../core/theory'
+import { qualityLabel } from '../shared/chordLabels'
 import { SegmentedGroup } from '../shell/SegmentedGroup'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
@@ -108,7 +109,7 @@ export function SetupPanel() {
                 aria-disabled={last ? true : undefined}
                 onClick={() => onChordChip(quality.name)}
               >
-                {quality.name}
+                {qualityLabel(quality.name)}
               </button>
             )
           })}

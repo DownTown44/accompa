@@ -1,9 +1,9 @@
-// Short fixed names for the answer buttons and hints, in CHORD_QUALITIES order (not a chord reading).
+// One short name per quality for the Setup chips, answer buttons and hints, in CHORD_QUALITIES order (not a chord reading).
 const LABELS: Readonly<Record<string, string>> = {
-  major: 'Major',
-  minor: 'Minor',
-  diminished: 'Diminished',
-  augmented: 'Augmented',
+  major: 'Maj',
+  minor: 'Min',
+  diminished: 'Dim',
+  augmented: 'Aug',
   maj7: 'Maj7',
   dom7: 'Dom7',
   min7: 'Min7',

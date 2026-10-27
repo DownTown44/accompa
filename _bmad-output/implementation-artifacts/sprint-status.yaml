@@ -83,10 +83,11 @@ development_status:
   4-9-keep-the-notes-i-click-on-the-guitar: done
   epic-4-retrospective: done
 
-  epic-5: done
+  epic-5: in-progress
   5-1-choose-chord-practice-and-hear-a-chord: done
   5-2-guess-a-chord-quality: done
   5-3-reveal-the-chord-on-the-instrument: done
+  5-4-fixes-from-the-epic-5-review: review # added after the Epic 5 review (Apor, 2026-10-27)
   epic-5-retrospective: done
 action_items:
   - id: "epic-1-retro-item-1-extract-one-guess-validity-rule-used-by"

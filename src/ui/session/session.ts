@@ -57,7 +57,7 @@ export type SessionAction =
   | { type: 'revealChord' }
   | { type: 'guess'; interval: Interval; pool: readonly Interval[] }
   | { type: 'guessChord'; quality: string; pool: readonly string[] }
-  | { type: 'chordRight'; question: ChordQuestion }
+  | { type: 'chordRight' }
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
   | { type: 'openHelp' }
@@ -234,15 +234,14 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         feedback: { kind: 'chordWrong', quality },
       }
     }
-    // A right chord guess stores the next chord, clears the marks and names the guessed quality.
+    // A right chord guess reveals the chord as Reveal does, keeps the marks and names the guessed quality.
     case 'chordRight': {
       const { chordQuestion, chordRevealed } = state.practice
       if (!chordQuestion || chordRevealed) return state
-      return {
-        ...state,
-        practice: { ...state.practice, chordQuestion: action.question, chordWrongMarks: [] },
-        feedback: { kind: 'chordRight', quality: chordQuestion.quality },
-      }
+      return fitRevealed(
+        { ...state, practice: { ...state.practice, chordRevealed: true }, feedback: { kind: 'chordRight', quality: chordQuestion.quality } },
+        true,
+      )
     }
     case 'toggleSetup':
       return { ...state, setupOpen: !state.setupOpen }
