@@ -1385,3 +1385,26 @@ So that I connect what I heard with its structure.
 **Given** a reveal
 **When** it happens
 **Then** no score, counter or praise appears.
+
+### Story 5.4: Fixes from the Epic 5 review
+
+As Apor,
+I want the chord answer to reveal before Next and the chord names to be short and consistent,
+So that I see what I got right and the names fit the screen.
+
+**Added after Apor reviewed Epic 5 (2026-10-27).** Reverses the Story 5.2 rule that a correct guess plays the next chord at once.
+
+**Acceptance Criteria:**
+
+**Given** chord Listen and a correct guess
+**When** the guess is evaluated
+**Then** the chord is revealed as Reveal does, the hint names the quality (for example `Min.`), and the next chord plays only when I press Next
+**And** a wrong guess keeps its marked button and hint with no reveal.
+
+**Given** the Setup chips, the answer buttons and the hints
+**When** I read them
+**Then** all use the short names `Maj, Min, Dim, Aug, Maj7, Dom7, Min7, m7♭5, Dim7`.
+
+**Given** the high dim7 question (77 80 83 86)
+**When** it is revealed on the guitar
+**Then** the best voicing at or below fret 12 shows (a test pins its frets); the question range stays uncapped on purpose.
