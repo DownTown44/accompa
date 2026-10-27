@@ -13,9 +13,10 @@ interface SegmentedGroupProps<T extends string> {
   value: T
   onChange: (value: T) => void
   variant: 'mode' | 'segment' | 'setup'
+  disabled?: boolean
 }
 
-export function SegmentedGroup<T extends string>({ label, labelledBy, name, options, value, onChange, variant }: SegmentedGroupProps<T>) {
+export function SegmentedGroup<T extends string>({ label, labelledBy, name, options, value, onChange, variant, disabled }: SegmentedGroupProps<T>) {
   return (
     <div role="radiogroup" aria-label={labelledBy ? undefined : label} aria-labelledby={labelledBy} className={`group group-${variant}`}>
       {options.map((option) => (
@@ -25,6 +26,7 @@ export function SegmentedGroup<T extends string>({ label, labelledBy, name, opti
             name={name}
             value={option.value}
             checked={option.value === value}
+            disabled={disabled}
             onChange={() => onChange(option.value)}
             onClick={variant === 'setup' ? undefined : focusInstrument}
           />

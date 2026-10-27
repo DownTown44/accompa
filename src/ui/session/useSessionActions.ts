@@ -1,11 +1,11 @@
-import type { Direction, Question, ReadingChoice, RootMode } from '../../core/model'
+import type { Direction, PracticeKind, Question, ReadingChoice, RootMode } from '../../core/model'
 import type { Interval, Pitch } from '../../core/pitch'
 import type { FretPosition } from '../../core/instruments'
 import type { PlayMode } from '../../audio/engine'
 import { canGuess } from '../../core/guess'
 import { COMMON_RANGE } from '../../core/instruments'
 import { moveFret, voicingPitches } from '../../core/voicings'
-import { generateQuestion } from '../../core/practice'
+import { generateChordQuestion, generateQuestion } from '../../core/practice'
 import { useLitNotes, type VoicingList } from './useLitNotes'
 import { useEngine } from '../engine/EngineContext'
 import { useSettings } from '../settings/SettingsContext'
@@ -33,6 +33,24 @@ export function useSessionActions() {
     dispatch({ type: 'setQuestion', question })
     if (fixed && fixedRoot === null) dispatch({ type: 'setFixedRoot', pitch: question.root })
     return question
+  }
+
+  // Chord practice draws from the chord pool; the interval question is left alone.
+  function startChordQuestion(override: { pool?: readonly string[] } = {}) {
+    const question = generateChordQuestion({ pool: override.pool ?? settings.chordPool, range: COMMON_RANGE, random: Math.random })
+    dispatch({ type: 'setChordQuestion', question })
+    return question
+  }
+
+  // The current chord stays replayable; the next question follows the new practice.
+  function setPractice(practice: PracticeKind) {
+    if (practice === settings.practice) return
+    dispatchSettings({ type: 'setPractice', practice })
+    if (session.mode !== 'listen') return
+    if (practice === 'chords') {
+      const question = session.practice.chordQuestion ?? startChordQuestion()
+      engine.play(question.pitches, 'block')
+    } else if (!session.practice.question) playQuestion(startQuestion())
   }
 
   function setDirection(direction: Direction) {
@@ -69,15 +87,18 @@ export function useSessionActions() {
 
   function play() {
     if (session.mode === 'explore') return playLit('arpeggio')
+    if (settings.practice === 'chords') return engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, 'block')
     const question = session.practice.question ?? startQuestion()
     playQuestion(question)
   }
 
   function reveal() {
+    if (settings.practice === 'chords') return
     if (session.mode === 'listen' && session.practice.question && !session.practice.revealed) dispatch({ type: 'reveal' })
   }
 
   function next() {
+    if (settings.practice === 'chords') return
     if (session.mode === 'listen') playQuestion(startQuestion())
   }
 
@@ -91,7 +112,7 @@ export function useSessionActions() {
   function guess(interval: Interval) {
     const { question, revealed, wrongMarks } = session.practice
     const { pool } = settings
-    if (session.mode !== 'listen' || !question || revealed) return
+    if (session.mode !== 'listen' || settings.practice === 'chords' || !question || revealed) return
     if (!canGuess(interval, pool, question.interval, wrongMarks)) return
     if (interval === question.interval) {
       dispatch({ type: 'reveal' })
@@ -106,7 +127,7 @@ export function useSessionActions() {
       engine.play([pitch], 'block')
       return
     }
-    if (settings.rootMode !== 'fixed') return
+    if (settings.practice === 'chords' || settings.rootMode !== 'fixed') return
     engine.play([pitch], 'block')
     dispatch({ type: 'setFixedRoot', pitch })
     startQuestion({ fixedRoot: pitch })
@@ -127,13 +148,16 @@ export function useSessionActions() {
     if (mode === session.mode) return
     dispatch({ type: 'setMode', mode })
     if (mode === 'explore') engine.stop()
-    if (mode === 'listen' && !session.practice.question) playQuestion(startQuestion())
+    if (mode !== 'listen') return
+    if (settings.practice === 'chords') engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, 'block')
+    else if (!session.practice.question) playQuestion(startQuestion())
   }
 
   return {
     play,
     revealOrNext,
     guess,
+    setPractice,
     setDirection,
     setRootMode,
     pressNote,

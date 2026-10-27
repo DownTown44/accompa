@@ -135,8 +135,9 @@ export function useLitNotes(): LitNotes {
   const { question, revealed, fixedRoot } = session.practice
   const { pitches, reading, root: chosenRoot } = session.workspace
   const shown = useShown()
-  if (session.mode === 'listen' && revealed && question) return { pitches: question.pitches, root: question.root }
-  if (session.mode === 'listen' && settings.rootMode === 'fixed' && fixedRoot !== null) return { pitches: [fixedRoot], root: fixedRoot }
+  const chords = settings.practice === 'chords'
+  if (session.mode === 'listen' && !chords && revealed && question) return { pitches: question.pitches, root: question.root }
+  if (session.mode === 'listen' && !chords && settings.rootMode === 'fixed' && fixedRoot !== null) return { pitches: [fixedRoot], root: fixedRoot }
   if (session.mode === 'explore') {
     const { positions } = session.workspace
     const { root, roles } = exploreReading(pitches, reading, chosenRoot)

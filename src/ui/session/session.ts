@@ -3,6 +3,7 @@ import {
   initialWorkspace,
   type Instrument,
   type Practice,
+  type ChordQuestion,
   type ReadingChoice,
   type Question,
   type Workspace,
@@ -48,6 +49,7 @@ export type SessionAction =
   | { type: 'selectVoicing'; frets: readonly (number | null)[] }
   | { type: 'editVoicing'; frets: readonly (number | null)[] }
   | { type: 'setQuestion'; question: Question }
+  | { type: 'setChordQuestion'; question: ChordQuestion }
   | { type: 'clearQuestion' }
   | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
@@ -184,6 +186,9 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         practice: { ...state.practice, question: action.question, revealed: false, wrongMarks: [] },
         feedback: null,
       }
+    // Touches the chord question only; the interval question stays.
+    case 'setChordQuestion':
+      return { ...state, practice: { ...state.practice, chordQuestion: action.question } }
     case 'clearQuestion':
       return {
         ...state,

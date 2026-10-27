@@ -1,8 +1,8 @@
 import './setup.css'
 import { useEffect, useRef, useState } from 'react'
-import type { Direction, RootMode, Sound, Theme } from '../../core/model'
+import type { Direction, PracticeKind, RootMode, Sound, Theme } from '../../core/model'
 import type { Interval } from '../../core/pitch'
-import { INTERVALS } from '../../core/theory'
+import { CHORD_QUALITIES, INTERVALS } from '../../core/theory'
 import { SegmentedGroup } from '../shell/SegmentedGroup'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
@@ -10,6 +10,11 @@ import { useSettings } from '../settings/SettingsContext'
 
 export const SETUP_PANEL_ID = 'setup-panel'
 export const SETUP_OPENER_ID = 'setup-opener'
+
+const PRACTICES: readonly { value: PracticeKind; label: string }[] = [
+  { value: 'intervals', label: 'Intervals' },
+  { value: 'chords', label: 'Chords' },
+]
 
 const DIRECTIONS: readonly { value: Direction; label: string }[] = [
   { value: 'ascending', label: 'Ascending' },
@@ -33,9 +38,10 @@ const THEMES: readonly { value: Theme; label: string }[] = [
 export function SetupPanel() {
   const { session } = useSession()
   const { settings, dispatch } = useSettings()
-  const { setDirection, setRootMode } = useSessionActions()
+  const { setPractice, setDirection, setRootMode } = useSessionActions()
   const open = session.setupOpen
-  const { pool } = settings
+  const { pool, chordPool } = settings
+  const chords = settings.practice === 'chords'
   const [keepNote, setKeepNote] = useState(false)
   const first = useRef<HTMLButtonElement>(null)
   const wasOpen = useRef(false)
@@ -58,12 +64,57 @@ export function SetupPanel() {
     dispatch({ type: 'togglePool', interval: semitones })
   }
 
+  function onChordChip(name: string) {
+    if (chordPool.length === 1 && chordPool[0] === name) {
+      setKeepNote(true)
+      return
+    }
+    setKeepNote(false)
+    dispatch({ type: 'toggleChordPool', quality: name })
+  }
+
   return (
     <section id={SETUP_PANEL_ID} className="setup-panel" aria-labelledby="setup-label" hidden={!open}>
       <h2 id="setup-label" className="setup-label">
         Setup
       </h2>
-      <div className="setup-chips" role="group" aria-labelledby="setup-label">
+      <h3 id="practice-label" className="setup-sublabel setup-sublabel-first">
+        Practice
+      </h3>
+      <SegmentedGroup<PracticeKind>
+        label="Practice"
+        labelledBy="practice-label"
+        name="practice"
+        variant="setup"
+        options={PRACTICES}
+        value={settings.practice}
+        onChange={(practice) => {
+          setKeepNote(false)
+          setPractice(practice)
+        }}
+      />
+      {chords ? (
+        <div className="setup-chips setup-chips-gap" role="group" aria-label="Chord qualities">
+          {CHORD_QUALITIES.map((quality, index) => {
+            const selected = chordPool.includes(quality.name)
+            const last = selected && chordPool.length === 1
+            return (
+              <button
+                key={quality.name}
+                ref={index === 0 ? first : undefined}
+                type="button"
+                className="setup-chip"
+                aria-pressed={selected}
+                aria-disabled={last ? true : undefined}
+                onClick={() => onChordChip(quality.name)}
+              >
+                {quality.name}
+              </button>
+            )
+          })}
+        </div>
+      ) : (
+      <div className="setup-chips setup-chips-gap" role="group" aria-labelledby="setup-label">
         {INTERVALS.map((definition, index) => {
           const selected = pool.includes(definition.semitones)
           const last = selected && pool.length === 1
@@ -82,6 +133,7 @@ export function SetupPanel() {
           )
         })}
       </div>
+      )}
       <h3 id="direction-label" className="setup-sublabel">
         Direction
       </h3>
@@ -92,6 +144,7 @@ export function SetupPanel() {
         variant="setup"
         options={DIRECTIONS}
         value={settings.direction}
+        disabled={chords}
         onChange={setDirection}
       />
       <h3 id="root-label" className="setup-sublabel">
@@ -104,6 +157,7 @@ export function SetupPanel() {
         variant="setup"
         options={ROOT_MODES}
         value={settings.rootMode}
+        disabled={chords}
         onChange={setRootMode}
       />
       <h3 id="sound-label" className="setup-sublabel">
@@ -131,7 +185,7 @@ export function SetupPanel() {
         onChange={(theme) => dispatch({ type: 'setTheme', theme })}
       />
       <p className="setup-note" role="status" aria-live="polite">
-        {keepNote ? 'Keep at least one interval.' : ''}
+        {keepNote ? (chords ? 'Keep at least one chord quality.' : 'Keep at least one interval.') : ''}
       </p>
     </section>
   )
