@@ -1266,7 +1266,7 @@ So that I can train my ear for chord quality as I did for intervals.
 
 **Given** Chords is selected and I open Listen
 **When** a question starts
-**Then** a random chord from the chord pool (a Setup chip group of the nine qualities, all selected by default) plays as a block, and the readout shows `Which chord?`.
+**Then** a random chord from the chord pool (a Setup chip group of the nine qualities, all selected by default) plays as a plain block on both instruments (not a strum; decided by Apor on 2026-10-27), and the readout shows `Which chord?`.
 
 **Given** the pool
 **When** I untick chips
@@ -1335,7 +1335,7 @@ So that I connect what I heard with its structure.
 
 **Given** Reveal on Guitar
 **When** the notes light
-**Then** each chord note shows at one position, the cluster nearest the lowest frets [ASSUMPTION: Epic 5 does not depend on voicings from Epic 4].
+**Then** the chord shows as the best-ranked playable voicing in the register of the question chord, derived the same way as the Explore guitar (open and muted markers included, no stepper) (decided by Apor on 2026-10-27, replacing the nearest-low-frets cluster).
 
 **Given** Next
 **When** I press `Enter` or click it
