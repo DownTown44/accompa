@@ -17,6 +17,7 @@ Ear-training web app for intervals and chords on a piano and a guitar fretboard.
 - Story workflow, the real-browser check and stopping the preview server on Windows: `docs/development-notes.md`; read it before any layout or CSS change.
 - Layers: `src/core` (pure), `src/audio`, `src/ui`; UI features share code only through `src/ui/shared`. `npm run check` enforces it.
 - Shared test helpers: `tests/ui/support/`.
+- Where each file group lives, the state model and the main data flows: `docs/codebase-map.md`; spec and review conventions (golden examples, exact assertions, findings already rejected): `docs/development-notes.md`.
 
 ## Running and verifying
 
