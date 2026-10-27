@@ -2,12 +2,12 @@
 title: accompa PRD
 status: final
 created: 2026-10-22
-updated: 2026-10-23
+updated: 2026-10-27
 ---
 
 # accompa — PRD
 
-> **Status: final.** Phase 1 defined. Phase 2 direction only.
+> **Status: final.** Phase 1 defined and built. Phase 2 scope defined 2026-10-27 (circle and progressions page needs discovery).
 
 ## Vision
 
@@ -107,7 +107,7 @@ The user can name M3, P4, P5 and the 7th intervals (m7, M7) by ear without looki
 ## Out of Scope (for now)
 
 - Progress tracking and adaptive drilling (possible later phase)
-- Chord library: picking a chord by root and quality (Phase 2)
+- Chord library: picking a chord by root and quality (now in Phase 2 as the chord builder, FR-28)
 - Instrument input (mic, MIDI). MIDI keyboard input is wanted later; leave a seam, build on-screen instruments only for now.
 - Mobile
 - Accounts, sharing, monetization
@@ -136,13 +136,73 @@ The user can name M3, P4, P5 and the 7th intervals (m7, M7) by ear without looki
 - Interval label: 6 semitones is A4 in the PRD, UX spines and architecture (AD-3).
 - Chord ear practice (FR-22): the Listen pattern with a chord-quality pool and answer buttons, Reveal lighting the chord on the active instrument (user-confirmed).
 
+- Phase 2 (2026-10-27): the chord library of FR-12 is the chord builder (FR-28). Piano inversions of FR-21 become inversions on both instruments in Explore (FR-27), with no piano voicing generator. Tier C chords, scales, and Listen practice for new qualities and inversions are a Phase 3 maybe list.
+- Phase 2 and the Vision: the Vision lists hearing progressions as part of Recognition. In Phase 2 the progressions page has no ear training, so progression ear practice stays later.
+
 ## Open Questions
 
-None open; assumptions are tagged inline.
+- Circle of fifths and progressions page (FR-33): what it contains. Owner: user with UX. Revisit: before the epic is written.
+- Navigation for five sections (FR-32): owner UX. Blocks epics 10 and 11.
+- Sample source and bundle size (FR-23): owner architecture.
+- Voicing omission rule for chords above four tones (FR-25): owner architecture.
 
-## Phase 2 direction
+Other assumptions are tagged inline.
 
-- Chord library: pick a chord by root and quality.
-- Piano inversions (FR-21 withdrawn); voicings are guitar-only in Phase 1.
-- Sampled guitar and piano sound; the sample source is decided then.
-- Further capability areas as listed above (scales and modes, circle of fifths, progression analysis).
+## Phase 2 — Richer chords, real sound, a place to learn progressions
+
+Scope agreed with the user on 2026-10-27. Phase 2 deepens chords in Explore, adds a chord flash drill, replaces the synth as the default sound, and adds a visual reference for keys and progressions. Listen practice does not change in Phase 2.
+
+### Epic order (proposed)
+
+| Epic | Area | Open with |
+| ---- | ---- | --------- |
+| 6 | Sampled sound | Architecture (bundling, licensing) |
+| 7 | Chord vocabulary, tiers A and B | Architecture (voicing rules) |
+| 8 | Inversions | PM |
+| 9 | Chord builder | UX (controls) |
+| 10 | Chord flash drill | UX (navigation) |
+| 11 | Circle of fifths and progressions | UX (discovery first) |
+| — | Navigation for five sections | UX; blocks epics 10 and 11 |
+
+### Functional Requirements
+
+**Sound**
+- FR-23: Sampled instruments, with different samples for piano and for guitar, chosen in the Sound setting of the setup panel. Samples are bundled with the app: no network calls (NFR2). The synthesized sound stays as a choice. [ASSUMPTION: synthesized sound is kept, not removed.] The sample source is decided in architecture and must be freely redistributable.
+
+**Chord vocabulary (Explore)**
+- FR-24: Chord qualities added, tiers A and B: sus2, sus4, 6, m6, add9, 9, maj9, m9. They are named, spelled and shown with roles in Explore like the nine existing qualities. Chord names still come only from the namer.
+- FR-25: Guitar voicings exist for every new quality. Voicing rules (FR-17) need an omission rule for chords with more than four distinct tones on six strings (for example a 9th chord). The rule is decided in architecture. [ASSUMPTION: the existing rules for span, fingers and register stay.]
+- FR-26: The new qualities are Explore-only in Phase 2: they do not enter Listen practice.
+
+**Inversions (Explore)**
+- FR-27: In Explore, the user can put the chord in an inversion (root position, 1st, 2nd, and 3rd on chords with four or more tones) on either instrument. The chord is named as a slash chord. There is no piano voicing generator: an inversion is the same chord tones with a different bass note. There is no inversion ear practice in Phase 2.
+
+**Chord builder (Explore)**
+- FR-28: In Explore, the user picks a root note and a quality and the app lights that chord in the Explore workspace. It then behaves like any chord: it is named, playable as a block or an arpeggio, and carries to the guitar as a voicing with the stepper. The picker controls (for example two dropdowns or a matrix) are decided in UX. This is the chord library that FR-12 deferred.
+
+**Chord flash drill (its own section)**
+- FR-29: The app shows a chord name and the user builds it on the active instrument.
+- FR-30: A Try button checks the user's chord and says right or wrong. There is no automatic check as notes are lit.
+- FR-31: Reveal shows the answer at any time with no penalty. No score, no streak, no praise.
+
+**Navigation**
+- FR-32: A navigation that holds Listen, Explore, the flash drill and the circle reference, replacing the two-tab mode strip. Decided in UX. The flash drill and circle epics wait for it.
+
+**Circle of fifths and progressions (needs discovery)**
+- FR-33: A separate page: an interactive visual reference that helps the user see and understand chord progressions, so he learns which options exist and what to look for. No ear training. What it contains is not decided. Candidate uses, to be explored with UX through sketches and not yet requirements: the diatonic chords of a key with Roman numerals, closely related keys, common progressions drawn as paths, relative major and minor, key signatures. [NEEDS DISCOVERY]
+- Architecture note: this page introduces keys and Roman-numeral analysis, a concept the app does not have today. Architecture hears about it early.
+
+### Phase 3 (maybe, not committed)
+
+- Tier C chords: 11ths, 13ths and altered chords. Seven-note chords on six strings need a new omission rule.
+- Scales from a root.
+- Listen practice for the new chord qualities.
+- Inversion ear training.
+
+### Not in Phase 2 (decided)
+
+- Alternate guitar tunings.
+- A piano voicing generator (inversions only).
+- Ear training for progressions.
+- Anything for touch, phones or narrow viewports.
+- Scores, streaks or progress tracking.
