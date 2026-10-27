@@ -90,14 +90,40 @@ describe('generateVoicings', () => {
       expect(fingersNeeded([3, null, null, 0, null, 3])).toBe(2)
     })
 
-    it('rejects five fingers and keeps the common C shapes', () => {
-      expect(fingersNeeded([8, 7, 5, 5, 8, 8])).toBe(5)
+    it('rejects shapes needing more than four fingers and keeps the common C shapes', () => {
+      expect(fingersNeeded([8, 7, 5, 5, 8, 8])).toBe(6)
       const c = shapes('major')
+      expect(c).not.toContain('8 7 5 5 5 8')
       expect(c).toContain('8 10 10 9 8 8')
       expect(c).toContain('x 3 5 5 5 3')
       expect(c).toContain('x 3 2 0 1 0')
       expect(c).not.toContain('8 7 5 5 8 8')
       expect(shapes('dom7')).not.toContain('3 2 3 0 3 3')
+    })
+
+    it('counts each note of a barre that misses both outer sounding strings as a finger', () => {
+      expect(fingersNeeded([8, 7, 5, 5, 5, 8])).toBe(6)
+      expect(fingersNeeded([null, 7, 5, 5, 5, 8])).toBe(5)
+      expect(fingersNeeded([null, 7, 5, 5, 8, null])).toBe(4)
+    })
+
+    it('still counts a barre as one finger when it reaches only the lowest or only the highest sounding string', () => {
+      expect(fingersNeeded([null, 5, 5, 7, 8, null])).toBe(3)
+      expect(fingersNeeded([null, 7, 8, 5, 5, null])).toBe(3)
+    })
+
+    it('lets an open string inside a middle barre keep every note a finger', () => {
+      expect(fingersNeeded([null, 7, 5, 0, 5, 8])).toBe(4)
+    })
+
+    it('counts a fragment whose barre includes the lowest sounding string as one finger', () => {
+      expect(fingersNeeded([null, null, null, 5, 5, 0])).toBe(1)
+    })
+
+    it('keeps at least one voicing for every quality on every root', () => {
+      for (const q of CHORD_QUALITIES)
+        for (let root = 0; root < 12; root++)
+          expect(generateVoicings({ root: root as PitchClass, quality: q }).length).toBeGreaterThan(0)
     })
 
     it('needs at most the maximum fingers in every voicing of the nine qualities', () => {
@@ -284,6 +310,47 @@ describe('rankVoicings with common shapes', () => {
     expect(rankVoicings([other, open], near, 6, [open.frets])[0]).toBe(open)
   })
 
+  describe('Story 4.10 golden rows', () => {
+    const E = 4 as PitchClass
+    it('lists C major for C4 E4 G4 without the middle barre', () => {
+      const ranked = rank('major', mean([60, 64, 67]))
+      expect(ranked).toHaveLength(28)
+      expect(ranked.slice(0, 8)).toEqual(['8 10 10 9 8 8', 'x 3 5 5 5 3', 'x x x 5 5 3', 'x 3 5 5 5 0', 'x 3 5 0 5 3', '8 10 10 9 8 x', 'x x 10 9 8 8', 'x x 10 12 8 12'])
+      expect(ranked).not.toContain('8 7 5 5 5 8')
+    })
+
+    it('lists the top three E major voicings for E4 G#4 B4', () => {
+      expect(rank('major', mean([64, 68, 71]), E).slice(0, 3)).toEqual(['x 7 9 9 9 7', 'x x x 9 9 7', '12 11 9 9 9 x'])
+    })
+
+    it('gives dim7 on pitch 77 thirty-two voicings, led by two fixed shapes', () => {
+      const root = pitchClass(pitch(77))
+      const ranked = rank('dim7', mean([77, 80, 83, 86]), root)
+      expect(ranked).toHaveLength(32)
+      expect(ranked.slice(0, 2)).toEqual(['x x x 10 9 10', 'x 8 9 7 9 7'])
+    })
+
+    it('pins the lowest voicing count over all qualities and roots at 10, on minor at Eb', () => {
+      let min = Infinity
+      let at = ''
+      for (const q of CHORD_QUALITIES)
+        for (let r = 0; r < 12; r++) {
+          const n = generateVoicings({ root: r as PitchClass, quality: q }).length
+          if (n < min) [min, at] = [n, `${q.name} ${r}`]
+        }
+      expect(min).toBe(10)
+      expect(at).toBe('minor 3')
+    })
+
+    it('has the per-quality minimum voicing counts of the spec', () => {
+      const expected: Record<string, number> = { major: 12, minor: 10, diminished: 11, augmented: 12, maj7: 18, dom7: 16, min7: 15, m7b5: 15, dim7: 15 }
+      for (const q of CHORD_QUALITIES) {
+        const counts = Array.from({ length: 12 }, (_, r) => generateVoicings({ root: r as PitchClass, quality: q }).length)
+        expect([q.name, Math.min(...counts)]).toEqual([q.name, expected[q.name] ?? -1])
+      }
+    })
+  })
+
   it('keeps the unshaped order for a quality with no templates', () => {
     for (const name of ['diminished', 'augmented', 'm7b5', 'dim7']) {
       const q = quality(name)
@@ -295,7 +362,8 @@ describe('rankVoicings with common shapes', () => {
   it('ranks the A-shape barre first for C7 in the low register, where unshaped ranking picks another', () => {
     const source = mean([48, 52, 55, 58])
     expect(rank('dom7', source)[0]).toBe('x 3 5 3 5 3')
-    expect(rank('dom7', source, C, false)[0]).toBe('8 7 5 5 5 6')
+    // Moved from '8 7 5 5 5 6' because Story 4.10 rejects that middle-barre shape.
+    expect(rank('dom7', source, C, false)[0]).toBe('x 3 5 3 5 0')
   })
 })
 

@@ -34,7 +34,7 @@ FR13: User plays the chord as a block or as an arpeggio.
 FR14: Chord naming in Explore: the user toggles any notes and the app names the chord.
 FR15: Swapping to the fretboard keeps the chord and shows it as a playable voicing in the register of the source chord (FR16, FR18), with the root highlighted and other notes marked by role (3rd, 5th, 7th). Swapping back keeps the chord.
 FR16: User can find a playable guitar voicing for the chord and change it. A voicing is a specific set of fretted notes, at most one per string, with unused strings muted.
-FR17: The app generates every playable voicing (reachable fret span, essential chord tones present) and the user steps through them. Common shapes (open, barre) rank first. Rules: max fret span 4 frets; open strings do not count toward the span; root and 3rd always present; 7th mandatory on seventh chords; the 5th required on triads and droppable only on seventh chords; at most four fingers (a barre at the lowest fretted fret counts as one finger unless an open string lies inside it); an open string only when every fretted note is at or below fret 5; no fret above 12; no muted string between sounding strings; register distance is the distance between mean pitches (AD-8), grouped in buckets of 6 semitones, then common-shape match, then more sounding strings, then smaller fret span, then fewer distinct fretted frets, then exact distance. (As built; reconciled 2026-10-27.)
+FR17: The app generates every playable voicing (reachable fret span, essential chord tones present) and the user steps through them. Common shapes (open, barre) rank first. Rules: max fret span 4 frets; open strings do not count toward the span; root and 3rd always present; 7th mandatory on seventh chords; the 5th required on triads and droppable only on seventh chords; at most four fingers (a barre at the lowest fretted fret counts as one finger unless an open string lies inside it or it includes neither the lowest nor the highest sounding string); an open string only when every fretted note is at or below fret 5; no fret above 12; no muted string between sounding strings; register distance is the distance between mean pitches (AD-8), grouped in buckets of 6 semitones, then common-shape match, then more sounding strings, then smaller fret span, then fewer distinct fretted frets, then exact distance. (As built; reconciled 2026-10-27.)
 FR18: Voicings match the register of the source chord. A chord built high on the piano maps to the nearest-register guitar voicing, not an open chord.
 FR19: User can hand-edit a voicing by moving notes on the fretboard. The app keeps naming the resulting chord.
 FR20: User can play the voicing (strummed and as an arpeggio) to hear it.
@@ -1282,6 +1282,22 @@ So that the app never completes my chord into a barre shape I did not ask for.
 **Given** some lit notes were clicked on the guitar and others came from the piano
 **When** I look at the fretboard
 **Then** every note appears where it was placed or placed by the one-per-string rule, and no voicing is added.
+
+### Story 4.10: Reject barres that miss the outer strings
+
+As Apor,
+I want guitar voicings that a hand can actually reach,
+So that the shapes I step through and see revealed are playable.
+
+**Covers:** FR17; added after Apor reviewed Epic 5 (2026-10-27); narrows Story 4.3 (voicing 4 of C major was `8 7 5 5 5 8`).
+
+**Acceptance Criteria:**
+
+**Given** a voicing whose notes at the lowest fretted fret form a barre
+**When** the barre includes neither the lowest nor the highest sounding string
+**Then** it does not count as one finger, each of its notes counts as one, and the four-finger limit decides
+**And** the first eight C major voicings in the register of C4 E4 G4 are `8 10 10 9 8 8`, `x 3 5 5 5 3`, `x x x 5 5 3`, `x 3 5 5 5 0`, `x 3 5 0 5 3`, `8 10 10 9 8 x`, `x x 10 9 8 8`, `x x 10 12 8 12`
+**And** every quality on every root keeps at least one voicing, and every shape template still matches.
 
 ## Epic 5: Chord ear practice
 
