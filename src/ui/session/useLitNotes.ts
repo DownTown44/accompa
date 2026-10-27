@@ -60,6 +60,17 @@ function rankedVoicings(pitches: readonly Pitch[], workspace: Pick<Workspace, 'r
   return { list, frets: list.map((v) => v.frets), lead, intervals: quality.intervals }
 }
 
+// Every component that shows or steps voicings asks for the same list, so the last ranking is kept: it runs once per change, not once per hook.
+let lastRanking: { pitches: readonly Pitch[]; reading: Workspace['reading']; root: Workspace['root']; ranked: Ranked | undefined } | undefined
+
+function rankedOnce(pitches: readonly Pitch[], workspace: Pick<Workspace, 'reading' | 'root'>): Ranked | undefined {
+  const { reading, root } = workspace
+  if (lastRanking && lastRanking.pitches === pitches && lastRanking.reading === reading && lastRanking.root === root) return lastRanking.ranked
+  const ranked = rankedVoicings(pitches, workspace)
+  lastRanking = { pitches, reading, root, ranked }
+  return ranked
+}
+
 const sameFrets = (a: readonly (number | null)[], b: readonly (number | null)[]) => a.length === b.length && a.every((f, i) => f === b[i])
 
 // The selected voicing is the list entry with the stored frets, else the best.
@@ -99,7 +110,7 @@ function useShown(): Shown | undefined {
   // Notes clicked on the guitar stay as clicked: a generated voicing shows only for a chord carried from the piano.
   // Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
   const carried = !pitches.some((p) => p in positions)
-  const ranked = useMemo(() => (onGuitar ? rankedVoicings(pitches, { reading, root }) : undefined), [onGuitar, pitches, reading, root])
+  const ranked = useMemo(() => (onGuitar ? rankedOnce(pitches, { reading, root }) : undefined), [onGuitar, pitches, reading, root])
   return useMemo(() => {
     if (!onGuitar) return undefined
     if (edited && voicing) return editedOf(ranked, voicing, { pitches, reading, root })

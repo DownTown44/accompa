@@ -76,7 +76,7 @@ describe('Voicing stepper', () => {
     expect(count()).toBe(`Voicing ${n} of ${n}`)
     expect(next()).toBeNull()
     expect(document.activeElement).toBe(previous())
-  }, 20000)
+  })
 
   it('moves focus to Next when Previous goes inert, and to the instrument when the stepper hides', () => {
     open()
