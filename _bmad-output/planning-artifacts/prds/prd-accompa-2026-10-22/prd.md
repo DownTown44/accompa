@@ -167,7 +167,7 @@ Scope agreed with the user on 2026-10-27. Phase 2 deepens chords in Explore, add
 ### Functional Requirements
 
 **Sound**
-- FR-23: Sampled instruments, with different samples for piano and for guitar, chosen in the Sound setting of the setup panel. Samples are bundled with the app: no network calls (NFR2). The synthesized sound stays as a choice. [ASSUMPTION: synthesized sound is kept, not removed.] The sample source is decided in architecture and must be freely redistributable.
+- FR-23: Sampled instruments, with different samples for piano and for guitar, chosen in the Sound setting of the setup panel. Samples are bundled with the app: no network calls (NFR2). The synthesized sound stays as a choice (user-confirmed 2026-10-27). The sample source is decided in architecture and must be freely redistributable.
 
 **Chord vocabulary (Explore)**
 - FR-24: Chord qualities added, tiers A and B: sus2, sus4, 6, m6, add9, 9, maj9, m9. They are named, spelled and shown with roles in Explore like the nine existing qualities. Chord names still come only from the namer.
