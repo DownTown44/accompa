@@ -1261,6 +1261,28 @@ So that I read `D♯m7♭5` and not `E♭m7♭5` with a `B𝄫`.
 **Then** its root takes the enharmonic twin that avoids it (`E♭m7♭5` reads `D♯m7♭5`, `F♯aug` reads `G♭aug`), and where no twin exists a tone that would need a double takes its single-accidental name (`Baug` is `B D♯ G`)
 **And** no name, note list, legend entry or interval readout shows `𝄫` or `𝄪`.
 
+### Story 4.9: Keep the notes I click on the guitar
+
+As Apor,
+I want the notes I click on the guitar to stay exactly as I clicked them,
+So that the app never completes my chord into a barre shape I did not ask for.
+
+**Covers:** FR16; added after Apor tried Epic 4 (narrows Story 4.3: a voicing is shown only for a chord carried from the piano)
+
+**Acceptance Criteria:**
+
+**Given** I click notes on the guitar that form a named chord (for example C, E and G)
+**When** the fretboard renders
+**Then** it shows exactly the notes I clicked, with no added notes and no stepper, and the readout names the chord.
+
+**Given** a chord built on the piano
+**When** I swap to Guitar
+**Then** it still shows as the best-ranked playable voicing with the stepper, and a fret click edits it (Story 4.6).
+
+**Given** some lit notes were clicked on the guitar and others came from the piano
+**When** I look at the fretboard
+**Then** every note appears where it was placed or placed by the one-per-string rule, and no voicing is added.
+
 ## Epic 5: Chord ear practice
 
 Apor does the Listen flow with chord qualities: a pool of qualities, optional guess, Reveal lighting the chord on the active instrument.
