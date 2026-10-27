@@ -3,7 +3,7 @@ import './listen.css'
 import { exploreReading } from '../../core/explore'
 import { INTERVALS } from '../../core/theory'
 import { RoleLegend } from '../shared/RoleLegend'
-import { qualityLabel } from './chordLabels'
+import { qualityLabel } from '../shared/chordLabels'
 import { useSession } from '../session/SessionContext'
 import { useSettings } from '../settings/SettingsContext'
 
@@ -19,7 +19,7 @@ export function ListenView() {
       feedback?.kind === 'chordWrong'
         ? `${qualityLabel(feedback.quality)} is not it — try another.`
         : feedback?.kind === 'chordRight'
-          ? `${qualityLabel(feedback.quality)}. Next chord is playing.`
+          ? `${qualityLabel(feedback.quality)}.`
           : ''
     return (
       <section className="listen" aria-label="Listen">
