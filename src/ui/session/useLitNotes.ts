@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
-import { exploreReading, litPositions, orderedReadings, readingChoice, readingRootedOn, type Role } from '../../core/explore'
-import { pitchClass, type PitchClass } from '../../core/pitch'
+import { exploreReading, isCarried, litPositions, orderedReadings, readingChoice, readingRootedOn, type Role } from '../../core/explore'
 import { STANDARD_GUITAR_TUNING, type FretPosition } from '../../core/instruments'
-import type { Pitch } from '../../core/pitch'
+import { pitchClass, type Pitch, type PitchClass } from '../../core/pitch'
 import { CHORD_QUALITIES } from '../../core/theory'
 import { shapeFrets } from '../../core/shapes'
 import { generateVoicings, mean, rankVoicings, VOICING_RULES, voicingPitches, type GuitarVoicing } from '../../core/voicings'
@@ -108,8 +107,7 @@ function useShown(): Shown | undefined {
   const { pitches, reading, root, voicing, edited, positions } = session.workspace
   const onGuitar = session.mode === 'explore' && session.instrument === 'guitar'
   // Notes clicked on the guitar stay as clicked: a generated voicing shows only for a chord carried from the piano.
-  // Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
-  const carried = !pitches.some((p) => p in positions)
+  const carried = isCarried({ pitches, positions })
   const ranked = useMemo(() => (onGuitar ? rankedOnce(pitches, { reading, root }) : undefined), [onGuitar, pitches, reading, root])
   return useMemo(() => {
     if (!onGuitar) return undefined
@@ -133,8 +131,7 @@ export function useVoicingList(): VoicingList {
   return useMemo(() => ({ count: shown?.count ?? 0, index: shown?.index ?? 0, edited: shown?.edited ?? false, frets: shown?.frets ?? NO_FRETS }), [shown])
 }
 
-// The stepper shows, and the arrows step, with two or more voicings, or one or more while the voicing is edited.
-// The stepper row shows while edited (arrows inert without a list) or with two or more voicings.
+// The stepper row shows with two or more voicings, or while the voicing is edited (the arrows are inert without a list).
 export const showsStepper = (list: VoicingList): boolean => list.edited || list.count >= 2
 
 export const canStep = (list: VoicingList): boolean => (list.edited ? list.count >= 1 : list.count >= 2)

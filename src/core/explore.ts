@@ -1,5 +1,5 @@
 import { nameChord, type ChordReading } from './chords'
-import type { ReadingChoice } from './model'
+import type { ReadingChoice, Workspace } from './model'
 import { positionsForPitch, STANDARD_GUITAR_TUNING, type FretPosition } from './instruments'
 import { pitchClass, type Pitch } from './pitch'
 import { chordSpoken, chordSymbol, noteName, spellChord, spellNotes } from './spelling'
@@ -202,6 +202,10 @@ export function placeLit(lit: readonly Pitch[], remembered: RememberedPositions)
     leftOut: playable.filter((p) => !positions.has(p)),
   }
 }
+
+// True when no lit note has a remembered guitar position, so the chord was carried from the piano rather than clicked on the guitar.
+// Workspace.positions doubles as the marker for notes clicked on the guitar (a note carried from the piano has none), so a change to how positions are written changes which chords get a voicing.
+export const isCarried = (workspace: Pick<Workspace, 'pitches' | 'positions'>): boolean => !workspace.pitches.some((p) => p in workspace.positions)
 
 // Where each lit pitch sits on the guitar, aligned with the pitches; null when beyond or left out.
 export const litPositions = (lit: readonly Pitch[], remembered: RememberedPositions): (FretPosition | null)[] =>
