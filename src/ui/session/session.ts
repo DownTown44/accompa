@@ -18,10 +18,10 @@ export type { Instrument }
 export type Mode = 'listen' | 'explore'
 
 // The last guess result; the wording is derived from the interval when shown.
-export interface Feedback {
-  readonly kind: 'wrong'
-  readonly interval: Interval
-}
+export type Feedback =
+  | { readonly kind: 'wrong'; readonly interval: Interval }
+  | { readonly kind: 'chordWrong'; readonly quality: string }
+  | { readonly kind: 'chordRight'; readonly quality: string }
 
 export interface Session {
   readonly mode: Mode
@@ -54,6 +54,8 @@ export type SessionAction =
   | { type: 'setFixedRoot'; pitch: Pitch }
   | { type: 'reveal' }
   | { type: 'guess'; interval: Interval; pool: readonly Interval[] }
+  | { type: 'guessChord'; quality: string; pool: readonly string[] }
+  | { type: 'chordRight'; question: ChordQuestion }
   | { type: 'toggleSetup' }
   | { type: 'closeSetup' }
   | { type: 'openHelp' }
@@ -210,6 +212,28 @@ export function sessionReducer(state: Session, action: SessionAction): Session {
         ...state,
         practice: { ...state.practice, wrongMarks: [...wrongMarks, interval] },
         feedback: { kind: 'wrong', interval },
+      }
+    }
+    // A wrong chord guess marks the quality; the chord stays.
+    case 'guessChord': {
+      const { chordQuestion, revealed, chordWrongMarks = [] } = state.practice
+      const { quality, pool } = action
+      if (!chordQuestion || revealed || chordQuestion.quality === quality) return state
+      if (!canGuess(quality, pool, chordQuestion.quality, chordWrongMarks)) return state
+      return {
+        ...state,
+        practice: { ...state.practice, chordWrongMarks: [...chordWrongMarks, quality] },
+        feedback: { kind: 'chordWrong', quality },
+      }
+    }
+    // A right chord guess stores the next chord, clears the marks and names the guessed quality.
+    case 'chordRight': {
+      const { chordQuestion, revealed } = state.practice
+      if (!chordQuestion || revealed) return state
+      return {
+        ...state,
+        practice: { ...state.practice, chordQuestion: action.question, chordWrongMarks: [] },
+        feedback: { kind: 'chordRight', quality: chordQuestion.quality },
       }
     }
     case 'toggleSetup':

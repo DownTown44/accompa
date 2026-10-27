@@ -6,6 +6,7 @@ import { useSettings } from '../settings/SettingsContext'
 import { useSession } from '../session/SessionContext'
 import { useSessionActions } from '../session/useSessionActions'
 import { focusInstrument } from '../shared/focus'
+import { ChordButtons } from './ChordButtons'
 import { INTERVAL_KEYS } from './intervalKeys'
 
 export function IntervalButtons() {
@@ -13,17 +14,7 @@ export function IntervalButtons() {
   const { settings } = useSettings()
   const { guess } = useSessionActions()
   if (session.mode !== 'listen') return null
-  // Chord practice keeps the row's height, empty until the chord guess arrives.
-  if (settings.practice === 'chords') {
-    return (
-      <div className="interval-row" aria-hidden="true">
-        <span className="interval-button" style={{ visibility: 'hidden' }}>
-          <span className="interval-label">&nbsp;</span>
-          <span className="key-hint">&nbsp;</span>
-        </span>
-      </div>
-    )
-  }
+  if (settings.practice === 'chords') return <ChordButtons />
   const { question, revealed, wrongMarks } = session.practice
   const { pool } = settings
   const active = question !== null && !revealed

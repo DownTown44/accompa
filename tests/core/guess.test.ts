@@ -30,3 +30,12 @@ describe('inPlay', () => {
     expect(inPlay(interval(5), [interval(3)], interval(7))).toBe(false)
   })
 })
+
+describe('generic guesses', () => {
+  it('works on quality names', () => {
+    expect(inPlay('dim7', ['major'], 'dim7')).toBe(true)
+    expect(canGuess('minor', ['major', 'minor'], 'major', [])).toBe(true)
+    expect(canGuess('minor', ['major', 'minor'], 'major', ['minor'])).toBe(false)
+    expect(canGuess('dim7', ['major', 'minor'], 'major', [])).toBe(false)
+  })
+})

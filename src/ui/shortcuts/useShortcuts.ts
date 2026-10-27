@@ -1,7 +1,8 @@
 import { useLayoutEffect, useEffect, useRef } from 'react'
-import { INTERVALS } from '../../core/theory'
+import { CHORD_QUALITIES, INTERVALS } from '../../core/theory'
 import { INTERVAL_KEYS } from '../listen/intervalKeys'
 import { useSession } from '../session/SessionContext'
+import { useSettings } from '../settings/SettingsContext'
 import { canStep, useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
 
@@ -34,22 +35,25 @@ function mayStep(target: EventTarget | null): boolean {
 export function useShortcuts() {
   const actions = useSessionActions()
   const { session } = useSession()
+  const { settings } = useSettings()
   const list = useVoicingList()
-  const latest = useRef({ actions, list, steps: false })
+  const latest = useRef({ actions, list, steps: false, chords: false })
 
   useLayoutEffect(() => {
-    latest.current = { actions, list, steps: session.mode === 'explore' && session.instrument === 'guitar' && canStep(list) }
+    latest.current = { actions, list, steps: session.mode === 'explore' && session.instrument === 'guitar' && canStep(list), chords: settings.practice === 'chords' }
   })
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.repeat || hasModifier(event) || isTextField(event.target)) return
-      const { actions, list, steps } = latest.current
-      const { play, revealOrNext, guess, toggleMode, toggleInstrument, shiftPiano, toggleSetup, toggleHelp, dismiss, armRoot, stepVoicing } = actions
+      const { actions, list, steps, chords } = latest.current
+      const { play, revealOrNext, guess, guessChord, toggleMode, toggleInstrument, shiftPiano, toggleSetup, toggleHelp, dismiss, armRoot, stepVoicing } = actions
       const key = event.key.toLowerCase()
       const keyIndex = INTERVAL_KEYS.indexOf(event.key)
       if (keyIndex >= 0) {
-        if (!isControl(event.target)) guess(INTERVALS[keyIndex].semitones)
+        if (isControl(event.target)) return
+        if (!chords) guess(INTERVALS[keyIndex].semitones)
+        else if (keyIndex < CHORD_QUALITIES.length) guessChord(CHORD_QUALITIES[keyIndex].name)
       } else if (key === 'm') toggleMode()
       else if (key === 'p') toggleSetup()
       else if (key === 'r') {
