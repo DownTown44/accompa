@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 15:00
+last_updated: 10-27-2026 17:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -85,8 +85,8 @@ development_status:
 
   epic-5: in-progress
   5-1-choose-chord-practice-and-hear-a-chord: done
-  5-2-guess-a-chord-quality: review
-  5-3-reveal-the-chord-on-the-instrument: backlog
+  5-2-guess-a-chord-quality: done
+  5-3-reveal-the-chord-on-the-instrument: review
   epic-5-retrospective: optional
 action_items:
   - id: "epic-1-retro-item-1-extract-one-guess-validity-rule-used-by"

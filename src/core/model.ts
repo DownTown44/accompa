@@ -55,6 +55,9 @@ export interface Practice {
   // Qualities guessed wrongly for the current chord; cleared when a new chord is drawn.
   // Absent until the first wrong guess, so interval-only practice state is unchanged.
   readonly chordWrongMarks?: readonly string[]
+  // The chord question has been revealed; separate from `revealed`, which belongs to the interval question.
+  // Absent until the first chord reveal, so interval-only practice state is unchanged.
+  readonly chordRevealed?: boolean
   readonly revealed: boolean
   readonly wrongMarks: readonly Interval[]
   // The pitch chosen as the root in Fixed mode; its pitch class roots every later question.

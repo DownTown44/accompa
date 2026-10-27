@@ -37,7 +37,7 @@ export function Shell() {
   const offscreen =
     session.instrument === 'piano'
       ? offscreenNote(offscreenLit(lit.pitches, session.pianoStart))
-      : session.mode === 'explore'
+      : lit.positions !== undefined
         ? lit.noVoicing
           ? NO_VOICING_NOTE
           : beyondFretboardNote(beyondFretboard(lit.pitches), lit.muted ? 0 : leftOutCount(lit.pitches, session.workspace.positions))

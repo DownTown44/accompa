@@ -64,14 +64,17 @@ describe('chord Listen', () => {
     expect(engine.plays).toHaveLength(3)
   })
 
-  it('leaves Reveal and Next inert', () => {
+  it('reveals silently on Reveal and plays a new chord on Next', () => {
     openChords()
     const reveal = screen.getByRole('button', { name: /Reveal/ })
-    expect(reveal.getAttribute('aria-disabled')).toBe('true')
+    expect(reveal.getAttribute('aria-disabled')).toBeNull()
     fireEvent.click(reveal)
+    expect(screen.queryByText('Which chord?')).toBeNull()
+    expect(engine.plays).toHaveLength(1)
+    expect(screen.getByRole('button', { name: /Next/ })).toBeTruthy()
     press('Enter')
     expect(screen.getByText('Which chord?')).toBeTruthy()
-    expect(engine.plays).toHaveLength(1)
+    expect(engine.plays).toHaveLength(2)
   })
 
   it('keeps the current chord when the pool changes and refuses the last chip', () => {
@@ -149,13 +152,12 @@ describe('matrix rows', () => {
     expect(chips().map((c) => c.textContent)).toEqual(['major', 'minor', 'diminished', 'augmented', 'maj7', 'dom7', 'min7', 'm7b5', 'dim7'])
   })
 
-  it('keeps Reveal aria-disabled and never turns it into Next', () => {
+  it('turns Reveal into Next on Enter and back on the next Enter', () => {
     openChords()
-    const reveal = screen.getByRole('button', { name: /Reveal/ })
-    expect(reveal.getAttribute('aria-disabled')).toBe('true')
     press('Enter')
-    expect(screen.queryByRole('button', { name: /Next/ })).toBeNull()
-    expect(screen.getByRole('button', { name: /Reveal/ }).getAttribute('aria-disabled')).toBe('true')
+    expect(screen.getByRole('button', { name: /Next/ })).toBeTruthy()
+    press('Enter')
+    expect(screen.getByRole('button', { name: /Reveal/ })).toBeTruthy()
   })
 })
 
@@ -163,7 +165,7 @@ describe('chord guards leave interval practice alone', () => {
   const pitchOf = (el: Element) => Number(el.getAttribute('data-pitch'))
   const keys = () => [...document.querySelectorAll('[data-pitch]')]
 
-  it('ignores Enter and digits in Chords after a revealed interval question', () => {
+  it('does not carry a revealed interval into Chords; Enter reveals the chord, not the interval', () => {
     press(' ')
     press('Enter')
     expect(lit()).toEqual(['40', '41'])
@@ -172,10 +174,11 @@ describe('chord guards leave interval practice alone', () => {
     fireEvent.click(radio('Chords'))
     const plays = engine.plays.length
     press('3')
-    press('Enter')
-    press('Enter')
     expect(engine.plays).toHaveLength(plays)
     expect(lit()).toEqual([])
+    press('Enter')
+    expect(lit()).not.toEqual(['40', '41'])
+    expect(lit().length).toBeGreaterThanOrEqual(3)
     fireEvent.click(radio('Intervals'))
     expect(engine.plays).toHaveLength(plays)
     expect(lit()).toEqual(['40', '41'])

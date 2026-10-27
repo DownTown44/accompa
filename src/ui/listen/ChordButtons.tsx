@@ -13,9 +13,9 @@ export function ChordButtons() {
   const { session } = useSession()
   const { settings } = useSettings()
   const { guessChord } = useSessionActions()
-  const { chordQuestion, revealed, chordWrongMarks = [] } = session.practice
+  const { chordQuestion, chordRevealed, chordWrongMarks = [] } = session.practice
   const { chordPool } = settings
-  const active = chordQuestion !== undefined && !revealed
+  const active = chordQuestion !== undefined && !chordRevealed
   return (
     <div className="interval-row" role="group" aria-label="Guess the chord quality">
       {CHORD_QUALITIES.map((quality, index) => {

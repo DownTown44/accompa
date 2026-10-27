@@ -1,6 +1,8 @@
 import '../shared/shared.css'
 import './listen.css'
+import { exploreReading } from '../../core/explore'
 import { INTERVALS } from '../../core/theory'
+import { RoleLegend } from '../shared/RoleLegend'
 import { qualityLabel } from './chordLabels'
 import { useSession } from '../session/SessionContext'
 import { useSettings } from '../settings/SettingsContext'
@@ -11,6 +13,8 @@ export function ListenView() {
   if (session.mode !== 'listen') return null
   if (settings.practice === 'chords') {
     const { feedback } = session
+    const { chordQuestion, chordRevealed } = session.practice
+    const reading = chordRevealed && chordQuestion ? exploreReading(chordQuestion.pitches, undefined, chordQuestion.root) : undefined
     const hint =
       feedback?.kind === 'chordWrong'
         ? `${qualityLabel(feedback.quality)} is not it — try another.`
@@ -19,11 +23,23 @@ export function ListenView() {
           : ''
     return (
       <section className="listen" aria-label="Listen">
-        <p className="readout-question">Which chord?</p>
+        <p className="readout-question">
+          {reading?.readout ? (
+            <>
+              <span aria-hidden="true">{reading.readout.label}</span>
+              <span className="visually-hidden">{reading.readout.name ?? reading.readout.label}</span>
+            </>
+          ) : (
+            'Which chord?'
+          )}
+        </p>
         <p className="guess-hint" aria-live="polite">
           {hint}
         </p>
-        <p className="visually-hidden" aria-live="polite"></p>
+        {reading ? <RoleLegend legend={reading.legend} /> : null}
+        <p className="visually-hidden" aria-live="polite">
+          {reading?.readout ? (reading.readout.name ?? reading.readout.label) : ''}
+        </p>
       </section>
     )
   }

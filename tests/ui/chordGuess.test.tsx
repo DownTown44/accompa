@@ -123,7 +123,7 @@ describe('chord guess, revealed and restricted pool', () => {
   it('disables all nine buttons and guesses nothing when revealed', () => {
     cleanup()
     const question = { root: 40 as never, quality: 'minor', pitches: [40, 43, 47] as never }
-    const seeded = { ...listenSession, practice: { ...listenSession.practice, chordQuestion: question, revealed: true } }
+    const seeded = { ...listenSession, practice: { ...listenSession.practice, chordQuestion: question, chordRevealed: true } }
     const revealedEngine = createFakeEngine()
     render(<App session={seeded} engine={revealedEngine} />)
     fireEvent.click(opener())
@@ -200,7 +200,7 @@ describe('chord guess reducer', () => {
     expect(sessionReducer(once, { type: 'guessChord', quality: 'major', pool: ['major'] })).toBe(once)
     expect(sessionReducer(asked, { type: 'guessChord', quality: 'minor', pool: ['minor'] })).toBe(asked)
     expect(sessionReducer(asked, { type: 'guessChord', quality: 'dim7', pool: ['major'] })).toBe(asked)
-    const revealed = { ...asked, practice: { ...asked.practice, revealed: true } }
+    const revealed = { ...asked, practice: { ...asked.practice, chordRevealed: true } }
     expect(sessionReducer(revealed, { type: 'guessChord', quality: 'major', pool: ['major'] })).toBe(revealed)
   })
 

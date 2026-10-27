@@ -93,19 +93,25 @@ export function useSessionActions() {
   }
 
   function reveal() {
-    if (settings.practice === 'chords') return
+    if (settings.practice === 'chords') {
+      if (session.mode === 'listen' && session.practice.chordQuestion && !session.practice.chordRevealed) dispatch({ type: 'revealChord' })
+      return
+    }
     if (session.mode === 'listen' && session.practice.question && !session.practice.revealed) dispatch({ type: 'reveal' })
   }
 
   function next() {
-    if (settings.practice === 'chords') return
+    if (settings.practice === 'chords') {
+      if (session.mode === 'listen') engine.play(startChordQuestion().pitches, 'block')
+      return
+    }
     if (session.mode === 'listen') playQuestion(startQuestion())
   }
 
   // One button: Reveal while a question waits, Next once it is revealed.
   function revealOrNext() {
     if (session.mode === 'explore') return playLit('block')
-    if (session.practice.revealed) next()
+    if (settings.practice === 'chords' ? session.practice.chordRevealed : session.practice.revealed) next()
     else reveal()
   }
 
@@ -123,9 +129,9 @@ export function useSessionActions() {
 
   // A right guess names the quality and plays the next chord; a wrong one marks it and the chord stays.
   function guessChord(quality: string) {
-    const { chordQuestion, revealed, chordWrongMarks = [] } = session.practice
+    const { chordQuestion, chordRevealed, chordWrongMarks = [] } = session.practice
     const { chordPool } = settings
-    if (session.mode !== 'listen' || settings.practice !== 'chords' || !chordQuestion || revealed) return
+    if (session.mode !== 'listen' || settings.practice !== 'chords' || !chordQuestion || chordRevealed) return
     if (!canGuess(quality, chordPool, chordQuestion.quality, chordWrongMarks)) return
     if (quality === chordQuestion.quality) {
       const question = generateChordQuestion({ pool: chordPool, range: COMMON_RANGE, random: Math.random })
@@ -161,7 +167,7 @@ export function useSessionActions() {
 
   function selectMode(mode: Mode) {
     if (mode === session.mode) return
-    dispatch({ type: 'setMode', mode })
+    dispatch({ type: 'setMode', mode, chords: settings.practice === 'chords' })
     if (mode === 'explore') engine.stop()
     if (mode !== 'listen') return
     if (settings.practice === 'chords') engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, 'block')
@@ -188,8 +194,8 @@ export function useSessionActions() {
     },
     chooseReading: (reading: ReadingChoice) => dispatch({ type: 'chooseReading', reading }),
     toggleMode: () => selectMode(session.mode === 'listen' ? 'explore' : 'listen'),
-    selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument }),
-    toggleInstrument: () => dispatch({ type: 'toggleInstrument' }),
+    selectInstrument: (instrument: Instrument) => dispatch({ type: 'setInstrument', instrument, chords: settings.practice === 'chords' }),
+    toggleInstrument: () => dispatch({ type: 'toggleInstrument', chords: settings.practice === 'chords' }),
     toggleSetup: () => dispatch({ type: 'toggleSetup' }),
     closeSetup: () => dispatch({ type: 'closeSetup' }),
     openHelp: () => dispatch({ type: 'openHelp' }),

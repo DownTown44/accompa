@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import '../shared/shared.css'
 import './explore.css'
 import { exploreReading } from '../../core/explore'
-import { RoleMarker } from '../shared/RoleMarker'
+import { RoleLegend } from '../shared/RoleLegend'
 import { useSession } from '../session/SessionContext'
 import { useVoicingList } from '../session/useLitNotes'
 import { useSessionActions } from '../session/useSessionActions'
@@ -67,16 +67,7 @@ export function ExploreView() {
         ))}
       </div>
       <VoicingStepper />
-      <ul className="role-legend" aria-label="Note roles">
-        {legend.map((entry) => (
-          <li key={entry.role} data-role={entry.role}>
-            <svg viewBox="-17 -17 34 34" aria-hidden="true">
-              <RoleMarker role={entry.role} cx={0} cy={0} />
-            </svg>
-            <span>{entry.degree ? `${entry.label} ${entry.note} (${entry.degree})` : `${entry.label} ${entry.note}`}</span>
-          </li>
-        ))}
-      </ul>
+      <RoleLegend legend={legend} />
       <p className="visually-hidden" aria-live="polite" data-testid="explore-announce">
         {announced}
       </p>
