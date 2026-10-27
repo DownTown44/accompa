@@ -1246,6 +1246,21 @@ So that I can check it against my own guitar.
 **When** the voicing plays
 **Then** the engine takes the ordered pitch list and owns all timing, so callers pass no timestamps.
 
+### Story 4.8: Spell chords without double accidentals
+
+As Apor,
+I want chord and interval names that never need a double flat or double sharp,
+So that I read `D♯m7♭5` and not `E♭m7♭5` with a `B𝄫`.
+
+**Covers:** FR13; added after Apor tried Epic 4 (replaces the Epic 3 decision that double accidentals use the glyphs `𝄫` and `𝄪`)
+
+**Acceptance Criteria:**
+
+**Given** a chord whose usual root spelling would put a double flat or double sharp on a chord tone
+**When** it is named and its notes are spelled
+**Then** its root takes the enharmonic twin that avoids it (`E♭m7♭5` reads `D♯m7♭5`, `F♯aug` reads `G♭aug`), and where no twin exists a tone that would need a double takes its single-accidental name (`Baug` is `B D♯ G`)
+**And** no name, note list, legend entry or interval readout shows `𝄫` or `𝄪`.
+
 ## Epic 5: Chord ear practice
 
 Apor does the Listen flow with chord qualities: a pool of qualities, optional guess, Reveal lighting the chord on the active instrument.
