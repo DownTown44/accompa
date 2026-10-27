@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 19:30
+last_updated: 10-27-2026 20:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -160,7 +160,7 @@ action_items:
     action: "Push main (or branch the docs) after housekeeping docs commits, before
       cutting the next story branch"
     owner: "Apor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-24.md"
   - id: "epic-2-retro-item-11-put-the-story-key-in-feature-and-fix-com"
     epic: 2
@@ -233,21 +233,21 @@ action_items:
       of any story that generates or ranks results and have the owner confirm them
       before build"
     owner: "Apor (planning)"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-4-retro-item-21-confirm-planning-assumption-lines-that-s"
     epic: 4
     action: "Confirm planning ASSUMPTION lines that shape visible behaviour with a
       concrete picture before the epic list is written"
     owner: "Apor with the PM"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-4-retro-item-22-tell-implementers-to-assert-exact-outcom"
     epic: 4
     action: "Tell implementers to assert exact outcomes, never loosen a test to pass
       and never leave an assertion that cannot fail (prompt and AGENTS.md pitfall)"
     owner: "dev"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-10-26.md"
   - id: "epic-5-retro-item-23-pin-the-high-register-guitar-reveal-77-8"
     epic: 5
@@ -270,11 +270,11 @@ action_items:
       empty-pool guards, stale hint clearing, SetupPanel re-indent, practice switch
       during reveal) in the project context"
     owner: "Apor with bmad-project-context"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"
   - id: "epic-5-retro-item-26-give-pr-merge-commits-a-story-key-so-evi"
     epic: 5
     action: "Give PR merge commits a story key so evidence tools attribute them"
     owner: "Apor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-5-retro-2026-10-27.md"

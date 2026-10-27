@@ -28,3 +28,12 @@ To see real states (revealed, wrong guess, guitar, light or dark):
 4. Stop the preview server afterwards. In PowerShell: `Get-NetTCPConnection -LocalPort 4173 -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`.
 
 A plain `chrome --headless --screenshot=<file> http://localhost:4173/` captures the initial state only.
+
+## Specs and review conventions
+
+- Put golden examples in the I/O matrix of any story that generates or ranks results: the first result for named inputs (for example the first eight C major voicings), confirmed by Apor before the build.
+- Confirm any planning `[ASSUMPTION]` that shapes visible behaviour with a concrete picture before the epic list is written.
+- Tests assert exact outcomes. Never loosen an assertion to make a test pass, never leave an assertion that cannot fail, and check a new guard test by removing the guard once.
+- Review findings that were rejected in earlier stories and need no new work: untyped chord quality strings (the pool and `CHORD_QUALITIES` own the names), empty-pool guards (the last chip cannot be unticked), stale hint clearing, re-indenting untouched lines in `SetupPanel.tsx`, and double key presses inside one frame. Log them as rejected with the reason; do not patch.
+- Merge commits carry the story key through the branch name (`story/<epic>-<n>-<name>`); keep that name when opening the PR.
+- `docs/codebase-map.md` is the index of the code; update it when a file group, a reducer action or a data flow changes.
