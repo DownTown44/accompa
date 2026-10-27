@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 19:00
+last_updated: 10-27-2026 19:30
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -130,7 +130,7 @@ action_items:
     action: "Keep carrying the deferred items: CI workflow and guitar out-of-range
       pitches"
     owner: "Apor"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-24.md"
   - id: "epic-1-retro-item-7-build-story-1-13-the-fixes-apor-asked-fo"
     epic: 1

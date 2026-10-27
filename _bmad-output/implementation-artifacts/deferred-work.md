@@ -1,6 +1,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-1-project-scaffold-and-quality-gates.md`
   summary: Add a CI workflow that runs `npm run check` on pull requests, so branch protection on main has a required check.
-  evidence: Review found the quality gates are only enforced when run by hand; CI was outside Story 1.1's intent.
+  evidence: Review found the quality gates are only enforced when run by hand; CI was outside Story 1.1's intent.
+  status: done 2026-10-27: `.github/workflows/ci.yml` runs `npm run check` and `npm run build` on pull requests and on pushes to main; set `check` as a required status in the branch protection.
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-guitar-fretboard-and-instrument-swap.md`
   summary: Decide what the user sees when lit workspace pitches fall outside the guitar range (below E2 or above D#6) after a swap from the piano.
