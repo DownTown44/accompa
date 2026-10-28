@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-23-2026 12:00
-last_updated: 10-27-2026 20:00
+last_updated: 10-28-2026 14:00
 project: accompa
 project_key: NOKEY
 tracking_system: file-system
@@ -44,7 +44,7 @@ development_status:
   1-6-reveal-an-interval: done
   1-7-guess-an-interval: done
   1-8-choose-which-intervals-to-practise: done
-  1-9-set-direction-and-root: done
+  1-9-set-direction: done
   1-10-choose-sound-and-theme: done
   1-11-shortcuts-and-help-hint: done
   1-12-fix-the-root: done
@@ -60,20 +60,20 @@ development_status:
   epic-2-retrospective: done
 
   epic-3: done
+  3-6-choose-the-root-by-clicking-a-note: done
+  3-7-tidy-up-before-the-fretboard: done
+  3-8-one-note-per-string-on-the-guitar: done
+  3-9-carry-piano-notes-to-the-guitar-one-per-string: done
   3-1-name-chords-in-core: done
   3-2-root-marker-role-shapes-and-legend: done
   3-3-choose-between-alternative-chord-readings: done
   3-4-play-the-chord-as-a-block-or-an-arpeggio: done
   3-5-see-the-chord-named-as-i-click-notes: done
-  3-6-choose-the-root-by-clicking-a-note: done
-  3-7-tidy-up-before-the-fretboard: done
-  3-8-one-note-per-string-on-the-guitar: done
-  3-9-carry-piano-notes-to-the-guitar-one-per-string: done
   epic-3-retrospective: done
 
   epic-4: done
-  4-1-carry-the-chord-to-the-fretboard: done # retired: delivered by 3-8 and 3-9, voicing shown by 4-3
-  4-2-limit-the-fretboard-to-a-fret-region: done # dropped, see sprint-change-proposal-2026-10-26
+  4-1-carry-the-chord-to-the-fretboard: done
+  4-2-limit-the-fretboard-to-a-fret-region: done
   4-3-generate-every-playable-guitar-voicing: done
   4-4-step-through-voicings-nearest-register-first: done
   4-5-common-shapes-rank-first: done
@@ -81,15 +81,62 @@ development_status:
   4-7-hear-the-voicing-strummed-or-arpeggiated: done
   4-8-spell-chords-without-double-accidentals: done
   4-9-keep-the-notes-i-click-on-the-guitar: done
-  4-10-reject-barres-that-miss-the-outer-strings: done # added after the Epic 5 review (Apor, 2026-10-27)
+  4-10-reject-barres-that-miss-the-outer-strings: done
   epic-4-retrospective: done
 
   epic-5: done
   5-1-choose-chord-practice-and-hear-a-chord: done
   5-2-guess-a-chord-quality: done
   5-3-reveal-the-chord-on-the-instrument: done
-  5-4-fixes-from-the-epic-5-review: done # added after the Epic 5 review (Apor, 2026-10-27)
+  5-4-fixes-from-the-epic-5-review: done
   epic-5-retrospective: done
+
+  epic-6: backlog
+  6-1-the-engine-knows-the-instrument: backlog
+  6-2-hear-a-sampled-piano: backlog
+  6-3-hear-a-sampled-guitar: backlog
+  6-4-loading-and-failure: backlog
+  epic-6-retrospective: optional
+
+  epic-7: backlog
+  7-1-the-rail-and-its-sections: backlog
+  7-2-instrument-toggle-gear-and-help-in-the-rail: backlog
+  7-3-retire-the-strip-and-m: backlog
+  7-4-fretboard-position-dots: backlog
+  epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-describe-chord-tones-explicitly: backlog
+  8-2-name-and-spell-the-eight-new-qualities: backlog
+  8-3-roles-for-the-new-notes: backlog
+  8-4-guitar-voicings-for-the-new-qualities: backlog
+  epic-8-retrospective: optional
+
+  epic-9: backlog
+  9-1-invert-a-chord-on-the-piano: backlog
+  9-2-invert-on-the-guitar: backlog
+  9-3-keep-the-inversion-across-swaps-and-clear-it-on-edits: backlog
+  epic-9-retrospective: optional
+
+  epic-10: backlog
+  10-1-place-a-picked-chord: backlog
+  10-2-the-builder-row: backlog
+  10-3-the-builder-on-the-guitar: backlog
+  epic-10-retrospective: optional
+
+  epic-11: backlog
+  11-1-the-drill-s-check-question-and-state-slot: backlog
+  11-2-the-drill-section: backlog
+  11-3-try-and-reveal: backlog
+  11-4-mark-misses: backlog
+  epic-11-retrospective: optional
+
+  epic-12: backlog
+  12-1-keys-in-core: backlog
+  12-2-the-circle-page: backlog
+  12-3-the-seven-chords: backlog
+  12-4-minor-scales: backlog
+  epic-12-retrospective: optional
 action_items:
   - id: "epic-1-retro-item-1-extract-one-guess-validity-rule-used-by"
     epic: 1
