@@ -1,8 +1,9 @@
 import type { AudioEngine, AudioStatus, PlayMode } from '../../../src/audio/engine'
 import type { Pitch } from '../../../src/core/pitch'
+import type { Instrument } from '../../../src/core/model'
 
 export interface FakeEngine extends AudioEngine {
-  plays: { pitches: readonly Pitch[]; mode: PlayMode }[]
+  plays: { pitches: readonly Pitch[]; instrument: Instrument; mode: PlayMode }[]
   unlocks: number
   stops: number
   setStatus(next: AudioStatus): void
@@ -15,8 +16,8 @@ export function createFakeEngine(initial: AudioStatus = 'idle'): FakeEngine {
     plays: [],
     unlocks: 0,
     stops: 0,
-    play(pitches, mode) {
-      engine.plays.push({ pitches, mode })
+    play(pitches, instrument, mode) {
+      engine.plays.push({ pitches, instrument, mode })
     },
     stop() {
       engine.stops++

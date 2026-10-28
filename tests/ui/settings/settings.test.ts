@@ -5,11 +5,11 @@ import { INTERVALS } from '../../../src/core/theory'
 import { settingsReducer } from '../../../src/ui/settings/settings'
 
 describe('settings reducer', () => {
-  it('starts with every interval, Ascending, Synthesized and System', () => {
+  it('starts with every interval, Ascending, Samples and System', () => {
     expect(initialSettings.pool).toEqual(INTERVALS.map((i) => i.semitones))
     expect(initialSettings.direction).toBe('ascending')
     expect(initialSettings.rootMode).toBe('random')
-    expect(initialSettings.sound).toBe('synthesized')
+    expect(initialSettings.sound).toBe('samples')
     expect(initialSettings.theme).toBe('system')
   })
 
@@ -34,7 +34,7 @@ describe('settings reducer', () => {
     const dark = settingsReducer(initialSettings, { type: 'setTheme', theme: 'dark' })
     expect(dark.theme).toBe('dark')
     expect(settingsReducer(dark, { type: 'setTheme', theme: 'dark' })).toBe(dark)
-    expect(settingsReducer(initialSettings, { type: 'setSound', sound: 'synthesized' })).toBe(initialSettings)
+    expect(settingsReducer(initialSettings, { type: 'setSound', sound: 'samples' })).toBe(initialSettings)
   })
 
   it('does not mutate and stays serializable', () => {

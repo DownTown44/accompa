@@ -174,10 +174,10 @@ describe('chord reveal in the app', () => {
     openChords()
     press('Enter')
     press(' ')
-    expect(engine.plays.at(-1)).toMatchObject({ pitches: cMajor.pitches, mode: 'block' })
+    expect(engine.plays.at(-1)).toMatchObject({ pitches: cMajor.pitches, instrument: 'piano', mode: 'block' })
     press('i')
     press(' ')
-    expect(engine.plays.at(-1)).toMatchObject({ pitches: cMajor.pitches, mode: 'block' })
+    expect(engine.plays.at(-1)).toMatchObject({ pitches: cMajor.pitches, instrument: 'guitar', mode: 'block' })
   })
 
   it('shows the high dim7 on the piano by shifting the window', () => {

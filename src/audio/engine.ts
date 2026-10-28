@@ -1,4 +1,5 @@
 import type { Pitch } from '../core/pitch'
+import type { Instrument } from '../core/model'
 
 export type PlayMode = 'block' | 'arpeggio' | 'strum'
 
@@ -7,7 +8,8 @@ export type AudioStatus = 'idle' | 'running' | 'blocked'
 
 export interface AudioEngine {
   // Plays the list as given; an arpeggio sounds the notes in list order, a strum does too but a short spread apart. The engine owns all timing.
-  play(pitches: readonly Pitch[], mode: PlayMode): void
+  // The instrument names which instrument the notes are for, so an engine may choose its timbre or sample set; the synth ignores it.
+  play(pitches: readonly Pitch[], instrument: Instrument, mode: PlayMode): void
   stop(): void
   // Creates or resumes the audio context. Call it synchronously inside a user gesture.
   unlock(): void

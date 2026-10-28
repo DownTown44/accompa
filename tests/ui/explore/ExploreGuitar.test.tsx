@@ -20,7 +20,7 @@ describe('Explore guitar', () => {
     click(cell(5, 0))
     click(cell(4, 5))
     expect(lit()).toEqual(['2:5', '4:5'])
-    expect(engine.plays.at(-1)).toEqual({ pitches: [64], mode: 'block' })
+    expect(engine.plays.at(-1)).toEqual({ pitches: [64], instrument: 'guitar', mode: 'block' })
   })
 
   it('puts the guitar root marker on the lower of two lit positions', () => {
@@ -148,7 +148,7 @@ describe('Explore guitar', () => {
     press('Enter')
     press(' ')
     expect(clicked.plays.map((p) => p.mode)).not.toContain('strum')
-    expect(clicked.plays[0]).toEqual({ pitches: [48, 52, 55], mode: 'block' })
+    expect(clicked.plays[0]).toEqual({ pitches: [48, 52, 55], instrument: 'guitar', mode: 'block' })
     unmount()
     const carried = createFakeEngine()
     render(<App engine={carried} />)

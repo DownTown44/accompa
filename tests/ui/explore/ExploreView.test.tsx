@@ -21,7 +21,7 @@ describe('Explore', () => {
     const engine = createFakeEngine()
     render(<App engine={engine} />)
     fireEvent.pointerDown(key(63))
-    expect(engine.plays).toEqual([{ pitches: [63], mode: 'block' }])
+    expect(engine.plays).toEqual([{ pitches: [63], instrument: 'piano', mode: 'block' }])
     expect(lit()).toEqual([])
     fireEvent.pointerUp(key(63))
     expect(lit()).toEqual(['63'])
@@ -135,8 +135,8 @@ describe('Explore', () => {
     press(' ')
     press('Enter')
     expect(engine.plays).toEqual([
-      { pitches: [60, 64, 67], mode: 'arpeggio' },
-      { pitches: [60, 64, 67], mode: 'block' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'arpeggio' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'block' },
     ])
   })
 
@@ -160,7 +160,7 @@ describe('Explore', () => {
     fireEvent.pointerOver(key(62))
     fireEvent.pointerMove(key(64))
     click(key(65))
-    expect(engine.plays).toEqual([{ pitches: [65], mode: 'block' }])
+    expect(engine.plays).toEqual([{ pitches: [65], instrument: 'piano', mode: 'block' }])
     expect(lit()).toEqual(['65'])
   })
 

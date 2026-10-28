@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { beyondFretboard, beyondFretboardNote, leftOutCount } from '../../core/explore'
 import { offscreenLit, offscreenNote } from '../../core/piano'
-import { ENGINES } from '../../audio/engines'
+import { createEngine } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
 import { EngineProvider } from '../engine/EngineContext'
 import { ExploreControls } from '../explore/ExploreControls'
@@ -74,7 +74,7 @@ export function Shell() {
 // The engine follows the chosen sound; replacing it stops whatever the old one was playing.
 function EngineHost({ override, children }: { override?: AudioEngine; children: ReactNode }) {
   const { settings } = useSettings()
-  const engine = useMemo(() => override ?? ENGINES[settings.sound](), [override, settings.sound])
+  const engine = useMemo(() => override ?? createEngine(settings.sound), [override, settings.sound])
   useEffect(() => () => engine.stop(), [engine])
   return <EngineProvider engine={engine}>{children}</EngineProvider>
 }

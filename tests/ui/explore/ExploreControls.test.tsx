@@ -26,8 +26,8 @@ describe('Explore controls', () => {
     press(' ')
     press('Enter')
     expect(engine.plays).toEqual([
-      { pitches: [60, 67], mode: 'arpeggio' },
-      { pitches: [60, 67], mode: 'block' },
+      { pitches: [60, 67], instrument: 'piano', mode: 'arpeggio' },
+      { pitches: [60, 67], instrument: 'piano', mode: 'block' },
     ])
   })
 
@@ -37,13 +37,13 @@ describe('Explore controls', () => {
     click(key(64))
     engine.plays.length = 0
     press(' ')
-    expect(engine.plays).toEqual([{ pitches: [64], mode: 'arpeggio' }])
+    expect(engine.plays).toEqual([{ pitches: [64], instrument: 'piano', mode: 'arpeggio' }])
     click(key(64))
     click(key(60))
     click(key(67))
     engine.plays.length = 0
     press(' ')
-    expect(engine.plays).toEqual([{ pitches: [60, 67], mode: 'arpeggio' }])
+    expect(engine.plays).toEqual([{ pitches: [60, 67], instrument: 'piano', mode: 'arpeggio' }])
   })
 
   it('plays nothing with nothing lit and disables the buttons', () => {
@@ -66,7 +66,7 @@ describe('Explore controls', () => {
     press('Enter', blockBtn())
     expect(engine.plays).toEqual([])
     fireEvent.click(blockBtn(), { detail: 0 })
-    expect(engine.plays).toEqual([{ pitches: [60, 67], mode: 'block' }])
+    expect(engine.plays).toEqual([{ pitches: [60, 67], instrument: 'piano', mode: 'block' }])
   })
 
   it('sounds a chord sorted low to high whatever the click order', () => {
@@ -79,10 +79,10 @@ describe('Explore controls', () => {
     fireEvent.click(blockBtn(), { detail: 1 })
     fireEvent.click(playBtn(), { detail: 1 })
     expect(engine.plays).toEqual([
-      { pitches: [60, 64, 67], mode: 'block' },
-      { pitches: [60, 64, 67], mode: 'arpeggio' },
-      { pitches: [60, 64, 67], mode: 'block' },
-      { pitches: [60, 64, 67], mode: 'arpeggio' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'block' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'arpeggio' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'block' },
+      { pitches: [60, 64, 67], instrument: 'piano', mode: 'arpeggio' },
     ])
   })
 
@@ -93,7 +93,7 @@ describe('Explore controls', () => {
     notes.forEach((n) => click(key(n)))
     engine.plays.length = 0
     press(' ')
-    expect(engine.plays).toEqual([{ pitches: [60, 62, 64, 65, 67, 69, 71, 72], mode: 'arpeggio' }])
+    expect(engine.plays).toEqual([{ pitches: [60, 62, 64, 65, 67, 69, 71, 72], instrument: 'piano', mode: 'arpeggio' }])
   })
 
   it('keeps the key hints and shortcuts on both buttons', () => {
@@ -118,8 +118,8 @@ describe('Explore controls', () => {
     press('Enter')
     press(' ')
     expect(engine.plays).toEqual([
-      { pitches: [60, 63, 66, 69], mode: 'block' },
-      { pitches: [60, 63, 66, 69], mode: 'arpeggio' },
+      { pitches: [60, 63, 66, 69], instrument: 'piano', mode: 'block' },
+      { pitches: [60, 63, 66, 69], instrument: 'piano', mode: 'arpeggio' },
     ])
   })
 

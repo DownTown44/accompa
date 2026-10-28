@@ -18,10 +18,10 @@ describe('settings storage', () => {
     saveSetting('sound', 'synthesized')
     saveSetting('theme', 'dark')
     expect(JSON.parse(localStorage.getItem('accompa.pool')!)).toEqual([7, 12])
-    expect(JSON.parse(localStorage.getItem('accompa.sound')!)).toBe('synthesized')
+    expect(JSON.parse(localStorage.getItem('accompa.sound.v2')!)).toBe('synthesized')
     expect(JSON.parse(localStorage.getItem('accompa.theme')!)).toBe('dark')
     expect(localStorage.length).toBe(3)
-    expect(loadSettings()).toEqual({ ...initialSettings, pool: [7, 12], theme: 'dark' })
+    expect(loadSettings()).toEqual({ ...initialSettings, pool: [7, 12], sound: 'synthesized', theme: 'dark' })
   })
 
   it('never restores a direction', () => {
@@ -34,12 +34,22 @@ describe('settings storage', () => {
     expect(loadSettings().pool).toEqual(initialSettings.pool)
   })
 
-  it.each(['"x"', '[]', '"purple"', 'not json', '3'])('falls back for sound and theme %s', (raw) => {
-    localStorage.setItem('accompa.sound', raw)
+  it.each(['"x"', '[]', '"purple"', '"loud"', 'null', '42', 'not json', '3'])('falls back for sound and theme %s', (raw) => {
+    localStorage.setItem('accompa.sound.v2', raw)
     localStorage.setItem('accompa.theme', raw)
     const loaded = loadSettings()
-    expect(loaded.sound).toBe('synthesized')
+    expect(loaded.sound).toBe('samples')
     expect(loaded.theme).toBe('system')
+  })
+
+  it('never reads, writes or deletes the Phase 1 sound key', () => {
+    localStorage.setItem('accompa.sound', '"synthesized"')
+    expect(loadSettings().sound).toBe('samples')
+    saveSetting('sound', 'synthesized')
+    expect(localStorage.getItem('accompa.sound')).toBe('"synthesized"')
+    localStorage.removeItem('accompa.sound.v2')
+    expect(loadSettings().sound).toBe('samples')
+    expect(localStorage.getItem('accompa.sound')).toBe('"synthesized"')
   })
 
   it('never throws when storage fails', () => {

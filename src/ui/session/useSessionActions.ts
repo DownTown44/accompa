@@ -49,7 +49,7 @@ export function useSessionActions() {
     if (session.mode !== 'listen') return
     if (practice === 'chords') {
       const question = session.practice.chordQuestion ?? startChordQuestion()
-      engine.play(question.pitches, 'block')
+      engine.play(question.pitches, session.instrument, 'block')
     } else if (!session.practice.question) playQuestion(startQuestion())
   }
 
@@ -70,7 +70,7 @@ export function useSessionActions() {
   }
 
   function playQuestion(question: Question) {
-    engine.play(question.pitches, question.direction === 'harmonic' ? 'block' : 'arpeggio')
+    engine.play(question.pitches, session.instrument, question.direction === 'harmonic' ? 'block' : 'arpeggio')
   }
 
   // With a guitar voicing shown, its fretted pitches (Play one at a time, Block strummed); else the lit Explore notes, low to high.
@@ -78,16 +78,16 @@ export function useSessionActions() {
   function playLit(mode: PlayMode) {
     if (voicingFrets) {
       const pitches = voicingPitches(voicingFrets)
-      if (pitches.length > 0) engine.play(pitches, mode === 'block' ? 'strum' : mode)
+      if (pitches.length > 0) engine.play(pitches, session.instrument, mode === 'block' ? 'strum' : mode)
       return
     }
     const pitches = [...session.workspace.pitches].sort((a, b) => a - b)
-    if (pitches.length > 0) engine.play(pitches, mode)
+    if (pitches.length > 0) engine.play(pitches, session.instrument, mode)
   }
 
   function play() {
     if (session.mode === 'explore') return playLit('arpeggio')
-    if (settings.practice === 'chords') return engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, 'block')
+    if (settings.practice === 'chords') return engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, session.instrument, 'block')
     const question = session.practice.question ?? startQuestion()
     playQuestion(question)
   }
@@ -102,7 +102,7 @@ export function useSessionActions() {
 
   function next() {
     if (settings.practice === 'chords') {
-      if (session.mode === 'listen') engine.play(startChordQuestion().pitches, 'block')
+      if (session.mode === 'listen') engine.play(startChordQuestion().pitches, session.instrument, 'block')
       return
     }
     if (session.mode === 'listen') playQuestion(startQuestion())
@@ -143,11 +143,11 @@ export function useSessionActions() {
   // Sounds the note, makes it the root and replaces the question with one on it, silently.
   function pressNote(pitch: Pitch) {
     if (session.mode === 'explore') {
-      engine.play([pitch], 'block')
+      engine.play([pitch], session.instrument, 'block')
       return
     }
     if (settings.practice === 'chords' || settings.rootMode !== 'fixed') return
-    engine.play([pitch], 'block')
+    engine.play([pitch], session.instrument, 'block')
     dispatch({ type: 'setFixedRoot', pitch })
     startQuestion({ fixedRoot: pitch })
   }
@@ -168,7 +168,7 @@ export function useSessionActions() {
     dispatch({ type: 'setMode', mode, chords: settings.practice === 'chords' })
     if (mode === 'explore') engine.stop()
     if (mode !== 'listen') return
-    if (settings.practice === 'chords') engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, 'block')
+    if (settings.practice === 'chords') engine.play((session.practice.chordQuestion ?? startChordQuestion()).pitches, session.instrument, 'block')
     else if (!session.practice.question) playQuestion(startQuestion())
   }
 
