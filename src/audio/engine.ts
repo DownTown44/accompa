@@ -13,6 +13,8 @@ export interface AudioEngine {
   stop(): void
   // Creates or resumes the audio context. Call it synchronously inside a user gesture.
   unlock(): void
+  // Tells the engine which instrument is active so it can load that instrument's sounds ahead of the first play. Optional; the synth has none.
+  prepare?(instrument: Instrument): void
   status(): AudioStatus
   subscribe(listener: () => void): () => void
 }

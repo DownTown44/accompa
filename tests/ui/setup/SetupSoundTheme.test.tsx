@@ -21,6 +21,7 @@ describe('sound and theme', () => {
     expect(radio('Synthesized').checked).toBe(false)
     expect(screen.getByText('Samples follow the instrument: piano sound on the piano, guitar sound on the guitar.').className).toBe('setup-hint')
     expect(screen.getByText('Piano sound: Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0.').className).toBe('setup-hint')
+    expect(screen.getByText('Guitar sound: FreePats Nylon-String Acoustic Guitar, CC0.').className).toBe('setup-hint')
     expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeTruthy()
     expect(radio('System').checked).toBe(true)
     expect(radio('Light').checked).toBe(false)
@@ -37,6 +38,22 @@ describe('sound and theme', () => {
     render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     expect(radio('Synthesized').checked).toBe(true)
+  })
+
+  it('prepares the new engine when the Sound changes back to Samples, before any note is played', () => {
+    const fetchSpy = vi.fn(() => Promise.reject(new Error('no network in tests')))
+    vi.stubGlobal('fetch', fetchSpy)
+    try {
+      render(<App session={listenSession} />)
+      expect(fetchSpy).toHaveBeenCalledTimes(21)
+      fireEvent.click(opener())
+      fireEvent.click(radio('Synthesized'), { detail: 1 })
+      expect(fetchSpy).toHaveBeenCalledTimes(21)
+      fireEvent.click(radio('Samples'), { detail: 1 })
+      expect(fetchSpy).toHaveBeenCalledTimes(42)
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 
   it('applies a theme at once and saves it, and System removes the attribute', () => {

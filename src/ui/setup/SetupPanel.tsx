@@ -180,6 +180,7 @@ export function SetupPanel() {
         Samples follow the instrument: piano sound on the piano, guitar sound on the guitar.
       </p>
       <p className="setup-hint">Piano sound: Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0.</p>
+      <p className="setup-hint">Guitar sound: FreePats Nylon-String Acoustic Guitar, CC0.</p>
       <h3 id="theme-label" className="setup-sublabel">
         Theme
       </h3>

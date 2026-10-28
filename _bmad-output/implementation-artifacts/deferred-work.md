@@ -42,5 +42,5 @@
   summary: The OfflineAudioContext decode path is verified only in Chrome.
   evidence: Chrome loaded 21 files and played a source; Firefox and Safari were not tried; try them to settle it.
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
-  summary: By-ear tuning of the sampler: stop click, 16 s sample tails, loudness against the synth (SAMPLE_GAIN 0.8).
+  summary: By-ear tuning of the sampler: stop click, 16 s sample tails, loudness against the synth (the sample gain, 0.8 for both sets).
   evidence: `src/audio/sampler.ts` stops sources without a release and plays each sample to its full length; settle by listening, then add a short gain release or cap the tails if needed.
