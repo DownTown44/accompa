@@ -23,3 +23,12 @@
   evidence: Split from Story 3.2 at the token gate; 3.2 keeps role markers, legend and intervals with the root always the reading's root. Apor's decisions for this goal: a note that is not any reading's root takes the marker and the set reads as unknown; Story 3.3 (reading choice) depends on it.
 
   status: done: delivered as Story 3.6.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-the-engine-knows-the-instrument.md`
+  summary: The synth never closes its AudioContext, so replacing an engine on a Sound change leaves the old one open.
+  evidence: `src/audio/synth.ts` has no `close()`; only reachable once Story 6.2 lets the user switch between Samples and Synthesized; browsers cap open contexts.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-the-engine-knows-the-instrument.md`
+  summary: When the piano and guitar engines differ, a new play does not stop the other instrument's notes.
+  evidence: `createEngine` calls only the selected instrument's engine; harmless while one shared synth cuts its own notes; revisit in Story 6.3.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-1-the-engine-knows-the-instrument.md`
+  summary: `unlock`, `status` and `subscribe` follow the piano engine only, so a guitar-first gesture would not unlock a separate guitar engine.
+  evidence: `createEngine` in `src/audio/engines.ts`; decided for 6.1 by Apor (status API unchanged), to be settled by Stories 6.3 and 6.4 once the factories differ.
