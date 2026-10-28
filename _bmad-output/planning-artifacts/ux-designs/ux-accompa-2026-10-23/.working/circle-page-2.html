@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Circle page, large circle</title><style>
+:root{--bg:#FDF1E8;--surface:#FFFAF5;--ink:#2C2A2B;--muted:#6F635D;--accent:#F3B5B0;--chip:#0000000D;--rel:#F3B5B055;--on:#2C2A2B}
+:root[data-theme=dark]{--bg:#272022;--surface:#342A2D;--ink:#F3E7E2;--muted:#A89A9C;--accent:#E9A8A6;--chip:#FFFFFF14;--rel:#E9A8A644;--on:#272022}
+body{margin:0;padding:20px 28px;background:var(--bg);color:var(--ink);font-family:Palatino,"Palatino Linotype",serif}
+h1{font-size:20px;font-style:italic;margin:0 0 4px}p.n{margin:0 0 14px;color:var(--muted);max-width:820px}
+.frame{width:1216px;height:800px;background:var(--bg);border-radius:16px;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--chip)}
+.rail{position:absolute;left:0;top:0;bottom:0;width:64px;background:var(--surface);border-radius:16px 0 0 16px}
+.tt{position:fixed;top:14px;right:14px;font:inherit;padding:6px 14px;border:0;border-radius:99px;background:var(--surface);color:var(--ink);cursor:pointer;z-index:9}
+svg text{font-family:inherit;font-style:italic;fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.seg{cursor:pointer}.seg path{fill:var(--surface);stroke:var(--bg);stroke-width:2}.seg:hover path{fill:var(--chip)}
+.seg.rel path{fill:var(--rel)}.seg.sel path{fill:var(--accent)}.seg.sel text{fill:var(--on);font-weight:700}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px 10px;border-radius:18px;background:var(--surface);flex:1;cursor:pointer;border:0;color:var(--ink);font:inherit}
+.chip:hover{background:var(--chip)}.chip:active{background:var(--rel)}.chip .rn{font-size:14px;color:var(--muted)}.chip .nm{font-size:26px;font-weight:700}.chip .rl{font-size:13px;color:var(--muted)}
+.lab{font-size:14px;color:var(--muted)}.abs{position:absolute}.big{font-size:48px;font-weight:700;font-style:italic;line-height:1.1}.line{font-size:18px;margin-top:10px}
+</style></head><body><button class="tt" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Light / dark</button>
+<h1>Circle page: large circle, chord row at the bottom</h1><p class="n">Frame is 1216 x 800 with the collapsed rail at the left. Click a major or a minor wedge. Chords are clickable (they would sound) but nothing in the row stays selected. Minor keys get a Natural / Harmonic / Melodic switch (triads only; spelling of some raised notes is approximate in this mock).</p>
+<div id="app"></div>
+<script>
+const MAJ=['C','G','D','A','E','B','F♯','D♭','A♭','E♭','B♭','F'],MIN=['Am','Em','Bm','F♯m','C♯m','G♯m','E♭m','B♭m','Fm','Cm','Gm','Dm'];
+let k=1,minor=false,form='nat';const rt=x=>x.replace('m','');const m=n=>((n%12)+12)%12;
+function chords(){if(!minor)return[['I',MAJ[k],'home',1],['ii',MIN[m(k-1)],'',0],['iii',MIN[m(k+1)],'',0],['IV',MAJ[m(k-1)],'',0],['V',MAJ[m(k+1)],'',0],['vi',MIN[k],'',0],['vii°',MIN[m(k+2)].replace('m','')+'°','',0]];
+const base=[['i',MIN[k],'home',1]];
+if(form==='nat')return[...base,['ii°',rt(MIN[m(k+2)])+'°','',0],['III',MAJ[k],'',0],['iv',MIN[m(k-1)],'',0],['v',MIN[m(k+1)],'',0],['VI',MAJ[m(k-1)],'',0],['VII',MAJ[m(k+1)],'',0]];
+if(form==='harm')return[...base,['ii°',rt(MIN[m(k+2)])+'°','',0],['III+',MAJ[k]+'+','',0],['iv',MIN[m(k-1)],'',0],['V',rt(MIN[m(k+1)]),'',0],['VI',MAJ[m(k-1)],'',0],['vii°',rt(MIN[m(k+5)])+'°','',0]];
+return[...base,['ii',MIN[m(k+2)],'',0],['III+',MAJ[k]+'+','',0],['IV',rt(MIN[m(k-1)]),'',0],['V',rt(MIN[m(k+1)]),'',0],['vi°',rt(MIN[m(k+3)])+'°','',0],['vii°',rt(MIN[m(k+5)])+'°','',0]]}
+function wedge(c,r0,r1,i){const a0=(i*30-15-90)*Math.PI/180,a1=(i*30+15-90)*Math.PI/180,P=(r,a)=>[c+r*Math.cos(a),c+r*Math.sin(a)];return`M${P(r1,a0)}A${r1} ${r1} 0 0 1 ${P(r1,a1)}L${P(r0,a1)}A${r0} ${r0} 0 0 0 ${P(r0,a0)}Z`}
+function circle(sz){const c=sz/2,R=c-4,r1=R*.68,r2=R*.38,near=[m(k-1),k,m(k+1)];let s=`<svg width="${sz}" height="${sz}">`;
+for(let i=0;i<12;i++){const a=(i*30-90)*Math.PI/180,pt=r=>[c+r*Math.cos(a),c+r*Math.sin(a)],[ox,oy]=pt((R+r1)/2),[ix,iy]=pt((r1+r2)/2);
+const oc=!minor&&i===k?'sel':near.includes(i)?'rel':'',ic=minor&&i===k?'sel':near.includes(i)?'rel':'';
+s+=`<g class="seg ${oc}" onclick="k=${i};minor=false;draw()"><path d="${wedge(c,r1,R,i)}"/><text x="${ox}" y="${oy}" style="font-size:${sz/15}px">${MAJ[i]}</text></g>`;
+s+=`<g class="seg ${ic}" onclick="k=${i};minor=true;draw()"><path d="${wedge(c,r2,r1,i)}"/><text x="${ix}" y="${iy}" style="font-size:${sz/21}px">${MIN[i]}</text></g>`}
+return s+`<text x="${c}" y="${c}" style="font-size:${sz/7}px;font-weight:700">${minor?MIN[k]:MAJ[k]}</text></svg>`}
+function draw(){const ch=chords(),name=minor?MIN[k]:MAJ[k],other=minor?'Relative major '+MAJ[k]:'Relative minor '+MIN[k];
+document.getElementById('app').innerHTML=`<div class="frame"><div class="rail"></div>
+<div class="abs" style="left:360px;top:22px">${circle(560)}</div>
+<div class="abs" style="left:960px;top:250px;width:150px">${minor?`<div class="lab">Minor scale</div><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;align-items:stretch">${[['nat','Natural'],['harm','Harmonic'],['mel','Melodic']].map(([f,n])=>`<button onclick="form='${f}';draw()" style="font:inherit;font-size:16px;padding:6px 16px;border:0;border-radius:99px;cursor:pointer;background:${form===f?'var(--accent)':'var(--chip)'};color:${form===f?'var(--on)':'var(--ink)'}">${n}</button>`).join('')}</div>`:''}</div>
+<div class="abs" style="left:100px;right:40px;top:620px;display:flex;gap:10px">${ch.map(x=>`<button class="chip" style="${x[3]?'background:var(--accent);color:var(--on)':''}"><span class="rn">${x[0]}</span><span class="nm">${x[1]}</span><span class="rl">${x[2]||'&nbsp;'}</span></button>`).join('')}</div></div>`}
+draw()</script></body></html>

@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Explore with the chord builder, full page</title><style>
+:root{--bg:#FDF1E8;--surface:#FFFAF5;--ink:#2C2A2B;--muted:#6F635D;--accent:#F3B5B0;--chip:#0000000D;--on:#2C2A2B;--keyline:#00000026;--bk:#2C2A2B;--root:#F29D95;--third:#F6C98B;--fifth:#A9D8B8;--seventh:#B7C4F0;--ninth:#D6B9EA;--fourth:#9ED6D8;--sixth:#D3DE9A}
+:root[data-theme=dark]{--bg:#272022;--surface:#342A2D;--ink:#F3E7E2;--muted:#A89A9C;--accent:#E9A8A6;--chip:#FFFFFF14;--on:#272022;--keyline:#FFFFFF26;--bk:#150F11;--root:#E9807A;--third:#E0B070;--fifth:#8CC5A0;--seventh:#9DB0E6;--ninth:#B896D0;--fourth:#7FBFC2;--sixth:#B5C27A}
+body{margin:0;padding:20px 28px;background:var(--bg);color:var(--ink);font-family:Palatino,"Palatino Linotype",serif}
+h1{font-size:20px;font-style:italic;margin:0 0 4px}p.n{margin:0 0 14px;color:var(--muted);max-width:980px}
+.frame{width:1216px;height:800px;background:var(--bg);border-radius:16px;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--chip);display:flex}
+.rail{width:64px;background:var(--surface);flex:none;display:flex;flex-direction:column;align-items:center;padding-top:60px;gap:6px}
+.rail .pg{margin-top:auto;margin-bottom:20px;display:flex;flex-direction:column;gap:2px;padding:3px;border-radius:14px;background:var(--chip)}
+.rail .pg button{font:inherit;font-size:13px;width:38px;height:34px;border:0;border-radius:11px;background:transparent;color:var(--muted);cursor:pointer}.rail .pg button.on{background:var(--accent);color:var(--on)}
+.body{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 0 44px;min-width:0}
+.tt{position:fixed;top:14px;right:14px;font:inherit;padding:6px 14px;border:0;border-radius:99px;background:var(--surface);color:var(--ink);cursor:pointer;z-index:9}
+.name{font-size:84px;font-weight:600;font-style:italic;line-height:1.05;height:88px;white-space:nowrap;margin-top:24px}
+.alts{height:34px;margin-top:14px;font-size:20px;font-style:italic;color:var(--muted)}
+.stp{height:40px;margin-top:14px;display:flex;align-items:center;gap:8px;font-size:20px}.stp b{width:40px;height:40px;display:grid;place-items:center;border-radius:99px;font-weight:400;cursor:pointer}.stp b:hover{background:var(--chip)}
+.leg{height:34px;margin-top:14px;display:flex;gap:28px;align-items:center;font-size:19px;font-style:italic}.leg span{display:flex;gap:6px;align-items:center}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;width:100%}
+.btn{font:inherit;font-size:20px;padding:12px 24px;border:0;border-radius:99px;background:var(--chip);color:var(--ink);cursor:pointer;white-space:nowrap}.btn.p{background:var(--accent);color:var(--on)}.btn kbd{font:inherit;font-size:13px;color:var(--muted);margin-left:8px}
+.bld{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:12px}.r1{display:flex;gap:12px;align-items:center}.roots{display:flex;gap:4px;margin-left:10px}
+.cell{position:relative;width:50px;height:50px;border-radius:11px;overflow:hidden;background:var(--surface);flex:none}
+.cell button{position:absolute;inset:0;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:0}
+.cell .a{clip-path:polygon(0 0,100% 0,0 100%)}.cell .b{clip-path:polygon(100% 0,100% 100%,0 100%)}
+.cell .a span{position:absolute;left:27%;top:27%;transform:translate(-50%,-50%);font-size:15px;white-space:nowrap}.cell .b span{position:absolute;left:73%;top:73%;transform:translate(-50%,-50%);font-size:15px;white-space:nowrap}
+.cell .a:hover,.cell .b:hover,.cell.one button:hover{background:var(--chip)}.cell button.sel{background:var(--accent);color:var(--on);font-weight:700}
+.cell.one button{font-size:21px}.cell i{position:absolute;left:-10%;top:50%;width:120%;height:1px;background:var(--keyline);transform:rotate(-45deg);pointer-events:none}
+.q{font:inherit;font-size:16px;padding:9px 0;width:56px;border:0;border-radius:11px;background:var(--surface);color:var(--ink);cursor:pointer}.q:hover{background:var(--chip)}.q.sel{background:var(--accent);color:var(--on);font-weight:700}
+.grp .l{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:3px}.grp .row{display:flex;gap:5px}.qs{display:flex;gap:16px;align-items:flex-end}
+.status{height:31px;margin-top:6px;color:var(--muted);font-size:20px;font-style:italic}
+.wk{fill:var(--surface);stroke:var(--keyline)}.bkey{fill:var(--bk)}.oct{fill:var(--muted);font-size:13px;font-style:italic}
+.fbd{fill:var(--surface)}.fret{stroke:var(--keyline);stroke-width:2}.nut{stroke:var(--ink);stroke-width:7}.str{stroke:var(--ink);stroke-opacity:.7}.fn{fill:var(--muted);font-size:15px;font-style:italic;text-anchor:middle}.inl{fill:var(--muted);opacity:.35}
+.sh{stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round}
+
+.hint{height:34px;margin-top:14px;font-size:22px;color:var(--muted);font-style:italic}
+.sw{display:flex;gap:6px;margin:0 0 14px}.sw button{font:inherit;font-size:15px;padding:6px 16px;border:0;border-radius:99px;background:var(--chip);color:var(--ink);cursor:pointer}.sw button.on{background:var(--accent);color:var(--on)}
+.ctl{display:flex;gap:16px;margin-top:20px}
+.btn[aria-disabled=true]{opacity:.5;cursor:default}</style></head><body><button class="tt" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Light / dark</button>
+<h1>Chord drill</h1><p class="n">1216 x 800 with the collapsed rail. The chord name is the question. Lit notes stay plain dots while you build (role shapes would give the answer away). Try checks and plays what is lit; after the second miss the notes that are not in the chord are marked with a cross (an option in Setup). Reveal lights the right chord with role shapes and plays it; both Reveal and a right answer end on Next. Use the state buttons to walk through it. The target here is F♯m7.</p>
+<div class="sw" id="sw"></div><div id="app"></div>
+<script>
+const poly=(n,cx,cy,r,rot=-90,inner=0)=>{const pts=[];for(let i=0;i<(inner?n*2:n);i++){const a=(rot+i*(inner?180/n:360/n))*Math.PI/180,rr=inner&&i%2?r*inner:r;pts.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1))}return pts.join(' ')};
+function shape(r,cx,cy,s=1){const f=`fill:var(--${r==='ext'?'surface':r})`;
+if(r==='root')return`<circle class="sh" style="${f}" cx="${cx}" cy="${cy}" r="${11*s}"/><circle cx="${cx}" cy="${cy}" r="${17*s}" fill="none" stroke="var(--ink)" stroke-width="1.8"/>`;
+if(r==='third')return`<polygon class="sh" style="${f}" points="${cx},${cy-13*s} ${cx+13*s},${cy} ${cx},${cy+13*s} ${cx-13*s},${cy}"/>`;
+if(r==='fifth')return`<rect class="sh" style="${f}" x="${cx-10*s}" y="${cy-10*s}" width="${20*s}" height="${20*s}"/>`;
+if(r==='seventh')return`<polygon class="sh" style="${f}" points="${cx},${cy-12*s} ${cx+13*s},${cy+10*s} ${cx-13*s},${cy+10*s}"/>`;
+if(r==='ninth')return`<polygon class="sh" style="${f}" points="${poly(5,cx,cy,13*s)}"/>`;
+if(r==='fourth')return`<polygon class="sh" style="${f}" points="${poly(6,cx,cy,13*s,0)}"/>`;
+if(r==='sixth')return`<polygon class="sh" style="${f}" points="${poly(5,cx,cy,15*s,-90,.48)}"/>`;
+return`<circle class="sh" style="${f}" cx="${cx}" cy="${cy}" r="${8*s}"/>`}
+
+const BLK=[1,3,6,8,10],TARGET=[54,57,61,64];/* F#3 A3 C#4 E4 */
+const ST={build:{h:'',lit:[54,57],gf:[2,4,-1,-1,-1,-1],bad:[]},wrong1:{h:'Not quite, try again.',lit:[54,57,61,65],gf:[2,4,-1,3,-1,-1],bad:[]},wrong2:{h:'Not quite. The crossed note is not in this chord.',lit:[54,57,61,65],gf:[2,4,-1,3,-1,-1],bad:[65,'g3']},reveal:{h:'',lit:TARGET,gf:[2,4,2,2,2,2],bad:[],done:true}};
+let st='build',inst='piano';
+const role=pc=>({0:'root',3:'third',7:'fifth',10:'seventh'})[((pc-6)%12+12)%12]||'ext';
+const NN=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const X=(cx,cy)=>`<path d="M${cx-9} ${cy-9}l18 18M${cx+9} ${cy-9}l-18 18" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round"/>`;
+const mk=(pc,cx,cy,bad,done,sc=1)=>bad?`<circle class="sh" style="fill:var(--surface)" cx="${cx}" cy="${cy}" r="${10*sc}"/>`+X(cx,cy):done?shape(role(pc),cx,cy,sc):`<circle cx="${cx}" cy="${cy}" r="${9*sc}" fill="var(--ink)"/>`;
+function piano(c){const base=48,n=36,wW=57,H=300,bw=36,bh=185;let wi=0,w='',b='',m='',t='';const pos=[];
+for(let p=base;p<base+n;p++){if(BLK.includes(p%12))pos.push([p,wi*wW-bw/2,true]);else{pos.push([p,wi*wW,false]);wi++}}
+for(const[p,x,k]of pos){const on=c.lit.includes(p),bad=c.bad.includes(p);
+if(!k){w+=`<rect class="wk" x="${x+1}" y="4" width="${wW}" height="${H}"/>`;if(p%12===0)t+=`<text class="oct" x="${x+1+wW/2}" y="324" text-anchor="middle">C${Math.floor(p/12)-1}</text>`;if(on)m+=mk(p%12,x+1+wW/2,255,bad,c.done)}
+else{b+=`<rect class="bkey" x="${x+1}" y="4" width="${bw}" height="${bh}"/>`;if(on)m+=`<g style="--ink:var(--surface)">${mk(p%12,x+1+bw/2,160,bad,c.done)}</g>`}}
+return`<svg viewBox="0 0 ${wi*wW+2} 330" height="296">${w}${b}${m}${t}</svg>`}
+const TUN=[40,45,50,55,59,64];
+function guitar(c){const NUT=150,FW=85,Y=s=>300-s*46;let s=`<rect class="fbd" x="${NUT}" y="56" width="1020" height="258"/>`;
+for(let f=1;f<=12;f++)s+=`<line class="fret" x1="${NUT+f*FW}" x2="${NUT+f*FW}" y1="56" y2="314"/>`;
+s+=`<line class="nut" x1="${NUT}" x2="${NUT}" y1="53" y2="317"/>`;
+for(const f of[3,5,7,9])s+=`<circle class="inl" cx="${NUT+(f-.5)*FW}" cy="185" r="9"/>`;
+s+=`<circle class="inl" cx="${NUT+11.5*FW}" cy="139" r="9"/><circle class="inl" cx="${NUT+11.5*FW}" cy="231" r="9"/>`;
+['E','A','D','G','B','E'].forEach((n,i)=>{s+=`<line class="str" x1="${NUT}" x2="1170" y1="${Y(i)}" y2="${Y(i)}" stroke-width="${3.25-2.25*i/5}"/><text class="fn" x="58" y="${Y(i)+5}">${n}</text>`});
+for(let f=1;f<=12;f++)s+=`<text class="fn" x="${NUT+(f-.5)*FW}" y="344">${f}</text>`;
+c.gf.forEach((f,i)=>{if(f<0)return;const pc=(TUN[i]+f)%12,bad=c.bad.includes('g'+i);const x=f===0?108:NUT+(f-.5)*FW;s+=mk(pc,x,Y(i),bad,c.done,f===0?.8:1)});
+return`<svg viewBox="0 0 1200 372" height="296">${s}</svg>`}
+function legend(c){if(!c.done)return'';return[0,3,7,10].map(i=>`<span><svg width="34" height="34" viewBox="-17 -17 34 34">${shape(role(6+i),0,0,.8)}</svg>${['root','3rd','5th','7th'][[0,3,7,10].indexOf(i)]} ${NN[(6+i)%12]}</span>`).join('')}
+function draw(){const c=ST[st];
+document.getElementById('sw').innerHTML=[['build','Building'],['wrong1','Wrong, first try'],['wrong2','Wrong, second try'],['reveal','Revealed or right']].map(([k,n])=>`<button class="${st===k?'on':''}" onclick="st='${k}';draw()">${n}</button>`).join('');
+document.getElementById('app').innerHTML=`<div class="frame"><div class="rail"><div class="pg"><button class="${inst==='piano'?'on':''}" onclick="inst='piano';draw()">Pno</button><button class="${inst==='guitar'?'on':''}" onclick="inst='guitar';draw()">Gtr</button></div></div>
+<div class="body"><div class="name">F♯m7</div><div class="hint">${c.h}</div><div class="leg">${legend(c)}</div>
+<div class="stage">${inst==='piano'?piano(c):guitar(c)}</div>
+<div class="ctl"><button class="btn">Play<kbd>Space</kbd></button>${c.done?`<button class="btn p">Next<kbd>Enter</kbd></button>`:`<button class="btn p" aria-disabled="${c.lit.length<3}">Try<kbd>Enter</kbd></button><button class="btn">Reveal<kbd>R</kbd></button>`}</div>
+<div class="status"></div></div></div>`}
+draw()</script></body></html>

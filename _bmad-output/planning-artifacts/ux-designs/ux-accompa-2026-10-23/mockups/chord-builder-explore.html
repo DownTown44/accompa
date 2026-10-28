@@ -1,0 +1,101 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Explore with the chord builder, full page</title><style>
+:root{--bg:#FDF1E8;--surface:#FFFAF5;--ink:#2C2A2B;--muted:#6F635D;--accent:#F3B5B0;--chip:#0000000D;--on:#2C2A2B;--keyline:#00000026;--bk:#2C2A2B;--root:#F29D95;--third:#F6C98B;--fifth:#A9D8B8;--seventh:#B7C4F0;--ninth:#D6B9EA;--fourth:#9ED6D8;--sixth:#D3DE9A}
+:root[data-theme=dark]{--bg:#272022;--surface:#342A2D;--ink:#F3E7E2;--muted:#A89A9C;--accent:#E9A8A6;--chip:#FFFFFF14;--on:#272022;--keyline:#FFFFFF26;--bk:#150F11;--root:#E9807A;--third:#E0B070;--fifth:#8CC5A0;--seventh:#9DB0E6;--ninth:#B896D0;--fourth:#7FBFC2;--sixth:#B5C27A}
+body{margin:0;padding:20px 28px;background:var(--bg);color:var(--ink);font-family:Palatino,"Palatino Linotype",serif}
+h1{font-size:20px;font-style:italic;margin:0 0 4px}p.n{margin:0 0 14px;color:var(--muted);max-width:980px}
+.frame{width:1216px;height:800px;background:var(--bg);border-radius:16px;position:relative;overflow:hidden;box-shadow:0 0 0 1px var(--chip);display:flex}
+.rail{width:64px;background:var(--surface);flex:none;display:flex;flex-direction:column;align-items:center;padding-top:60px;gap:6px}
+.rail .pg{margin-top:auto;margin-bottom:20px;display:flex;flex-direction:column;gap:2px;padding:3px;border-radius:14px;background:var(--chip)}
+.rail .pg button{font:inherit;font-size:13px;width:38px;height:34px;border:0;border-radius:11px;background:transparent;color:var(--muted);cursor:pointer}.rail .pg button.on{background:var(--accent);color:var(--on)}
+.body{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 0 44px;min-width:0}
+.tt{position:fixed;top:14px;right:14px;font:inherit;padding:6px 14px;border:0;border-radius:99px;background:var(--surface);color:var(--ink);cursor:pointer;z-index:9}
+.name{font-size:84px;font-weight:600;font-style:italic;line-height:1.05;height:88px;white-space:nowrap;margin-top:24px}
+.alts{height:34px;margin-top:14px;font-size:20px;font-style:italic;color:var(--muted)}
+.stp{height:40px;margin-top:14px;display:flex;align-items:center;gap:8px;font-size:20px}.stp b{width:40px;height:40px;display:grid;place-items:center;border-radius:99px;font-weight:400;cursor:pointer}.stp b:hover{background:var(--chip)}
+.leg{height:34px;margin-top:14px;display:flex;gap:28px;align-items:center;font-size:19px;font-style:italic}.leg span{display:flex;gap:6px;align-items:center}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;width:100%}
+.btn{font:inherit;font-size:20px;padding:12px 24px;border:0;border-radius:99px;background:var(--chip);color:var(--ink);cursor:pointer;white-space:nowrap}.btn.p{background:var(--accent);color:var(--on)}.btn kbd{font:inherit;font-size:13px;color:var(--muted);margin-left:8px}
+.bld{display:flex;flex-direction:column;gap:10px;align-items:center;margin-top:12px}.r1{display:flex;gap:12px;align-items:center}.roots{display:flex;gap:4px;margin-left:10px}
+.cell{position:relative;width:50px;height:50px;border-radius:11px;overflow:hidden;background:var(--surface);flex:none}
+.cell button{position:absolute;inset:0;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer;padding:0}
+.cell .a{clip-path:polygon(0 0,100% 0,0 100%)}.cell .b{clip-path:polygon(100% 0,100% 100%,0 100%)}
+.cell .a span{position:absolute;left:27%;top:27%;transform:translate(-50%,-50%);font-size:15px;white-space:nowrap}.cell .b span{position:absolute;left:73%;top:73%;transform:translate(-50%,-50%);font-size:15px;white-space:nowrap}
+.cell .a:hover,.cell .b:hover,.cell.one button:hover{background:var(--chip)}.cell button.sel{background:var(--accent);color:var(--on);font-weight:700}
+.cell.one button{font-size:21px}.cell i{position:absolute;left:-10%;top:50%;width:120%;height:1px;background:var(--keyline);transform:rotate(-45deg);pointer-events:none}
+.q{font:inherit;font-size:16px;padding:9px 0;width:56px;border:0;border-radius:11px;background:var(--surface);color:var(--ink);cursor:pointer}.q:hover{background:var(--chip)}.q.sel{background:var(--accent);color:var(--on);font-weight:700}
+.grp .l{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:3px}.grp .row{display:flex;gap:5px}.qs{display:flex;gap:16px;align-items:flex-end}
+.status{height:31px;margin-top:6px;color:var(--muted);font-size:20px;font-style:italic}
+.wk{fill:var(--surface);stroke:var(--keyline)}.bkey{fill:var(--bk)}.oct{fill:var(--muted);font-size:13px;font-style:italic}
+.fbd{fill:var(--surface)}.fret{stroke:var(--keyline);stroke-width:2}.nut{stroke:var(--ink);stroke-width:7}.str{stroke:var(--ink);stroke-opacity:.7}.fn{fill:var(--muted);font-size:15px;font-style:italic;text-anchor:middle}.inl{fill:var(--muted);opacity:.35}
+.sh{stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round}
+</style></head><body><button class="tt" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Light / dark</button>
+<h1>Explore with the chord builder, full page</h1><p class="n">1216 x 800 with the collapsed rail. Name, other readings, voicing stepper (guitar), role legend, instrument, Play and Block, then the builder in the same row as the buttons, and the status line. Switch Piano / Guitar with the toggle at the bottom of the rail. The guitar voicings are generated naively here, only to show the stepper working; fretboard frets are evenly spaced as in the app. The row of shapes above the frame is the role set; the last three (2nd / 9th pentagon, 4th hexagon, 6th star) are new. The arrow row under the name now also carries the inversion stepper (same style as the voicing stepper); on the guitar both sit on one line.</p>
+<div id="roles" style="display:flex;gap:30px;align-items:center;margin:0 0 18px;font-size:18px;font-style:italic"></div><div id="app"></div>
+<script>
+const R=[['C'],['C♯','D♭'],['D'],['D♯','E♭'],['E'],['F'],['F♯','G♭'],['G'],['G♯','A♭'],['A'],['A♯','B♭'],['B']];
+const Q=[['Triads',[['maj','',[0,4,7]],['min','m',[0,3,7]],['dim','°',[0,3,6]],['aug','+',[0,4,8]],['sus2','sus2',[0,2,7]],['sus4','sus4',[0,5,7]]]],
+['Sixths',[['6','6',[0,4,7,9]],['m6','m6',[0,3,7,9]]]],
+['Sevenths',[['maj7','maj7',[0,4,7,11]],['7','7',[0,4,7,10]],['m7','m7',[0,3,7,10]],['m7♭5','m7♭5',[0,3,6,10]],['dim7','dim7',[0,3,6,9]]]],
+['Ninths',[['add9','add9',[0,4,7,14]],['9','9',[0,4,7,10,14]],['maj9','maj9',[0,4,7,11,14]],['m9','m9',[0,3,7,10,14]]]]];
+let root=0,spell=0,q=Q[0][1][0],inst='piano',vi=0,inv=0;const maxInv=()=>Math.min(q[2].length,4)-1;const invName=['Root position','1st inversion','2nd inversion','3rd inversion'];
+const tones=()=>{const n=Math.min(inv,maxInv());return q[2].map((iv,i)=>i<n?iv+12:iv).sort((a,b)=>a-b).map(iv=>iv)};
+const bassIv=()=>q[2][Math.min(inv,maxInv())];
+const flat=()=>(R[root][spell]||'').includes('♭')||root===5;
+const NS=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'],NF=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const note=p=>(flat()?NF:NS)[((p%12)+12)%12];
+const rootName=()=>R[root][spell]||R[root][0];
+const role=iv=>iv===0?'root':iv===2||iv===14?'ninth':iv===5?'fourth':iv===9&&['6','m6'].includes(q[0])?'sixth':iv<12&&[3,4].includes(iv%12)?'third':iv<12&&[6,7,8].includes(iv%12)?'fifth':iv<12&&[10,11].includes(iv%12)?'seventh':iv===9?'seventh':'ext';
+const roleLabel=iv=>({0:'root',2:q[0]==='sus2'?'2nd':'9th',3:'3rd',4:'3rd',5:'4th',6:'5th',7:'5th',8:'5th',9:'6th',10:'7th',11:'7th',14:'9th'})[iv]+(iv===2?'':'');
+const poly=(n,cx,cy,r,rot=-90,inner=0)=>{const pts=[];for(let i=0;i<(inner?n*2:n);i++){const a=(rot+i*(inner?180/n:360/n))*Math.PI/180,rr=inner&&i%2?r*inner:r;pts.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1))}return pts.join(' ')};
+function shape(r,cx,cy,s=1){const f=`fill:var(--${r==='ext'?'surface':r})`;
+if(r==='root')return`<circle class="sh" style="${f}" cx="${cx}" cy="${cy}" r="${11*s}"/><circle cx="${cx}" cy="${cy}" r="${17*s}" fill="none" stroke="var(--ink)" stroke-width="1.8"/>`;
+if(r==='third')return`<polygon class="sh" style="${f}" points="${cx},${cy-13*s} ${cx+13*s},${cy} ${cx},${cy+13*s} ${cx-13*s},${cy}"/>`;
+if(r==='fifth')return`<rect class="sh" style="${f}" x="${cx-10*s}" y="${cy-10*s}" width="${20*s}" height="${20*s}"/>`;
+if(r==='seventh')return`<polygon class="sh" style="${f}" points="${cx},${cy-12*s} ${cx+13*s},${cy+10*s} ${cx-13*s},${cy+10*s}"/>`;
+if(r==='ninth')return`<polygon class="sh" style="${f}" points="${poly(5,cx,cy,13*s)}"/>`;
+if(r==='fourth')return`<polygon class="sh" style="${f}" points="${poly(6,cx,cy,13*s,0)}"/>`;
+if(r==='sixth')return`<polygon class="sh" style="${f}" points="${poly(5,cx,cy,15*s,-90,.48)}"/>`;
+return`<circle class="sh" style="${f}" cx="${cx}" cy="${cy}" r="${8*s}"/>`}
+const BLK=[1,3,6,8,10];
+function piano(){const base=48,n=36,wW=57,H=300,bw=36,bh=185,lit=new Map(q[2].map((iv,i)=>{let p=48+root+iv+(i<Math.min(inv,maxInv())?12:0);if(p>83)p-=12;return[p,role(iv)]}));let wi=0,w='',b='',m='',t='';const pos=[];
+for(let p=base;p<base+n;p++){if(BLK.includes(p%12))pos.push([p,wi*wW-bw/2,true]);else{pos.push([p,wi*wW,false]);wi++}}
+for(const[p,x,k]of pos){const r=lit.get(p),tint=r?`style="fill:color-mix(in srgb,var(--${r==='ext'?'muted':r}) ${r==='ext'?30:80}%,var(--${k?'bk':'surface'}))"`:'';
+if(!k){w+=`<rect class="wk" x="${x+1}" y="4" width="${wW}" height="${H}" ${tint}/>`;if(p%12===0)t+=`<text class="oct" x="${x+1+wW/2}" y="324" text-anchor="middle">C${Math.floor(p/12)-1}</text>`;if(r)m+=shape(r,x+1+wW/2,255)}
+else{b+=`<rect class="bkey" x="${x+1}" y="4" width="${bw}" height="${bh}" ${tint}/>`;if(r)m+=shape(r,x+1+bw/2,160)}}
+return`<svg viewBox="0 0 ${wi*wW+2} 330" height="296">${w}${b}${m}${t}</svg>`}
+const TUN=[40,45,50,55,59,64];
+function voicings(){const pcs=new Set(q[2].map(iv=>(60+root+iv)%12)),need=[root%12,(60+root+q[2][1])%12],seen=new Set(),out=[];
+for(let lo=0;lo<=9;lo++){const opts=TUN.map(t=>{const o=[-1];for(let f=0;f<=lo+3;f++){if(f>0&&f<lo)continue;if(pcs.has((t+f)%12))o.push(f)}return o});
+const rec=(s,cur)=>{if(out.length>400)return;if(s===6){const pl=cur.filter(x=>x>=0);if(pl.length<4)return;const bi=cur.findIndex(x=>x>=0);if(inv>0&&(TUN[bi]+cur[bi])%12!==(60+root+bassIv())%12)return;const set=new Set(cur.map((f,i)=>f<0?-1:(TUN[i]+f)%12));if(!need.every(x=>set.has(x)))return;const first=cur.findIndex(x=>x>=0),last=cur.length-1-[...cur].reverse().findIndex(x=>x>=0);if(cur.slice(first,last+1).includes(-1))return;
+const fr=pl.filter(x=>x>0);if(fr.length&&Math.max(...fr)-Math.min(...fr)>3)return;const k=cur.join();if(seen.has(k))return;seen.add(k);out.push({f:cur,key:(fr.length?Math.min(...fr):0)*10+cur.filter(x=>x<0).length});return}for(const f of opts[s])rec(s+1,[...cur,f])};rec(0,[])}
+out.sort((a,b)=>a.key-b.key);return out.slice(0,12)}
+function guitar(){const L=voicings(),v=L[Math.min(vi,L.length-1)]||{f:[]},NUT=150,FW=85,Y=s=>300-s*46;let s='';
+s+=`<rect class="fbd" x="${NUT}" y="56" width="1020" height="258"/>`;
+for(let f=1;f<=12;f++)s+=`<line class="fret" x1="${NUT+f*FW}" x2="${NUT+f*FW}" y1="56" y2="314"/>`;
+s+=`<line class="nut" x1="${NUT}" x2="${NUT}" y1="53" y2="317"/>`;
+for(const f of[3,5,7,9])s+=`<circle class="inl" cx="${NUT+(f-.5)*FW}" cy="185" r="9"/>`;
+s+=`<circle class="inl" cx="${NUT+11.5*FW}" cy="139" r="9"/><circle class="inl" cx="${NUT+11.5*FW}" cy="231" r="9"/>`;
+['E','A','D','G','B','E'].forEach((n,i)=>{s+=`<line class="str" x1="${NUT}" x2="1170" y1="${Y(i)}" y2="${Y(i)}" stroke-width="${3.25-2.25*i/5}"/><text class="fn" x="58" y="${Y(i)+5}">${n}</text>`});
+for(let f=1;f<=12;f++)s+=`<text class="fn" x="${NUT+(f-.5)*FW}" y="344">${f}</text>`;
+const names=new Map(q[2].map(iv=>[(60+root+iv)%12,role(iv)]));
+v.f.forEach((f,i)=>{if(f<0){s+=`<path d="M${100} ${Y(i)-8}l16 16M116 ${Y(i)-8}l-16 16" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round"/>`;return}
+const r=names.get((TUN[i]+f)%12)||'ext';if(f===0)s+=`<g>${shape(r,108,Y(i),.8)}</g>`;else s+=shape(r,NUT+(f-.5)*FW,Y(i))});
+return`<svg viewBox="0 0 1200 372" height="296">${s}</svg>`}
+const bassNote=()=>note(60+root+bassIv());
+const nm0=()=>rootName()+({'maj':' major','min':' minor','dim':' dim','aug':' aug'}[q[0]]||' '+q[1]);
+const nm=()=>nm0()+(Math.min(inv,maxInv())>0?' / '+bassNote():'');
+function alt(){const r=rootName();if(q[0]==='6')return`${note(root+9)}m7/${r}`;if(q[0]==='m7')return`${note(root+3)}6/${r}`;return''}
+function legend(){const seen=new Set();return q[2].filter(iv=>!seen.has(role(iv)+iv)&&seen.add(role(iv)+iv)).map(iv=>`<span><svg width="34" height="34" viewBox="-17 -17 34 34">${shape(role(iv),0,0,.8)}</svg>${roleLabel(iv)} ${note(60+root+iv)}</span>`).join('')}
+function draw(){const rc=R.map((r,i)=>r.length===1?`<div class="cell one"><button class="${root===i?'sel':''}" onclick="root=${i};spell=0;vi=0;inv=0;draw()">${r[0]}</button></div>`:
+`<div class="cell"><button class="a ${root===i&&spell===0?'sel':''}" onclick="root=${i};spell=0;vi=0;inv=0;draw()"><span>${r[0]}</span></button><button class="b ${root===i&&spell===1?'sel':''}" onclick="root=${i};spell=1;vi=0;inv=0;draw()"><span>${r[1]}</span></button><i></i></div>`).join('');
+const qc=Q.map(([g,l])=>`<div class="grp"><div class="l">${g}</div><div class="row">${l.map(x=>`<button class="q ${q===x?'sel':''}" onclick="q=Q[${Q.findIndex(z=>z[1]===l)}][1][${l.indexOf(x)}];vi=0;inv=0;draw()">${x[0]}</button>`).join('')}</div></div>`).join('');
+const L=inst==='guitar'?voicings().length:0;
+document.getElementById('app').innerHTML=`<div class="frame"><div class="rail"><div class="pg"><button class="${inst==='piano'?'on':''}" onclick="inst='piano';draw()">Pno</button><button class="${inst==='guitar'?'on':''}" onclick="inst='guitar';vi=0;draw()">Gtr</button></div></div>
+<div class="body"><div class="name">${nm()}</div><div class="alts">${alt()}</div>
+<div class="stp">${inst==='guitar'&&L>1?`<b onclick="vi=Math.max(0,vi-1);draw()">◀</b><span style="min-width:9em;text-align:center">Voicing ${Math.min(vi,L-1)+1} of ${L}</span><b onclick="vi=Math.min(${L-1},vi+1);draw()">▶</b><span style="width:40px"></span>`:''}${maxInv()>0?`<b onclick="inv=Math.max(0,inv-1);vi=0;draw()">◀</b><span style="min-width:9em;text-align:center">${invName[Math.min(inv,maxInv())]}</span><b onclick="inv=Math.min(${maxInv()},inv+1);vi=0;draw()">▶</b>`:''}</div>
+<div class="leg">${legend()}</div>
+<div class="stage">${inst==='piano'?piano():guitar()}</div>
+<div class="bld"><div class="r1"><button class="btn">Play<kbd>Space</kbd></button><button class="btn p">Block<kbd>Enter</kbd></button><div class="roots">${rc}</div></div><div class="qs">${qc}</div></div>
+<div class="status"></div></div></div>`}
+document.getElementById('roles').innerHTML=[['root','root'],['third','3rd'],['fifth','5th'],['seventh','7th'],['ninth','2nd / 9th'],['fourth','4th'],['sixth','6th']].map(([r,n])=>`<span style="display:flex;gap:8px;align-items:center"><svg width="44" height="44" viewBox="-22 -22 44 44">${shape(r,0,0,1.1)}</svg>${n}</span>`).join('');
+draw()</script></body></html>

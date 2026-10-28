@@ -7,7 +7,7 @@ updated: 2026-10-27
 
 # accompa — PRD
 
-> **Status: final.** Phase 1 defined and built. Phase 2 scope defined 2026-10-27 (circle and progressions page needs discovery).
+> **Status: final.** Phase 1 defined and built. Phase 2 scope defined 2026-10-27; its UX decided 2026-10-28.
 
 ## Vision
 
@@ -141,8 +141,6 @@ The user can name M3, P4, P5 and the 7th intervals (m7, M7) by ear without looki
 
 ## Open Questions
 
-- Circle of fifths and progressions page (FR-33): what it contains. Owner: user with UX. Revisit: before the epic is written.
-- Navigation for five sections (FR-32): owner UX. Blocks epics 10 and 11.
 - Sample source and bundle size (FR-23): owner architecture.
 - Voicing omission rule for chords above four tones (FR-25): owner architecture.
 
@@ -162,7 +160,7 @@ Scope agreed with the user on 2026-10-27. Phase 2 deepens chords in Explore, add
 | 9 | Chord builder | UX (controls) |
 | 10 | Chord flash drill | UX (navigation) |
 | 11 | Circle of fifths and progressions | UX (discovery first) |
-| — | Navigation for five sections | UX; blocks epics 10 and 11 |
+| — | Navigation for four sections | UX (decided 2026-10-28); blocks epics 10 and 11 |
 
 ### Functional Requirements
 
@@ -186,10 +184,10 @@ Scope agreed with the user on 2026-10-27. Phase 2 deepens chords in Explore, add
 - FR-31: Reveal shows the answer at any time with no penalty. No score, no streak, no praise.
 
 **Navigation**
-- FR-32: A navigation that holds Listen, Explore, the flash drill and the circle reference, replacing the two-tab mode strip. Decided in UX. The flash drill and circle epics wait for it.
+- FR-32: A navigation that holds the four sections, Listen, Explore, the flash drill and the circle reference, replacing the two-tab mode strip. Decided in UX (2026-10-28): a collapsible side rail, collapsed by default, with its state kept between sessions. The flash drill and circle epics wait for it.
 
-**Circle of fifths and progressions (needs discovery)**
-- FR-33: A separate page: an interactive visual reference that helps the user see and understand chord progressions, so he learns which options exist and what to look for. No ear training. What it contains is not decided. Candidate uses, to be explored with UX through sketches and not yet requirements: the diatonic chords of a key with Roman numerals, closely related keys, common progressions drawn as paths, relative major and minor, key signatures. [NEEDS DISCOVERY]
+**Circle of fifths**
+- FR-33: A separate page with a large, clickable circle of fifths: major keys outside, relative minors inside, the chosen key shown in the middle, its neighbours and relative highlighted. Choosing a key (or a minor key, with a Natural / Harmonic / Melodic choice) shows its seven chords as Roman-numeral triads that can be clicked to hear. It has no instrument, no common-progression paths, no key signature and no ear training. Decided in UX on 2026-10-28.
 - Architecture note: this page introduces keys and Roman-numeral analysis, a concept the app does not have today. Architecture hears about it early.
 
 ### Phase 3 (maybe, not committed)

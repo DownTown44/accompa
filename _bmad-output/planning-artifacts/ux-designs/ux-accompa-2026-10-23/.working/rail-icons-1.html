@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Rail icon options</title>
+<style>
+:root{--bg:#FDF1E8;--surface:#FFFAF5;--ink:#2C2A2B;--muted:#6F635D;--accent:#F3B5B0;--chip:#0000000D;--on:#2C2A2B}
+:root[data-theme=dark]{--bg:#272022;--surface:#342A2D;--ink:#F3E7E2;--muted:#A89A9C;--accent:#E9A8A6;--chip:#FFFFFF14;--on:#272022}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Palatino,"Palatino Linotype",serif;padding:28px}
+h1{font-size:22px;font-style:italic;margin:0 0 4px}p.s{color:var(--muted);margin:0 0 24px}
+button.t{position:fixed;top:16px;right:16px;font:inherit;padding:6px 14px;border-radius:99px;border:0;background:var(--chip);color:var(--ink);cursor:pointer}
+.row{display:flex;gap:56px;flex-wrap:wrap}
+.opt h2{font-size:16px;margin:0 0 2px;font-style:italic}.opt small{color:var(--muted);display:block;margin-bottom:12px;max-width:240px}
+.rail{width:64px;height:560px;background:var(--surface);border-radius:18px;display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px}
+.rail .wm{font-style:italic;font-weight:700;font-size:20px;margin-bottom:10px}
+.it{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:var(--muted)}
+.it.on{background:var(--accent);color:var(--on)}
+.sp{flex:1}.sep{width:28px;height:1px;background:var(--chip);margin:8px 0;background:color-mix(in srgb,var(--muted) 35%,transparent)}
+.seg{display:flex;flex-direction:column;gap:2px;padding:3px;border-radius:14px;background:var(--chip)}
+.seg .it{width:36px;height:36px;border-radius:11px}
+.pair{display:flex;gap:0}.pair .it{width:30px;height:30px;border-radius:10px}
+svg{width:24px;height:24px;overflow:visible}.pair svg,.seg svg{width:20px;height:20px}
+.line svg *{fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.line svg .f{fill:currentColor;stroke:none}
+.solid svg *{fill:currentColor;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round}
+.solid svg .k{fill:none;stroke:var(--surface);stroke-width:1.5;stroke-linecap:round}
+.solid .on svg .k{stroke:var(--accent)}
+.soft svg *{fill:color-mix(in srgb,currentColor 18%,transparent);stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.soft svg .n{fill:none}.soft svg .f{fill:currentColor;stroke:none}
+</style></head><body>
+<button class="t" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">Light / dark</button>
+<h1>Rail icons: three treatments</h1>
+<p class="s">Same shapes, collapsed rail, Explore selected. Top to bottom: Listen, Explore, Flash drill, Circle of fifths; then Piano / Guitar, then gear and ?.</p>
+<div class="row" id="row"></div>
+<template id="ic">
+<svg id="listen" viewBox="0 0 24 24"><path class="n" d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.8"/></svg>
+<svg id="explore" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.8 8.2l-2.2 5.4-5.4 2.2 2.2-5.4z"/></svg>
+<svg id="drill" viewBox="0 0 24 24"><path class="n" d="M7 3.5h10"/><rect x="4" y="6" width="16" height="14" rx="2.4"/><path class="n" d="M9 13l2.2 2.2L15.5 11"/></svg>
+<svg id="circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle class="n" cx="12" cy="12" r="3.6"/><circle class="f" cx="12" cy="3" r="1.3"/><circle class="f" cx="21" cy="12" r="1.3"/><circle class="f" cx="12" cy="21" r="1.3"/><circle class="f" cx="3" cy="12" r="1.3"/></svg>
+<svg id="piano" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.2"/><path class="k n" d="M9 12v7M15 12v7"/><rect class="f" x="7.2" y="5" width="3.6" height="7" rx="1"/><rect class="f" x="13.2" y="5" width="3.6" height="7" rx="1"/></svg>
+<svg id="guitar" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/><path class="k n" d="M9 6v12M15 6v12M3 12h18"/><circle class="f" cx="12" cy="9" r="1.3"/></svg>
+<svg id="gear" viewBox="0 0 24 24"><circle class="n" cx="12" cy="12" r="3"/><path class="n" d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="6.2" class="n" style="fill:none"/></svg>
+<svg id="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="n" d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.6"/><circle class="f" cx="12" cy="16.8" r="1"/></svg>
+</template>
+<script>
+const t=document.getElementById('ic').content,u=i=>{const s=t.getElementById(i).cloneNode(true);s.removeAttribute('id');return s.outerHTML}
+const opts=[['line','A. Line','Thin outline, like the rest of the app\'s quiet, italic look. Selected state is only the accent pill.'],['solid','B. Solid','Filled shapes. Heaviest and easiest to spot at a glance; sits closest to the filled accent pill.'],['soft','C. Soft fill','Outline with a faint tint of its own colour. Between A and B; shapes stay readable at 20px.']];
+document.getElementById('row').innerHTML=opts.map(([c,n,d])=>`<div class="opt ${c}"><h2>${n}</h2><small>${d}</small><div class="rail"><div class="wm">a</div>
+<div class="it">${u('listen')}</div><div class="it on">${u('explore')}</div><div class="it">${u('drill')}</div><div class="it">${u('circle')}</div>
+<div class="sp"></div><div class="seg"><div class="it on">${u('piano')}</div><div class="it">${u('guitar')}</div></div><div class="sep"></div>
+<div class="pair"><div class="it">${u('gear')}</div><div class="it">${u('help')}</div></div></div></div>`).join('')
+</script></body></html>
