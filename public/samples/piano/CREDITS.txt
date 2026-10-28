@@ -1,0 +1,8 @@
+Piano samples: Salamander Grand Piano V3
+Author: Alexander Holm
+Licence: Creative Commons Attribution 3.0 (CC BY 3.0), https://creativecommons.org/licenses/by/3.0/
+Source: https://archive.org/details/SalamanderGrandPianoV3 ; the files here are copied from the Tone.js audio repository, https://github.com/Tonejs/audio (salamander/, C2 to C7). Retrieved 2026-10-28.
+
+Changes: the recordings were trimmed and converted to MP3 (21 notes, every third semitone from C2 to C7).
+
+The author made a public-domain claim on 2022-03-04. It is unconfirmed, so the CC BY 3.0 terms are followed here.

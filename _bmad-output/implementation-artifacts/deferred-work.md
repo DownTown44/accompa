@@ -32,3 +32,15 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-1-the-engine-knows-the-instrument.md`
   summary: `unlock`, `status` and `subscribe` follow the piano engine only, so a guitar-first gesture would not unlock a separate guitar engine.
   evidence: `createEngine` in `src/audio/engines.ts`; decided for 6.1 by Apor (status API unchanged), to be settled by Stories 6.3 and 6.4 once the factories differ.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
+  summary: A failed, partial or stalled sample fetch is silent and a chord can lose notes; there is no retry, timeout or synth fallback.
+  evidence: `src/audio/sampler.ts` swallows every fetch and decode error; loading, failure, retry and the synth fallback are Story 6.4.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
+  summary: Switching Sound rebuilds the router, re-fetching and re-decoding the 21 files and leaving the old AudioContext open.
+  evidence: `createEngine` in `src/audio/engines.ts` runs on every Sound change; share decoded buffers and close contexts in the 6.4 engine lifecycle.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
+  summary: The OfflineAudioContext decode path is verified only in Chrome.
+  evidence: Chrome loaded 21 files and played a source; Firefox and Safari were not tried; try them to settle it.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
+  summary: By-ear tuning of the sampler: stop click, 16 s sample tails, loudness against the synth (SAMPLE_GAIN 0.8).
+  evidence: `src/audio/sampler.ts` stops sources without a release and plays each sample to its full length; settle by listening, then add a short gain release or cap the tails if needed.

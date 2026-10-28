@@ -12,13 +12,15 @@ registerSetupHooks()
 describe('sound and theme', () => {
   const theme = () => document.documentElement.getAttribute('data-theme')
 
-  it('shows Synthesized as the only sound with none selected, and the three themes', () => {
+  it('shows Samples then Synthesized with Samples selected, the hint and the credit, and the three themes', () => {
     render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     const sound = screen.getByRole('radiogroup', { name: 'Sound' })
-    expect(sound.querySelectorAll('input')).toHaveLength(1)
+    expect([...sound.querySelectorAll('input')].map((i) => i.closest('label')?.textContent)).toEqual(['Samples', 'Synthesized'])
+    expect(radio('Samples').checked).toBe(true)
     expect(radio('Synthesized').checked).toBe(false)
-    expect(sound.querySelector('input:checked')).toBeNull()
+    expect(screen.getByText('Samples follow the instrument: piano sound on the piano, guitar sound on the guitar.').className).toBe('setup-hint')
+    expect(screen.getByText('Piano sound: Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0.').className).toBe('setup-hint')
     expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeTruthy()
     expect(radio('System').checked).toBe(true)
     expect(radio('Light').checked).toBe(false)

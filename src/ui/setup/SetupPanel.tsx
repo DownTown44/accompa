@@ -28,7 +28,10 @@ const ROOT_MODES: readonly { value: RootMode; label: string }[] = [
   { value: 'fixed', label: 'Fixed' },
 ]
 
-const SOUNDS: readonly { value: Sound; label: string }[] = [{ value: 'synthesized', label: 'Synthesized' }]
+const SOUNDS: readonly { value: Sound; label: string }[] = [
+  { value: 'samples', label: 'Samples' },
+  { value: 'synthesized', label: 'Synthesized' },
+]
 
 const THEMES: readonly { value: Theme; label: string }[] = [
   { value: 'system', label: 'System' },
@@ -173,6 +176,10 @@ export function SetupPanel() {
         value={settings.sound}
         onChange={(sound) => dispatch({ type: 'setSound', sound })}
       />
+      <p className="setup-hint">
+        Samples follow the instrument: piano sound on the piano, guitar sound on the guitar.
+      </p>
+      <p className="setup-hint">Piano sound: Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0.</p>
       <h3 id="theme-label" className="setup-sublabel">
         Theme
       </h3>

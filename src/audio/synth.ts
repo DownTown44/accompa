@@ -1,9 +1,8 @@
 import type { Pitch } from '../core/pitch'
-import type { AudioEngine, AudioStatus, PlayMode } from './engine'
+import { createContextGate } from './contextGate'
+import type { AudioEngine, PlayMode } from './engine'
+import { LEAD_IN, stepFor } from './timing'
 
-const LEAD_IN = 0.03
-const ARPEGGIO_STEP = 0.55
-const STRUM_SPREAD = 0.04
 const NOTE_LENGTH = 1.2
 const ATTACK = 0.015
 const PEAK_GAIN = 0.3
@@ -12,51 +11,8 @@ const FLOOR_GAIN = 0.0001
 const frequency = (p: Pitch) => 440 * 2 ** ((p - 69) / 12)
 
 export function createSynthEngine(createContext: () => AudioContext = () => new AudioContext()): AudioEngine {
-  let context: AudioContext | null = null
-  let status: AudioStatus = 'idle'
+  const gate = createContextGate(createContext)
   let sounding: OscillatorNode[] = []
-  // Bumped by play and stop so a request still waiting on resume cannot start late.
-  let generation = 0
-  const listeners = new Set<() => void>()
-
-  function setStatus(next: AudioStatus) {
-    if (next === status) return
-    status = next
-    listeners.forEach((listener) => listener())
-  }
-
-  function refresh() {
-    if (context) setStatus(context.state === 'running' ? 'running' : 'blocked')
-  }
-
-  function ensureContext(): AudioContext | null {
-    if (context) return context
-    try {
-      context = createContext()
-      context.onstatechange = refresh
-      return context
-    } catch {
-      setStatus('blocked')
-      return null
-    }
-  }
-
-  // Runs the callback once the context is running; reports blocked when it cannot be.
-  function whenRunning(ctx: AudioContext, callback: () => void) {
-    const requested = generation
-    if (ctx.state === 'running') {
-      refresh()
-      callback()
-      return
-    }
-    ctx.resume().then(
-      () => {
-        refresh()
-        if (ctx.state === 'running' && requested === generation) callback()
-      },
-      refresh,
-    ).catch(() => setStatus('blocked'))
-  }
 
   function stopSounding() {
     for (const oscillator of sounding) {
@@ -74,7 +30,7 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
     const start = ctx.currentTime + LEAD_IN
     const peak = PEAK_GAIN / Math.sqrt(pitches.length)
     pitches.forEach((p, index) => {
-      const step = mode === 'arpeggio' ? ARPEGGIO_STEP : mode === 'strum' ? STRUM_SPREAD : 0
+      const step = stepFor(mode)
       const at = start + index * step
       const oscillator = ctx.createOscillator()
       const gain = ctx.createGain()
@@ -95,34 +51,29 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
 
   return {
     play(pitches, _instrument, mode) {
-      const ctx = ensureContext()
+      const ctx = gate.ensureContext()
       if (!ctx) return
-      generation++
+      gate.invalidate()
       try {
-        whenRunning(ctx, () => schedule(ctx, pitches, mode))
+        gate.whenRunning(ctx, () => schedule(ctx, pitches, mode))
       } catch {
-        setStatus('blocked')
+        gate.setBlocked()
       }
     },
     stop() {
-      generation++
+      gate.invalidate()
       stopSounding()
     },
     unlock() {
-      const ctx = ensureContext()
+      const ctx = gate.ensureContext()
       if (!ctx) return
       try {
-        whenRunning(ctx, () => {})
+        gate.whenRunning(ctx, () => {})
       } catch {
-        setStatus('blocked')
+        gate.setBlocked()
       }
     },
-    status: () => status,
-    subscribe(listener) {
-      listeners.add(listener)
-      return () => {
-        listeners.delete(listener)
-      }
-    },
+    status: gate.status,
+    subscribe: gate.subscribe,
   }
 }

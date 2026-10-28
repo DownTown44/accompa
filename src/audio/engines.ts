@@ -1,10 +1,12 @@
 import type { Instrument, Sound } from '../core/model'
 import type { AudioEngine } from './engine'
+import { PIANO_SET } from './sampleSets'
+import { createSamplerEngine } from './sampler'
 import { createSynthEngine } from './synth'
 
 // Each sound and instrument the app offers, and how to make the engine that plays it.
 export const ENGINES: Readonly<Record<Sound, Readonly<Record<Instrument, () => AudioEngine>>>> = {
-  samples: { piano: createSynthEngine, guitar: createSynthEngine },
+  samples: { piano: () => createSamplerEngine(PIANO_SET), guitar: createSynthEngine },
   synthesized: { piano: createSynthEngine, guitar: createSynthEngine },
 }
 
@@ -22,6 +24,8 @@ export function createEngine(sound: Sound): AudioEngine {
     }
     return engine
   }
+  // The piano engine is built now, so its sample set starts loading at startup.
+  forInstrument('piano')
   return {
     play: (pitches, instrument, mode) => forInstrument(instrument).play(pitches, instrument, mode),
     stop: () => byFactory.forEach((engine) => engine.stop()),

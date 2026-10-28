@@ -1,70 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createSynthEngine } from '../../src/audio/synth'
 import { pitch } from '../../src/core/pitch'
-
-class FakeOscillator {
-  type = ''
-  frequency = { value: 0 }
-  startedAt: number | null = null
-  stoppedAt: number | null = null
-  stoppedNow = false
-  onended: (() => void) | null = null
-  connect<T>(target: T): T {
-    return target
-  }
-  start(at: number) {
-    this.startedAt = at
-  }
-  stop(at?: number) {
-    if (at === undefined) this.stoppedNow = true
-    else this.stoppedAt = at
-  }
-}
-
-class FakeGain {
-  gain = {
-    setValueAtTime: vi.fn(),
-    linearRampToValueAtTime: vi.fn(),
-    exponentialRampToValueAtTime: vi.fn(),
-  }
-  connect<T>(target: T): T {
-    return target
-  }
-}
-
-class FakeContext {
-  state: 'running' | 'suspended'
-  currentTime = 1
-  destination = {}
-  onstatechange: (() => void) | null = null
-  oscillators: FakeOscillator[] = []
-  resumes = 0
-  failOscillators = false
-  constructor(
-    initial: 'running' | 'suspended',
-    private afterResume: 'running' | 'suspended' = 'running',
-  ) {
-    this.state = initial
-  }
-  createOscillator() {
-    if (this.failOscillators) throw new Error('no oscillator')
-    const osc = new FakeOscillator()
-    this.oscillators.push(osc)
-    return osc
-  }
-  createGain() {
-    return new FakeGain()
-  }
-  resume() {
-    this.resumes++
-    this.state = this.afterResume
-    this.onstatechange?.()
-    return Promise.resolve()
-  }
-}
-
-const asContext = (ctx: FakeContext) => () => ctx as unknown as AudioContext
-const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
+import { asContext, FakeContext, FakeGain, flush } from './support/fakeContext'
 
 describe('synth engine', () => {
   it('creates no context before the first gesture', () => {
