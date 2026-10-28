@@ -83,7 +83,7 @@ describe('chord guess', () => {
     fireEvent.click(named('Maj'))
     engine.plays.length = 0
     press('Enter')
-    expect(engine.plays).toEqual([{ pitches: [40, 43, 47], mode: 'block' }])
+    expect(engine.plays).toEqual([{ pitches: [40, 43, 47], instrument: 'piano', mode: 'block' }])
     expect(hint()).toBe('')
     expect(marked()).toEqual([])
     expect(document.querySelectorAll('[data-lit]')).toHaveLength(0)
@@ -118,7 +118,7 @@ describe('chord guess', () => {
     fireEvent.click(named('Dim7'))
     expect(marked()).toEqual(['Dim7'])
     press(' ')
-    expect(engine.plays).toEqual([{ pitches: [40, 43, 47], mode: 'block' }])
+    expect(engine.plays).toEqual([{ pitches: [40, 43, 47], instrument: 'piano', mode: 'block' }])
   })
 
   it('dims out-of-pool buttons, ignores them, and keeps the answer in play', () => {
@@ -213,7 +213,7 @@ describe('chord guess outside Listen', () => {
     press('m')
     expect(marked()).toEqual([])
     expect(hint()).toBe('')
-    expect(engine.plays.at(-1)).toEqual({ pitches: [40, 44, 47], mode: 'block' })
+    expect(engine.plays.at(-1)).toEqual({ pitches: [40, 44, 47], instrument: 'piano', mode: 'block' })
   })
 
   it('has one short label per quality, the same on chips and buttons', () => {

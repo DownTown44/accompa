@@ -12,16 +12,29 @@ registerSetupHooks()
 describe('sound and theme', () => {
   const theme = () => document.documentElement.getAttribute('data-theme')
 
-  it('shows Synthesized as the only sound, selected, and the three themes', () => {
+  it('shows Synthesized as the only sound with none selected, and the three themes', () => {
     render(<App session={listenSession} engine={createFakeEngine()} />)
     fireEvent.click(opener())
     const sound = screen.getByRole('radiogroup', { name: 'Sound' })
     expect(sound.querySelectorAll('input')).toHaveLength(1)
-    expect(radio('Synthesized').checked).toBe(true)
+    expect(radio('Synthesized').checked).toBe(false)
+    expect(sound.querySelector('input:checked')).toBeNull()
     expect(screen.getByRole('radiogroup', { name: 'Theme' })).toBeTruthy()
     expect(radio('System').checked).toBe(true)
     expect(radio('Light').checked).toBe(false)
     expect(radio('Dark').checked).toBe(false)
+  })
+
+  it('selects Synthesized when clicked, saves it under the v2 key and starts on it after a reload', () => {
+    const first = render(<App session={listenSession} engine={createFakeEngine()} />)
+    fireEvent.click(opener())
+    fireEvent.click(radio('Synthesized'), { detail: 1 })
+    expect(radio('Synthesized').checked).toBe(true)
+    expect(localStorage.getItem('accompa.sound.v2')).toBe('"synthesized"')
+    first.unmount()
+    render(<App session={listenSession} engine={createFakeEngine()} />)
+    fireEvent.click(opener())
+    expect(radio('Synthesized').checked).toBe(true)
   })
 
   it('applies a theme at once and saves it, and System removes the attribute', () => {

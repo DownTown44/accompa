@@ -32,16 +32,16 @@ Index for agents. Policy and pitfalls are in `AGENTS.md`; the story workflow and
 
 | File | Owns |
 | --- | --- |
-| `engine.ts` | The `AudioEngine` interface (`play(pitches, mode)`, `stop`, `unlock`, `status`, `subscribe`) and `PlayMode` (`block`, `arpeggio`, `strum`). |
+| `engine.ts` | The `AudioEngine` interface (`play(pitches, instrument, mode)`, `stop`, `unlock`, `status`, `subscribe`) and `PlayMode` (`block`, `arpeggio`, `strum`). |
 | `synth.ts` | `createSynthEngine`: Web Audio triangle oscillators; timing constants `ARPEGGIO_STEP`, `STRUM_SPREAD` at the top. |
-| `engines.ts` | `ENGINES`: one engine factory per `Sound`; `EngineHost` in `App.tsx` picks by `settings.sound`. |
+| `engines.ts` | `ENGINES`: one engine factory per `Sound` and `Instrument` (all four are the synth for now); `createEngine(sound)` is the router that builds each instrument's engine on first use and shares one instance per factory. `EngineHost` in `App.tsx` builds it keyed on `settings.sound` only. |
 
 ## src/ui
 
 | Folder | Files and role |
 | --- | --- |
 | `session/` | `session.ts`: `Session`, `SessionAction`, `sessionReducer`, `initialSession`, `Feedback`, `Mode`. `SessionContext.tsx`: `SessionProvider`, `useSession`. `useSessionActions.ts`: every action a component may call (plays sound, draws questions, dispatches); 15 components call it. `useLitNotes.ts`: what the instruments light, `useLitNotes`, `useVoicingList`, `showsStepper`, `canStep`, voicing ranking cache `rankedOnce`. |
-| `settings/` | `settings.ts`: `settingsReducer`, `SettingsAction`. `SettingsContext.tsx`: provider, theme attribute, saves `pool`, `sound`, `theme`. `settingsStorage.ts`: `loadSettings`, `saveSetting`, keys `accompa.pool`, `accompa.sound`, `accompa.theme`. |
+| `settings/` | `settings.ts`: `settingsReducer`, `SettingsAction`. `SettingsContext.tsx`: provider, theme attribute, saves `pool`, `sound`, `theme`. `settingsStorage.ts`: `loadSettings`, `saveSetting`, keys `accompa.pool`, `accompa.sound.v2` (Phase 1 `accompa.sound` is never touched), `accompa.theme`. |
 | `listen/` | `ListenView.tsx` (question readout, hint, chord legend), `ListenControls.tsx` (Play again, Reveal or Next), `IntervalButtons.tsx` (renders `ChordButtons` when practice is chords), `ChordButtons.tsx`, `intervalKeys.ts` (`INTERVAL_KEYS`, also used by shortcuts). |
 | `explore/` | `ExploreView.tsx` (readout, alternative readings, announcements), `ExploreControls.tsx` (Play, Block), `VoicingStepper.tsx`. |
 | `setup/` | `SetupPanel.tsx`: Practice, pool chips, Direction, Root, Sound, Theme; `SETUP_PANEL_ID`, `SETUP_OPENER_ID`. |
@@ -60,7 +60,7 @@ Index for agents. Policy and pitfalls are in `AGENTS.md`; the story workflow and
 - `Workspace` (Explore): `pitches` (max 8, oldest first), `positions` (guitar position per pitch), `reading`, `root`, `voicing`, `edited`. Changed by `toggleNote`, `chooseReading`, `chooseRoot`, `selectVoicing`, `editVoicing`, `dismiss` (clears), `undoClear`.
 - `Practice` (Listen rounds): `question`, `revealed`, `wrongMarks`, `fixedRoot`, and the optional chord fields `chordQuestion`, `chordWrongMarks`, `chordRevealed`. Changed by `setQuestion`, `setChordQuestion`, `clearQuestion`, `setFixedRoot`, `reveal`, `revealChord`, `guess`, `guessChord`, `chordRight`.
 - Session-level actions: `setMode`, `setInstrument`, `toggleInstrument` (these take `chords` because the reducer cannot see settings), `shiftPiano`, `armRoot`, `toggleSetup`, `closeSetup`, `openHelp`, `closeHelp`, `toggleHelp`. `reveal`, `revealChord`, `chordRight`, mode and instrument changes and `undoClear` refit the piano window through `fitRevealed`.
-- `Settings` (`settingsReducer`): `practice` (not saved), `pool` (saved), `chordPool` (not saved), `direction` (not saved), `rootMode` (not saved), `sound` (saved), `theme` (saved).
+- `Settings` (`settingsReducer`): `practice` (not saved), `pool` (saved), `chordPool` (not saved), `direction` (not saved), `rootMode` (not saved), `sound` (`samples` or `synthesized`, default `samples`, saved), `theme` (saved).
 - Reducer tests assert the untouched half is the same reference (`tests/ui/session/session.test.ts`, "workspace and practice stay apart").
 
 ## Main data flows

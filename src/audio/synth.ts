@@ -94,7 +94,7 @@ export function createSynthEngine(createContext: () => AudioContext = () => new 
   }
 
   return {
-    play(pitches, mode) {
+    play(pitches, _instrument, mode) {
       const ctx = ensureContext()
       if (!ctx) return
       generation++

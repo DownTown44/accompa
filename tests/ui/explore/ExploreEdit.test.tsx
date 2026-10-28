@@ -40,7 +40,7 @@ describe('Hand-edit a voicing', () => {
     expect(lit()).toEqual(['1:3', '2:2', '3:0', '4:1', '5:0'])
     click(cell(4, 3))
     expect(lit()).toEqual(['1:3', '2:2', '3:0', '4:3', '5:0'])
-    expect(engine.plays.at(-1)).toEqual({ pitches: [62], mode: 'block' })
+    expect(engine.plays.at(-1)).toEqual({ pitches: [62], instrument: 'guitar', mode: 'block' })
     expect(count()).toBe('Voicing edited')
     expect(readout()).toContain('C E G D')
     expect(status()).not.toContain('5th')
@@ -214,8 +214,8 @@ describe('Hear the voicing', () => {
     press('Enter')
     press(' ')
     expect(engine.plays).toEqual([
-      { pitches: [48, 52, 55, 60, 64], mode: 'strum' },
-      { pitches: [48, 52, 55, 60, 64], mode: 'arpeggio' },
+      { pitches: [48, 52, 55, 60, 64], instrument: 'guitar', mode: 'strum' },
+      { pitches: [48, 52, 55, 60, 64], instrument: 'guitar', mode: 'arpeggio' },
     ])
   })
 
@@ -224,7 +224,7 @@ describe('Hear the voicing', () => {
     click(cell(0, 0))
     engine.plays.length = 0
     press('Enter')
-    expect(engine.plays).toEqual([{ pitches: [40, 48, 52, 55, 60, 64], mode: 'strum' }])
+    expect(engine.plays).toEqual([{ pitches: [40, 48, 52, 55, 60, 64], instrument: 'guitar', mode: 'strum' }])
   })
 
   it('plays the edited pitches once edited', () => {
@@ -232,7 +232,7 @@ describe('Hear the voicing', () => {
     click(cell(4, 3))
     engine.plays.length = 0
     press('Enter')
-    expect(engine.plays).toEqual([{ pitches: [48, 52, 55, 62, 64], mode: 'strum' }])
+    expect(engine.plays).toEqual([{ pitches: [48, 52, 55, 62, 64], instrument: 'guitar', mode: 'strum' }])
   })
 
   it('leaves muted strings silent', () => {

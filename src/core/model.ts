@@ -73,7 +73,7 @@ export const initialPractice: Practice = {
   fixedRoot: null,
 }
 
-export type Sound = 'synthesized'
+export type Sound = 'samples' | 'synthesized'
 
 export type Theme = 'system' | 'light' | 'dark'
 
@@ -96,6 +96,6 @@ export const initialSettings: Settings = {
   chordPool: CHORD_QUALITIES.map((q) => q.name),
   direction: 'ascending',
   rootMode: 'random',
-  sound: 'synthesized',
+  sound: 'samples',
   theme: 'system',
 }

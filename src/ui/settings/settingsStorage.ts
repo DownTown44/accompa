@@ -2,11 +2,11 @@ import { initialSettings, type Settings, type Sound, type Theme } from '../../co
 import type { Interval } from '../../core/pitch'
 
 // index.html reads the theme key before first paint; keep the key and its values in step.
-const KEYS = { pool: 'accompa.pool', sound: 'accompa.sound', theme: 'accompa.theme' } as const
+const KEYS = { pool: 'accompa.pool', sound: 'accompa.sound.v2', theme: 'accompa.theme' } as const
 
 export type SavedSetting = keyof typeof KEYS
 
-const SOUNDS: readonly Sound[] = ['synthesized']
+const SOUNDS: readonly Sound[] = ['samples', 'synthesized']
 const THEMES: readonly Theme[] = ['system', 'light', 'dark']
 
 function read(key: SavedSetting): unknown {
