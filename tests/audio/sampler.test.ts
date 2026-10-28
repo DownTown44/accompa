@@ -1,24 +1,29 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createSamplerEngine, SAMPLE_GAIN } from '../../src/audio/sampler'
-import { PIANO_SET } from '../../src/audio/sampleSets'
+import { createSamplerEngine } from '../../src/audio/sampler'
+import { GUITAR_SET, PIANO_SET } from '../../src/audio/sampleSets'
 import { ARPEGGIO_STEP, STRUM_SPREAD } from '../../src/audio/timing'
 import { pitch } from '../../src/core/pitch'
 import { asContext, FakeContext, flush } from './support/fakeContext'
 
-const loaded = async (ctx: FakeContext) => {
+const loaded = async (ctx: FakeContext, set = PIANO_SET) => {
   const load = (url: string) => Promise.resolve(new TextEncoder().encode(url).buffer as ArrayBuffer)
   const decode = (data: ArrayBuffer) =>
     Promise.resolve({ name: new TextDecoder().decode(data) } as unknown as AudioBuffer)
-  const engine = createSamplerEngine(PIANO_SET, asContext(ctx), load, decode)
+  const engine = createSamplerEngine(set, asContext(ctx), load, decode)
+  engine.prepare?.('piano')
   await flush()
   return engine
 }
 const bufferName = (source: { buffer: unknown }) => (source.buffer as { name: string }).name.split('/').pop()
 
 describe('sampler engine', () => {
-  it('starts 21 same-origin fetches at creation', () => {
+  it('fetches nothing at creation, then 21 same-origin files on prepare, and nothing on a second prepare', () => {
     const load = vi.fn((_url: string) => new Promise<ArrayBuffer>(() => {}))
-    createSamplerEngine(PIANO_SET, asContext(new FakeContext('running')), load)
+    const engine = createSamplerEngine(PIANO_SET, asContext(new FakeContext('running')), load)
+    expect(load).not.toHaveBeenCalled()
+    engine.prepare?.('piano')
+    expect(load).toHaveBeenCalledTimes(21)
+    engine.prepare?.('piano')
     expect(load).toHaveBeenCalledTimes(21)
     for (const [url] of load.mock.calls) {
       expect(url.startsWith(import.meta.env.BASE_URL)).toBe(true)
@@ -27,9 +32,30 @@ describe('sampler engine', () => {
     }
   })
 
+  it('prepares on play as a safety net, and only once', () => {
+    const load = vi.fn((_url: string) => new Promise<ArrayBuffer>(() => {}))
+    const engine = createSamplerEngine(GUITAR_SET, asContext(new FakeContext('running')), load)
+    engine.play([pitch(60)], 'guitar', 'block')
+    engine.play([pitch(62)], 'guitar', 'block')
+    expect(load).toHaveBeenCalledTimes(18)
+  })
+
+  it('plays the guitar set as flac buffers at its own gain, in list order bass first for a strum', async () => {
+    const ctx = new FakeContext('running')
+    const engine = await loaded(ctx, GUITAR_SET)
+    engine.play([pitch(53), pitch(52), pitch(85)], 'guitar', 'strum')
+    expect(ctx.sources.map(bufferName)).toEqual(['F3.flac', 'F3.flac', 'C6.flac'])
+    expect(ctx.sources.map((s) => s.playbackRate.value)).toEqual([1, 2 ** (-1 / 12), 2 ** (1 / 12)])
+    const [a, b, c] = ctx.sources.map((s) => s.startedAt!)
+    expect(b - a).toBeCloseTo(STRUM_SPREAD, 10)
+    expect(c - a).toBeCloseTo(2 * STRUM_SPREAD, 10)
+    expect(ctx.gains[0].gain.value).toBe(GUITAR_SET.gain / Math.sqrt(3))
+  })
+
   it('stays silent and throws nothing when a fetch fails', async () => {
     const ctx = new FakeContext('running')
     const engine = createSamplerEngine(PIANO_SET, asContext(ctx), () => Promise.reject(new Error('404')))
+    engine.prepare?.('piano')
     await flush()
     expect(() => engine.play([pitch(60)], 'piano', 'block')).not.toThrow()
     expect(ctx.sources).toHaveLength(0)
@@ -49,7 +75,7 @@ describe('sampler engine', () => {
     expect(ctx.sources.map(bufferName)).toEqual(['C4.mp3', 'Ds4.mp3', 'Fs4.mp3'])
     expect(ctx.sources.map((s) => s.playbackRate.value)).toEqual([1, 2 ** (1 / 12), 2 ** (1 / 12)])
     expect(new Set(ctx.sources.map((s) => s.startedAt)).size).toBe(1)
-    expect(ctx.gains.map((g) => g.gain.value)).toEqual([0, 1, 2].map(() => SAMPLE_GAIN / Math.sqrt(3)))
+    expect(ctx.gains.map((g) => g.gain.value)).toEqual([0, 1, 2].map(() => PIANO_SET.gain / Math.sqrt(3)))
   })
 
   it.each([
