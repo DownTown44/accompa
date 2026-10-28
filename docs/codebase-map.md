@@ -33,8 +33,20 @@ Index for agents. Policy and pitfalls are in `AGENTS.md`; the story workflow and
 | File | Owns |
 | --- | --- |
 | `engine.ts` | The `AudioEngine` interface (`play(pitches, instrument, mode)`, `stop`, `unlock`, `status`, `subscribe`) and `PlayMode` (`block`, `arpeggio`, `strum`). |
-| `synth.ts` | `createSynthEngine`: Web Audio triangle oscillators; timing constants `ARPEGGIO_STEP`, `STRUM_SPREAD` at the top. |
-| `engines.ts` | `ENGINES`: one engine factory per `Sound` and `Instrument` (all four are the synth for now); `createEngine(sound)` is the router that builds each instrument's engine on first use and shares one instance per factory. `EngineHost` in `App.tsx` builds it keyed on `settings.sound` only. |
+| `synth.ts` | `createSynthEngine`: Web Audio triangle oscillators. |
+| `timing.ts` | `LEAD_IN`, `ARPEGGIO_STEP`, `STRUM_SPREAD`, `stepFor(mode)`; shared by the synth and the sampler. |
+| `contextGate.ts` | `createContextGate`: create or resume the `AudioContext` inside a gesture, `idle \| running \| blocked`, the generation counter; shared by the synth and the sampler. |
+| `sampleSets.ts` | `PIANO_SET` (21 notes), `nearestSample(pitch)` (name and playback rate), `sampleUrl` (built from `import.meta.env.BASE_URL`). |
+| `sampler.ts` | `createSamplerEngine(set, createContext, load, decode)`: loads and decodes the set at creation, plays `AudioBufferSourceNode`s; `SAMPLE_GAIN`. A play before the set has decoded is silent (Story 6.4 adds the synth fallback). |
+| `engines.ts` | `ENGINES`: one engine factory per `Sound` and `Instrument` (`samples` + piano is the sampler, the other three are the synth); `createEngine(sound)` is the router that builds the piano engine at creation (so its samples start loading) and the guitar's on first use, sharing one instance per factory. `EngineHost` in `App.tsx` builds it keyed on `settings.sound` only. |
+
+### Samples
+
+- Format: MP3, decoded with `decodeAudioData` (an `OfflineAudioContext`, so no gesture is needed); the buffers play on the live context.
+- Location: `public/samples/piano/<name>.mp3`, fetched from `import.meta.env.BASE_URL` plus `samples/piano/`; same-origin only. Credits sit beside the files in `CREDITS.txt` and at the repo root in `CREDITS.md`.
+- Bundled notes: 21 files, `C2 Ds2 Fs2 A2 ... A6 C7` (MIDI 36, 39 ... 96), about 1.36 MB in total. Every pitch from 36 to 96 plays the nearest file shifted by `playbackRate = 2^(semitones/12)`, at most one semitone; pitches outside clamp to the edge note.
+- Source: the Tone.js audio repository (`Tonejs/audio`, `salamander/`), a trimmed MP3 derivative of Salamander Grand Piano V3 (CC BY 3.0).
+- The guitar has no set yet (Story 6.3).
 
 ## src/ui
 
@@ -44,7 +56,7 @@ Index for agents. Policy and pitfalls are in `AGENTS.md`; the story workflow and
 | `settings/` | `settings.ts`: `settingsReducer`, `SettingsAction`. `SettingsContext.tsx`: provider, theme attribute, saves `pool`, `sound`, `theme`. `settingsStorage.ts`: `loadSettings`, `saveSetting`, keys `accompa.pool`, `accompa.sound.v2` (Phase 1 `accompa.sound` is never touched), `accompa.theme`. |
 | `listen/` | `ListenView.tsx` (question readout, hint, chord legend), `ListenControls.tsx` (Play again, Reveal or Next), `IntervalButtons.tsx` (renders `ChordButtons` when practice is chords), `ChordButtons.tsx`, `intervalKeys.ts` (`INTERVAL_KEYS`, also used by shortcuts). |
 | `explore/` | `ExploreView.tsx` (readout, alternative readings, announcements), `ExploreControls.tsx` (Play, Block), `VoicingStepper.tsx`. |
-| `setup/` | `SetupPanel.tsx`: Practice, pool chips, Direction, Root, Sound, Theme; `SETUP_PANEL_ID`, `SETUP_OPENER_ID`. |
+| `setup/` | `SetupPanel.tsx`: Practice, pool chips, Direction, Root, Sound (Samples, Synthesized, a hint and the piano credit in `.setup-hint`), Theme; `SETUP_PANEL_ID`, `SETUP_OPENER_ID`. |
 | `shell/` | `ModeStrip.tsx` (Mode and Instrument), `Corner.tsx` (Setup opener, panel, help), `SegmentedGroup.tsx` (all radio groups), `StatusNote.tsx`. |
 | `instruments/` | `piano/PianoKeyboard.tsx`, `PianoStage.tsx`; `guitar/Fretboard.tsx`, `GuitarStage.tsx`; `instruments.css`. Keyboard and Fretboard are presentational; Stages read `useLitNotes` and call `pressNote` and `releaseNote`. |
 | `shortcuts/` | `useShortcuts.ts`: one `keydown` listener for the whole app. |
@@ -84,7 +96,7 @@ Index for agents. Policy and pitfalls are in `AGENTS.md`; the story workflow and
 ## Tests
 
 - `tests/core` has one file per core module plus `chordQuestion.test.ts`; `tests/audio`; `tests/scripts`; `tests/ui` by feature folder, plus three chord files at the root (`chordPractice`, `chordGuess`, `chordReveal`). Reducer tests: `tests/ui/session/`. About 1,000 tests; a full run takes about 30 s, mostly happy-dom set-up.
-- Helpers in `tests/ui/support/`: `dom.ts` (`radio`, `opener`, `panel`, `key`, `click`, `lit`, `rooted`), `explore.ts` (`cell`, `roleOf`, `legend`, `readout`, `alts`, `status`, `mutedStrings`), `fakeEngine.ts` (`createFakeEngine`: records `plays`, `unlocks`, `stops`), `keys.ts` (`press`), `sessions.ts` (`listenSession`), `setupPanel.ts` (`chip`, `answer`, `registerSetupHooks`).
+- Helpers in `tests/ui/support/`: `dom.ts` (`radio`, `opener`, `panel`, `key`, `click`, `lit`, `rooted`), `explore.ts` (`cell`, `roleOf`, `legend`, `readout`, `alts`, `status`, `mutedStrings`), `fakeEngine.ts` (`createFakeEngine`: records `plays`, `unlocks`, `stops`), `tests/audio/support/fakeContext.ts` (`FakeContext`, `FakeGain`, `FakeOscillator`, `FakeSource` for the synth and sampler tests), `keys.ts` (`press`), `sessions.ts` (`listenSession`), `setupPanel.ts` (`chip`, `answer`, `registerSetupHooks`).
 - UI tests render `<App session={...} engine={fakeEngine} />`. Random questions are fixed by mocking `Math.random` (about 16 call sites in 10 files).
 
 ## Quirks that bite
