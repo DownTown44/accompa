@@ -4,7 +4,7 @@
   align-items: center;
   gap: var(--spacing-readout-gap);
   box-sizing: content-box;
-  height: var(--spacing-readout-block-height);
+  height: var(--spacing-listen-block-height);
   padding-top: 24px;
 }
 

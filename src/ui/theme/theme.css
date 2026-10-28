@@ -87,6 +87,10 @@
     var(--type-readout-size) * var(--type-readout-line-height) + var(--spacing-readout-gap) + var(--spacing-alternatives-height) +
       var(--spacing-readout-gap) + var(--spacing-voicing-height) + var(--spacing-readout-gap) + var(--spacing-legend-height)
   );
+  --spacing-listen-block-height: calc(
+    var(--type-readout-question-size) * var(--type-readout-question-line-height) + var(--spacing-readout-gap) + 1.4 *
+      var(--type-hint-size) + var(--spacing-readout-gap) + var(--spacing-legend-height)
+  );
   --spacing-interval-gap: 10px;
   --spacing-control-gap: 18px;
   --spacing-control-top: 26px;
