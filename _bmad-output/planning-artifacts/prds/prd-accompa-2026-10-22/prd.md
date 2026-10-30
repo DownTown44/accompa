@@ -152,15 +152,15 @@ Scope agreed with the user on 2026-10-27. Phase 2 deepens chords in Explore, add
 
 ### Epic order (proposed)
 
-| Epic | Area | Open with |
-| ---- | ---- | --------- |
-| 6 | Sampled sound | Architecture (bundling, licensing) |
-| 7 | Chord vocabulary, tiers A and B | Architecture (voicing rules) |
-| 8 | Inversions | PM |
-| 9 | Chord builder | UX (controls) |
-| 10 | Chord flash drill | UX (navigation) |
-| 11 | Circle of fifths and progressions | UX (discovery first) |
-| — | Navigation for four sections | UX (decided 2026-10-28); blocks epics 10 and 11 |
+| Epic | Area                              | Open with                                       |
+| ---- | --------------------------------- | ----------------------------------------------- |
+| 6    | Sampled sound                     | Architecture (bundling, licensing)              |
+| 7    | Chord vocabulary, tiers A and B   | Architecture (voicing rules)                    |
+| 8    | Inversions                        | PM                                              |
+| 9    | Chord builder                     | UX (controls)                                   |
+| 10   | Chord flash drill                 | UX (navigation)                                 |
+| 11   | Circle of fifths and progressions | UX (discovery first)                            |
+| —    | Navigation for four sections      | UX (decided 2026-10-28); blocks epics 10 and 11 |
 
 ### Functional Requirements
 
