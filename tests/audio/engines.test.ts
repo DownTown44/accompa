@@ -240,3 +240,71 @@ describe('the router', () => {
     expect(guitar.stop).not.toHaveBeenCalled()
   })
 })
+
+describe('the router fallback', () => {
+  const table = ENGINES as unknown as Record<Sound, Record<Instrument, (memory?: Set<string>) => AudioEngine>>
+  const saved = { piano: ENGINES.samples.piano, guitar: ENGINES.samples.guitar }
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    table.samples.piano = saved.piano
+    table.samples.guitar = saved.guitar
+  })
+  const make = (ready: boolean) => ({
+    play: vi.fn(),
+    stop: vi.fn(),
+    unlock: vi.fn(),
+    prepare: vi.fn(),
+    ready: vi.fn(() => ready),
+    status: vi.fn((): AudioStatus => 'loading'),
+    subscribe: vi.fn(() => () => {}),
+  })
+
+  it('plays the synth while the set is not ready, still prepares the set, and uses the samples once ready', () => {
+    const guitar = make(false)
+    table.samples.guitar = () => guitar
+    const router = createEngine('samples')
+    router.play([pitch(60)], 'guitar', 'block')
+    expect(guitar.play).not.toHaveBeenCalled()
+    expect(guitar.prepare).toHaveBeenCalledWith('guitar')
+    expect(guitar.stop).toHaveBeenCalled()
+    guitar.ready.mockReturnValue(true)
+    router.play([pitch(60)], 'guitar', 'block')
+    expect(guitar.play).toHaveBeenCalledTimes(1)
+  })
+
+  it('shares stop and unlock with the fallback without throwing', () => {
+    const guitar = make(false)
+    table.samples.guitar = () => guitar
+    const router = createEngine('samples')
+    router.play([pitch(60)], 'guitar', 'block')
+    expect(() => router.stop()).not.toThrow()
+    expect(() => router.unlock()).not.toThrow()
+    expect(guitar.unlock).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands the memory to the factories', () => {
+    const memory = new Set<string>()
+    const factory = vi.fn((_memory?: Set<string>) => make(true))
+    table.samples.piano = factory
+    createEngine('samples', memory).prepare?.('piano')
+    expect(factory).toHaveBeenCalledWith(memory)
+  })
+
+  it('keeps a failure across routers sharing a memory and fetches nothing for it', async () => {
+    const memory = new Set<string>()
+    const first = createEngine('samples', memory)
+    first.prepare?.('guitar')
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(first.status()).toBe('failed')
+    expect(memory.has('guitar')).toBe(true)
+    const fetchSpy = vi.fn(() => Promise.reject(new Error('no')))
+    vi.stubGlobal('fetch', fetchSpy)
+    const second = createEngine('samples', memory)
+    second.prepare?.('guitar')
+    expect(second.status()).toBe('failed')
+    expect(fetchSpy).not.toHaveBeenCalled()
+    second.prepare?.('piano')
+    expect(fetchSpy).toHaveBeenCalledTimes(21)
+    expect(second.status()).toBe('loading')
+  })
+})

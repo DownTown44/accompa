@@ -1,6 +1,6 @@
 import type { Pitch } from '../core/pitch'
 import { createContextGate } from './contextGate'
-import type { AudioEngine, PlayMode } from './engine'
+import type { AudioEngine, AudioStatus, LoadMemory, PlayMode } from './engine'
 import { nearestSample, sampleUrl, type SampleSet } from './sampleSets'
 import { LEAD_IN, stepFor } from './timing'
 
@@ -21,27 +21,47 @@ export function createSamplerEngine(
   createContext: () => AudioContext = () => new AudioContext(),
   load: SampleLoader = fetchBytes,
   decode: SampleDecoder = offlineDecode,
+  memory: LoadMemory = new Set(),
 ): AudioEngine {
   const gate = createContextGate(createContext)
   const buffers = new Map<string, AudioBuffer>()
   let sounding: AudioBufferSourceNode[] = []
 
-  let prepared = false
+  // A set remembered as failed never fetches again this session.
+  let loadState: 'idle' | 'loading' | 'ready' | 'failed' = memory.has(set.directory) ? 'failed' : 'idle'
+  const loadListeners = new Set<() => void>()
+  const notifyLoad = () => loadListeners.forEach((listener) => listener())
 
-  // Loads and decodes the set once. A failed fetch or decode leaves that note silent; showing it and falling back are Story 6.4.
+  function fail() {
+    if (loadState === 'failed') return
+    loadState = 'failed'
+    memory.add(set.directory)
+    buffers.clear()
+    notifyLoad()
+  }
+
+  // Loads and decodes the set once; the set is all-or-nothing, so any file failing marks it failed.
   function prepare() {
-    if (prepared) return
-    prepared = true
+    if (loadState !== 'idle') return
+    loadState = 'loading'
+    notifyLoad()
+    let pending = set.notes.length
     for (const note of set.notes) {
       try {
         load(sampleUrl(set, note.name))
           .then(decode)
           .then((buffer) => {
+            if (loadState !== 'loading') return
             buffers.set(note.name, buffer)
+            if (--pending === 0) {
+              loadState = 'ready'
+              notifyLoad()
+            }
           })
-          .catch(() => {})
+          .catch(fail)
       } catch {
         // a loader that throws synchronously is the same as a failed fetch
+        fail()
       }
     }
   }
@@ -108,7 +128,21 @@ export function createSamplerEngine(
         gate.setBlocked()
       }
     },
-    status: gate.status,
-    subscribe: gate.subscribe,
+    ready: () => loadState !== 'loading' && loadState !== 'failed',
+    status(): AudioStatus {
+      const gated = gate.status()
+      if (gated === 'blocked') return 'blocked'
+      if (loadState === 'loading') return 'loading'
+      if (loadState === 'failed') return 'failed'
+      return gated
+    },
+    subscribe(listener) {
+      loadListeners.add(listener)
+      const unsubscribeGate = gate.subscribe(listener)
+      return () => {
+        loadListeners.delete(listener)
+        unsubscribeGate()
+      }
+    },
   }
 }

@@ -147,3 +147,90 @@ describe('sampler engine', () => {
     expect(engine.status()).toBe('blocked')
   })
 })
+
+describe('sampler loading and failure', () => {
+  const ok = (url: string) => Promise.resolve(new TextEncoder().encode(url).buffer as ArrayBuffer)
+  const decodeName = (data: ArrayBuffer) => Promise.resolve({ name: new TextDecoder().decode(data) } as unknown as AudioBuffer)
+  const never = () => new Promise<ArrayBuffer>(() => {})
+
+  it('reports loading after prepare, not ready, then running and ready once decoded', async () => {
+    const ctx = new FakeContext('running')
+    const engine = createSamplerEngine(PIANO_SET, asContext(ctx), ok, decodeName)
+    expect(engine.ready?.()).toBe(true)
+    expect(engine.status()).toBe('idle')
+    engine.prepare?.('piano')
+    expect(engine.ready?.()).toBe(false)
+    expect(engine.status()).toBe('loading')
+    await flush()
+    expect(engine.ready?.()).toBe(true)
+    engine.unlock()
+    expect(engine.status()).toBe('running')
+  })
+
+  it('reports blocked before loading, and loading once the context runs', () => {
+    const ctx = new FakeContext('suspended', 'suspended')
+    const engine = createSamplerEngine(GUITAR_SET, asContext(ctx), never, decodeName)
+    engine.prepare?.('guitar')
+    engine.unlock()
+    ctx.onstatechange?.()
+    expect(engine.status()).toBe('blocked')
+    ctx.state = 'running'
+    ctx.onstatechange?.()
+    expect(engine.status()).toBe('loading')
+  })
+
+  it('tells subscribers when loading starts and when it ends', async () => {
+    const engine = createSamplerEngine(PIANO_SET, asContext(new FakeContext('running')), ok, decodeName)
+    const listener = vi.fn()
+    engine.subscribe(listener)
+    engine.prepare?.('piano')
+    expect(listener).toHaveBeenCalledTimes(1)
+    await flush()
+    expect(listener).toHaveBeenCalledTimes(2)
+  })
+
+  const bad = () => Promise.reject(new Error('bad'))
+  const throws = () => {
+    throw new Error('sync')
+  }
+  it.each([
+    ['a file rejecting', (url: string) => (url.includes('/C4.') ? bad() : ok(url)), decodeName],
+    ['the decoder rejecting', ok, bad],
+    ['the decoder throwing', ok, throws],
+    ['the loader throwing', throws, decodeName],
+  ] as const)('marks the whole set failed on %s and remembers it', async (_name, load, decode) => {
+    const memory = new Set<string>()
+    const ctx = new FakeContext('running')
+    const engine = createSamplerEngine(PIANO_SET, asContext(ctx), load as never, decode as never, memory)
+    const listener = vi.fn()
+    engine.subscribe(listener)
+    engine.prepare?.('piano')
+    await flush()
+    expect(engine.status()).toBe('failed')
+    expect(engine.ready?.()).toBe(false)
+    expect(memory.has('piano')).toBe(true)
+    expect(listener).toHaveBeenCalled()
+    expect(() => engine.play([pitch(60)], 'piano', 'block')).not.toThrow()
+    expect(ctx.sources).toHaveLength(0)
+  })
+
+  it('starts failed and fetches nothing when the set is in the memory; the other set is unaffected', () => {
+    const load = vi.fn(ok)
+    const memory = new Set(['guitar'])
+    const failed = createSamplerEngine(GUITAR_SET, asContext(new FakeContext('running')), load, decodeName, memory)
+    expect(failed.status()).toBe('failed')
+    failed.prepare?.('guitar')
+    failed.play([pitch(60)], 'guitar', 'block')
+    expect(load).not.toHaveBeenCalled()
+    const piano = createSamplerEngine(PIANO_SET, asContext(new FakeContext('running')), load, decodeName, memory)
+    piano.prepare?.('piano')
+    expect(load).toHaveBeenCalledTimes(21)
+  })
+
+  it('stays loading when a loader never settles', async () => {
+    const engine = createSamplerEngine(PIANO_SET, asContext(new FakeContext('running')), never, decodeName)
+    engine.prepare?.('piano')
+    await flush()
+    expect(engine.status()).toBe('loading')
+  })
+})
