@@ -173,3 +173,55 @@ describe('notes left out for want of a string', () => {
     expect(lit()).toEqual([])
   })
 })
+
+describe('loading and failure notes', () => {
+  const guitar = (): Session => ({ ...withNotes(90), instrument: 'guitar' })
+
+  it('names the loading set, and the failed one, for the active instrument', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} session={guitar()} />)
+    act(() => engine.setStatus('loading'))
+    expect(note()).toBe('Loading the guitar sound.')
+    act(() => engine.setStatus('failed'))
+    expect(note()).toBe('The guitar sound did not load. The synthesized sound is playing.')
+    act(() => engine.setStatus('running'))
+    expect(note()).toBe('1 note lit beyond the fretboard')
+  })
+
+  it('uses the piano wording on the piano', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} />)
+    act(() => engine.setStatus('loading'))
+    expect(note()).toBe('Loading the piano sound.')
+    act(() => engine.setStatus('failed'))
+    expect(note()).toBe('The piano sound did not load. The synthesized sound is playing.')
+  })
+
+  it('lets the wake message win over loading, then shows loading after the wake', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} session={guitar()} />)
+    act(() => engine.setStatus('blocked'))
+    expect(note()).toBe('Press any key to wake the sound.')
+    act(() => engine.setStatus('loading'))
+    expect(note()).toBe('Loading the guitar sound.')
+  })
+
+  it('shows the failure over Notes cleared and hides Undo', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} session={guitar()} />)
+    press('Escape')
+    expect(note()).toBe('Notes cleared. Undo')
+    act(() => engine.setStatus('failed'))
+    expect(note()).toBe('The guitar sound did not load. The synthesized sound is playing.')
+    expect(screen.queryByRole('button', { name: 'Undo' })).toBeNull()
+    act(() => engine.setStatus('running'))
+    expect(note()).toBe('Notes cleared. Undo')
+  })
+
+  it('shows the root note over the failure', () => {
+    const engine = createFakeEngine()
+    render(<App engine={engine} session={{ ...guitar(), rootArmed: true }} />)
+    act(() => engine.setStatus('failed'))
+    expect(note()).toBe('Click a lit note to set the root.')
+  })
+})

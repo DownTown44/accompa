@@ -44,3 +44,12 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-6-2-hear-a-sampled-piano.md`
   summary: By-ear tuning of the sampler: stop click, 16 s sample tails, loudness against the synth (the sample gain, 0.8 for both sets).
   evidence: `src/audio/sampler.ts` stops sources without a release and plays each sample to its full length; settle by listening, then add a short gain release or cap the tails if needed.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-4-loading-and-failure.md`
+  summary: A stalled fetch (a request that never settles) leaves a set `loading` forever, with the synth playing and the Loading note showing; there is no timeout.
+  evidence: `prepare` in `src/audio/sampler.ts` waits on every file with no deadline; add a timeout or a retry only if it shows up in use.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-4-loading-and-failure.md`
+  summary: A failed or loading set's Status note outranks the beyond-fretboard and No-voicing notes, so they stay hidden for the session after a failure.
+  evidence: `Shell` in `src/ui/app/App.tsx`; the order was decided by Apor on 2026-10-30; settle by merging the notes or ranking No-voicing higher.
+- source_spec: `_bmad-output/implementation-artifacts/spec-6-4-loading-and-failure.md`
+  summary: Router `status` follows the sampler only, so a suspended fallback synth context shows no wake message.
+  evidence: `createEngine` in `src/audio/engines.ts`; the fallback plays only from gestures, so it has not been seen; settle by reporting `blocked` from the fallback synth while a set is loading or failed.

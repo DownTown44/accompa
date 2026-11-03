@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { Instrument } from '../../core/model'
 import { beyondFretboard, beyondFretboardNote, leftOutCount } from '../../core/explore'
 import { offscreenLit, offscreenNote } from '../../core/piano'
 import { createEngine } from '../../audio/engines'
-import type { AudioEngine } from '../../audio/engine'
+import type { AudioEngine, AudioStatus, LoadMemory } from '../../audio/engine'
 import { EngineProvider, useEngine } from '../engine/EngineContext'
 import { ExploreControls } from '../explore/ExploreControls'
 import { ExploreView } from '../explore/ExploreView'
@@ -24,6 +25,12 @@ import { useSessionActions } from '../session/useSessionActions'
 import { useShortcuts } from '../shortcuts/useShortcuts'
 
 const NO_VOICING_NOTE = 'No voicing fits these notes.'
+
+function loadNote(audio: AudioStatus, instrument: Instrument): string | undefined {
+  if (audio === 'loading') return `Loading the ${instrument} sound.`
+  if (audio === 'failed') return `The ${instrument} sound did not load. The synthesized sound is playing.`
+  return undefined
+}
 
 export function Shell() {
   useShortcuts()
@@ -47,7 +54,8 @@ export function Shell() {
           ? NO_VOICING_NOTE
           : beyondFretboardNote(beyondFretboard(lit.pitches), lit.muted ? 0 : leftOutCount(lit.pitches, session.workspace.positions))
         : undefined
-  const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked'
+  const loading = loadNote(audio, session.instrument)
+  const undo = session.mode === 'explore' && session.cleared !== null && audio !== 'blocked' && loading === undefined
   const message =
     audio === 'blocked'
       ? 'Press any key to wake the sound.'
@@ -55,9 +63,7 @@ export function Shell() {
         ? 'Click a lit note to set the root.'
         : chooseRoot
           ? 'Click a note to set the root.'
-          : undo
-            ? 'Notes cleared.'
-            : offscreen
+          : (loading ?? (undo ? 'Notes cleared.' : offscreen))
   return (
     <div className="page">
       <ModeStrip />
@@ -79,7 +85,9 @@ export function Shell() {
 // The engine follows the chosen sound; replacing it stops whatever the old one was playing.
 function EngineHost({ override, children }: { override?: AudioEngine; children: ReactNode }) {
   const { settings } = useSettings()
-  const engine = useMemo(() => override ?? createEngine(settings.sound), [override, settings.sound])
+  // Failed sets are remembered here, outside the engine, so changing Sound does not clear a failure.
+  const [memory] = useState<LoadMemory>(() => new Set())
+  const engine = useMemo(() => override ?? createEngine(settings.sound, memory), [override, settings.sound, memory])
   useEffect(() => () => engine.stop(), [engine])
   return <EngineProvider engine={engine}>{children}</EngineProvider>
 }

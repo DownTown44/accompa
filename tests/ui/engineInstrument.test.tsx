@@ -54,11 +54,11 @@ describe('the engine knows the instrument', () => {
 
   it('replaces the engine and stops the old one when the Sound changes', () => {
     render(<App />)
-    expect(createEngine).toHaveBeenLastCalledWith('samples')
+    expect(createEngine).toHaveBeenLastCalledWith('samples', expect.any(Set))
     fireEvent.click(opener())
     fireEvent.click(radio('Synthesized'), { detail: 1 })
     expect(createEngine).toHaveBeenCalledTimes(2)
-    expect(createEngine).toHaveBeenLastCalledWith('synthesized')
+    expect(createEngine).toHaveBeenLastCalledWith('synthesized', expect.any(Set))
     const [first] = vi.mocked(createEngine).mock.results
     expect((first!.value as ReturnType<typeof createFakeEngine>).stops).toBeGreaterThan(0)
   })

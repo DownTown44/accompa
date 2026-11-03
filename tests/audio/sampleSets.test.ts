@@ -90,3 +90,13 @@ describe('the guitar set', () => {
     expect(sampleUrl(GUITAR_SET, 'Gs3')).toBe(`${import.meta.env.BASE_URL}samples/guitar/Gs3.flac`)
   })
 })
+
+describe('sample URLs', () => {
+  it.each([PIANO_SET, GUITAR_SET])('are relative to the app for the $directory set', (set) => {
+    for (const note of set.notes) {
+      const url = sampleUrl(set, note.name)
+      expect(url).not.toContain('://')
+      expect(url.startsWith('//')).toBe(false)
+    }
+  })
+})
