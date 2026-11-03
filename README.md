@@ -82,7 +82,7 @@ npm run check     # type-check, import boundaries and tests
 
 ## Hosting
 
-Pushing to `main` runs `.github/workflows/pages.yml`, which checks, builds with `BASE_PATH=/accompa/` and deploys `dist/` to GitHub Pages at `https://downtown44.github.io/accompa/`. In the repository settings, Pages must use the GitHub Actions source. A plain `npm run build` keeps the base path `/`, so `vite preview` works as before.
+Pushing to the `release` branch runs `.github/workflows/pages.yml`, which checks, builds with `BASE_PATH=/accompa/` and deploys `dist/` to GitHub Pages at `https://downtown44.github.io/accompa/`. In the repository settings, Pages must use the GitHub Actions source. `main` is not deployed: to publish, fast-forward `release` to the `main` commit you want live. Pages must also allow the `release` branch under Settings, Environments, `github-pages`, Deployment branches. A plain `npm run build` keeps the base path `/`, so `vite preview` works as before.
 
 ## Project structure
 
