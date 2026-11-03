@@ -7,7 +7,7 @@ import { pitch } from '../../src/core/pitch'
 const sounds: Sound[] = ['samples', 'synthesized']
 const instruments: Instrument[] = ['piano', 'guitar']
 
-// The real piano sampler fetches at creation; no test may reach a network.
+// The real samplers fetch on prepare; no test may reach a network.
 beforeEach(() => {
   vi.stubGlobal('fetch', () => Promise.reject(new Error('no network in tests')))
 })
@@ -25,11 +25,11 @@ describe('engines', () => {
     },
   )
 
-  // A tripwire: Story 6.3 gives the guitar its own factory, and this test then changes with it.
-  it('gives only samples on the piano its own factory', () => {
-    expect(ENGINES.samples.guitar).toBe(ENGINES.synthesized.piano)
+  it('gives only the synthesized combinations a shared factory', () => {
     expect(ENGINES.synthesized.guitar).toBe(ENGINES.synthesized.piano)
     expect(ENGINES.samples.piano).not.toBe(ENGINES.synthesized.piano)
+    expect(ENGINES.samples.guitar).not.toBe(ENGINES.synthesized.piano)
+    expect(ENGINES.samples.guitar).not.toBe(ENGINES.samples.piano)
   })
 
   it('routes every combination through one shared engine without throwing', () => {
@@ -41,15 +41,34 @@ describe('engines', () => {
     }
   })
 
-  it('fetches the 21 piano files for samples and requests nothing for synthesized', () => {
+  it('fetches nothing at creation, the active set on prepare once, and nothing for synthesized', () => {
     const fetchSpy = vi.fn(() => Promise.reject(new Error('no network in tests')))
     vi.stubGlobal('fetch', fetchSpy)
     const synthesized = createEngine('synthesized')
+    synthesized.prepare?.('guitar')
     synthesized.play([pitch(60)], 'piano', 'block')
     synthesized.play([pitch(60)], 'guitar', 'block')
     expect(fetchSpy).not.toHaveBeenCalled()
-    createEngine('samples')
+    const samples = createEngine('samples')
+    expect(fetchSpy).not.toHaveBeenCalled()
+    samples.prepare?.('piano')
     expect(fetchSpy).toHaveBeenCalledTimes(21)
+    samples.prepare?.('guitar')
+    expect(fetchSpy).toHaveBeenCalledTimes(39)
+    samples.prepare?.('piano')
+    samples.prepare?.('guitar')
+    expect(fetchSpy).toHaveBeenCalledTimes(39)
+    const urls = (fetchSpy.mock.calls as unknown as [string][]).map(([url]) => url)
+    expect(urls.filter((u) => u.includes('/guitar/') && u.endsWith('.flac'))).toHaveLength(18)
+    vi.unstubAllGlobals()
+  })
+
+  it('fetches only the guitar set when the session starts on the guitar', () => {
+    const fetchSpy = vi.fn(() => Promise.reject(new Error('no network in tests')))
+    vi.stubGlobal('fetch', fetchSpy)
+    createEngine('samples').prepare?.('guitar')
+    expect(fetchSpy).toHaveBeenCalledTimes(18)
+    for (const [url] of fetchSpy.mock.calls as unknown as [string][]) expect(url).toContain('/guitar/')
     vi.unstubAllGlobals()
   })
 
@@ -70,16 +89,17 @@ describe('the router', () => {
     table.samples.guitar = saved.guitar
   })
 
-  it('builds the piano engine when the router is created and the guitar on first use', () => {
+  it('builds no engine at creation and builds each on first use', () => {
     const piano = vi.fn(spyEngine)
     const guitar = vi.fn(spyEngine)
     table.samples.piano = piano
     table.samples.guitar = guitar
     const router = createEngine('samples')
-    expect(piano).toHaveBeenCalledTimes(1)
+    expect(piano).not.toHaveBeenCalled()
     expect(guitar).not.toHaveBeenCalled()
     router.play([pitch(60)], 'guitar', 'block')
     expect(guitar).toHaveBeenCalledTimes(1)
+    expect(piano).not.toHaveBeenCalled()
   })
 
   it('builds one engine for both instruments when they share a factory, and forwards the exact play arguments', () => {
@@ -109,21 +129,114 @@ describe('the router', () => {
     router.play([pitch(60)], 'piano', 'block')
     router.stop()
     expect(piano.stop).toHaveBeenCalledTimes(1)
-    expect(guitar.stop).toHaveBeenCalledTimes(1)
+    expect(guitar.stop).toHaveBeenCalledTimes(2)
   })
 
-  it('takes unlock, status and subscribe from the piano engine until the status follows the instrument', () => {
+  it('prepare records the active instrument, builds its engine and prepares it', () => {
+    const piano = { ...spyEngine(), prepare: vi.fn() }
+    const guitar = { ...spyEngine(), prepare: vi.fn() }
+    table.samples.piano = () => piano
+    table.samples.guitar = () => guitar
+    const router = createEngine('samples')
+    router.prepare?.('guitar')
+    expect(guitar.prepare).toHaveBeenCalledWith('guitar')
+    expect(piano.prepare).not.toHaveBeenCalled()
+    router.status()
+    expect(guitar.status).toHaveBeenCalledTimes(1)
+    expect(piano.status).not.toHaveBeenCalled()
+  })
+
+  it('unlocks every built engine', () => {
     const piano = spyEngine()
     const guitar = spyEngine()
     table.samples.piano = () => piano
     table.samples.guitar = () => guitar
     const router = createEngine('samples')
+    router.prepare?.('piano')
     router.unlock()
-    router.status()
-    router.subscribe(() => {})
     expect(piano.unlock).toHaveBeenCalledTimes(1)
-    expect(piano.status).toHaveBeenCalledTimes(1)
-    expect(piano.subscribe).toHaveBeenCalledTimes(1)
     expect(guitar.unlock).not.toHaveBeenCalled()
+    router.play([pitch(60)], 'guitar', 'block')
+    router.unlock()
+    expect(piano.unlock).toHaveBeenCalledTimes(2)
+    expect(guitar.unlock).toHaveBeenCalledTimes(1)
+  })
+
+  it('status and subscribe follow the active instrument, and a swap notifies listeners', () => {
+    const make = (status: AudioStatus) => {
+      const listeners = new Set<() => void>()
+      return {
+        ...spyEngine(),
+        status: vi.fn(() => status),
+        subscribe: vi.fn((l: () => void) => {
+          listeners.add(l)
+          return () => listeners.delete(l)
+        }),
+        emit: () => listeners.forEach((l) => l()),
+        listeners,
+      }
+    }
+    const piano = make('running')
+    const guitar = make('blocked')
+    table.samples.piano = () => piano
+    table.samples.guitar = () => guitar
+    const router = createEngine('samples')
+    const listener = vi.fn()
+    router.subscribe(listener)
+    expect(router.status()).toBe('running')
+    piano.emit()
+    expect(listener).toHaveBeenCalledTimes(1)
+    router.prepare?.('guitar')
+    expect(listener).toHaveBeenCalledTimes(2)
+    expect(router.status()).toBe('blocked')
+    expect(piano.listeners.size).toBe(0)
+    guitar.emit()
+    expect(listener).toHaveBeenCalledTimes(3)
+    piano.emit()
+    expect(listener).toHaveBeenCalledTimes(3)
+  })
+
+  it('attaches once for several listeners, detaches after the last unsubscribe and attaches again on a new one', () => {
+    const detach = vi.fn()
+    const piano = { ...spyEngine(), subscribe: vi.fn(() => detach) }
+    table.samples.piano = () => piano
+    table.samples.guitar = () => spyEngine()
+    const router = createEngine('samples')
+    router.prepare?.('piano')
+    const first = router.subscribe(() => {})
+    const second = router.subscribe(() => {})
+    expect(piano.subscribe).toHaveBeenCalledTimes(1)
+    first()
+    expect(detach).not.toHaveBeenCalled()
+    second()
+    expect(detach).toHaveBeenCalledTimes(1)
+    router.subscribe(() => {})
+    expect(piano.subscribe).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not notify listeners when prepare names the instrument that is already active', () => {
+    table.samples.piano = () => spyEngine()
+    table.samples.guitar = () => spyEngine()
+    const router = createEngine('samples')
+    router.prepare?.('piano')
+    const listener = vi.fn()
+    router.subscribe(listener)
+    router.prepare?.('piano')
+    expect(listener).not.toHaveBeenCalled()
+  })
+
+  it('a play stops the other built engines first; a swap on its own cuts nothing', () => {
+    const piano = spyEngine()
+    const guitar = spyEngine()
+    table.samples.piano = () => piano
+    table.samples.guitar = () => guitar
+    const router = createEngine('samples')
+    router.play([pitch(60)], 'piano', 'block')
+    router.prepare?.('guitar')
+    expect(piano.stop).not.toHaveBeenCalled()
+    expect(guitar.stop).not.toHaveBeenCalled()
+    router.play([pitch(60)], 'guitar', 'block')
+    expect(piano.stop).toHaveBeenCalledTimes(1)
+    expect(guitar.stop).not.toHaveBeenCalled()
   })
 })

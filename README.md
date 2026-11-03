@@ -35,7 +35,7 @@ Explore is a workbench. Click notes on either instrument and the app tells you w
 
 ### Instruments and sound
 
-The piano is a keyboard you can shift an octave at a time with `[` and `]`. The guitar is a standard-tuned fretboard with 22 frets. Both are plain, schematic drawings, not photographs of instruments. The piano plays a bundled sampled piano (Salamander Grand Piano V3, see `CREDITS.md`) through the Web Audio API; the guitar and the Synthesized choice in Setup use a synthesizer. Every sound file is served by the app itself, with no third-party requests. If the browser holds the audio back until a key press, the status note says so.
+The piano is a keyboard you can shift an octave at a time with `[` and `]`. The guitar is a standard-tuned fretboard with 22 frets. Both are plain, schematic drawings, not photographs of instruments. The piano plays a bundled sampled piano (Salamander Grand Piano V3, see `CREDITS.md`) through the Web Audio API; the guitar plays a bundled sampled nylon-string guitar (FreePats, CC0), and the Synthesized choice in Setup uses a synthesizer for both. Every sound file is served by the app itself, with no third-party requests. If the browser holds the audio back until a key press, the status note says so.
 
 ### Themes
 

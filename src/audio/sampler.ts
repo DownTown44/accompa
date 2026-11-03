@@ -4,9 +4,6 @@ import type { AudioEngine, PlayMode } from './engine'
 import { nearestSample, sampleUrl, type SampleSet } from './sampleSets'
 import { LEAD_IN, stepFor } from './timing'
 
-// Per-note gain before dividing by the square root of the note count. Tuned by ear.
-export const SAMPLE_GAIN = 0.8
-
 export type SampleLoader = (url: string) => Promise<ArrayBuffer>
 export type SampleDecoder = (data: ArrayBuffer) => Promise<AudioBuffer>
 
@@ -29,17 +26,23 @@ export function createSamplerEngine(
   const buffers = new Map<string, AudioBuffer>()
   let sounding: AudioBufferSourceNode[] = []
 
-  // A failed fetch or decode leaves that note silent; showing it and falling back are Story 6.4.
-  for (const note of set.notes) {
-    try {
-      load(sampleUrl(set, note.name))
-        .then(decode)
-        .then((buffer) => {
-          buffers.set(note.name, buffer)
-        })
-        .catch(() => {})
-    } catch {
-      // a loader that throws synchronously is the same as a failed fetch
+  let prepared = false
+
+  // Loads and decodes the set once. A failed fetch or decode leaves that note silent; showing it and falling back are Story 6.4.
+  function prepare() {
+    if (prepared) return
+    prepared = true
+    for (const note of set.notes) {
+      try {
+        load(sampleUrl(set, note.name))
+          .then(decode)
+          .then((buffer) => {
+            buffers.set(note.name, buffer)
+          })
+          .catch(() => {})
+      } catch {
+        // a loader that throws synchronously is the same as a failed fetch
+      }
     }
   }
 
@@ -58,7 +61,7 @@ export function createSamplerEngine(
     stopSounding()
     const start = ctx.currentTime + LEAD_IN
     const step = stepFor(mode)
-    const level = SAMPLE_GAIN / Math.sqrt(pitches.length)
+    const level = set.gain / Math.sqrt(pitches.length)
     pitches.forEach((p, index) => {
       const { name, rate } = nearestSample(p, set)
       const buffer = buffers.get(name)
@@ -78,7 +81,11 @@ export function createSamplerEngine(
   }
 
   return {
+    prepare() {
+      prepare()
+    },
     play(pitches, _instrument, mode) {
+      prepare()
       const ctx = gate.ensureContext()
       if (!ctx) return
       gate.invalidate()

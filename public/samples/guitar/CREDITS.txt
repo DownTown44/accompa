@@ -1,0 +1,6 @@
+Guitar samples: FreePats Nylon-String Acoustic Guitar (the Spanish classical guitar bank)
+Recorded in 2008 by roberto@zenvoid.org for the FreePats project.
+Licence: CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://freepats.zenvoid.org/Guitar/acoustic-guitar.html, archive SpanishClassicalGuitar-SFZ+FLAC-20190618.7z (samples/). Retrieved 2026-10-28.
+
+Changes: none to the audio. The 18 files are copied unchanged; "#" in file names is renamed "s" (G#3.flac is Gs3.flac).

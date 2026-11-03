@@ -3,7 +3,7 @@ import { beyondFretboard, beyondFretboardNote, leftOutCount } from '../../core/e
 import { offscreenLit, offscreenNote } from '../../core/piano'
 import { createEngine } from '../../audio/engines'
 import type { AudioEngine } from '../../audio/engine'
-import { EngineProvider } from '../engine/EngineContext'
+import { EngineProvider, useEngine } from '../engine/EngineContext'
 import { ExploreControls } from '../explore/ExploreControls'
 import { ExploreView } from '../explore/ExploreView'
 import { GuitarStage } from '../instruments/guitar/GuitarStage'
@@ -31,6 +31,11 @@ export function Shell() {
   const audio = useAudioStatus()
   const { session } = useSession()
   const { settings } = useSettings()
+  const engine = useEngine()
+  // The active instrument's sample set loads at startup and on a swap; the other's waits until needed.
+  useEffect(() => {
+    engine.prepare?.(session.instrument)
+  }, [engine, session.instrument])
   const lit = useLitNotes()
   const { undoClear } = useSessionActions()
   const chooseRoot = session.mode === 'listen' && settings.rootMode === 'fixed' && session.practice.fixedRoot === null
